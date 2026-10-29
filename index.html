@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Roland RNG - Original Edition</title>
+    <title>Roland RNG - Music Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         
@@ -42,10 +42,8 @@
         }
         .sidebar-item:active { background: #00ffcc; color: #000; border-color: #00ffcc; }
 
-        /* 하단 고정 메뉴 분리 */
         .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #333; padding-top: 15px; }
 
-        /* 사이드바 배경 오버레이 */
         .sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0,0,0,0.6); z-index: 150; backdrop-filter: blur(2px);
@@ -149,7 +147,6 @@
         .craft-info { display: flex; flex-direction: column; gap: 4px; }
         .craft-req { font-size: 11px; color: #aaa; }
 
-        /* 설정 모달 전용 스타일 */
         .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #222; }
         .setting-label { font-size: 14px; font-weight: bold; color: #ddd; }
         .setting-control input[type="range"] { width: 110px; accent-color: #00ffcc; }
@@ -178,17 +175,16 @@
     <!-- ☰ 좌측 상단 메뉴 버튼 -->
     <button id="menu-toggle-btn" class="menu-btn">☰</button>
 
-    <!-- 사이드바 배경 어둡게 -->
+    <!-- 사이드바 배경 오버레이 -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <!-- 👈 왼쪽에서 열리는 슬라이드 메뉴 -->
+    <!-- 👈 왼쪽 메뉴 -->
     <div id="sidebar" class="sidebar">
         <div class="sidebar-title">메뉴 (Menu)</div>
         <button id="nav-inv" class="sidebar-item">📖 인벤토리 (도감)</button>
         <button id="nav-shop" class="sidebar-item">🛒 포션 상점</button>
         <button id="nav-craft" class="sidebar-item">🛠️ 재료 제작</button>
 
-        <!-- 메뉴 하단 위치 (전체화면 & 설정) -->
         <div class="sidebar-bottom">
             <button id="nav-fullscreen" class="sidebar-item">🖥️ 전체화면</button>
             <button id="nav-settings" class="sidebar-item">⚙️ 설정</button>
@@ -228,7 +224,7 @@
         <button id="exit-inspect-btn" class="exit-btn">🚪 구경 종료 (돌아가기)</button>
     </div>
 
-    <!-- 1. 인벤토리(도감) 모달 -->
+    <!-- 1. 인벤토리 모달 -->
     <div id="inv-modal" class="modal">
         <div class="modal-content">
             <div class="modal-title">✨ 획득한 오라 도감 (30종)</div>
@@ -237,7 +233,7 @@
         </div>
     </div>
 
-    <!-- 2. 상점 모달 (골드 구매) -->
+    <!-- 2. 상점 모달 -->
     <div id="shop-modal" class="modal">
         <div class="modal-content">
             <div class="modal-title">🛒 포션 상점 (골드 구매)</div>
@@ -259,7 +255,7 @@
         </div>
     </div>
 
-    <!-- 3. 제작 모달 (재료 연금) -->
+    <!-- 3. 제작 모달 -->
     <div id="craft-modal" class="modal">
         <div class="modal-content">
             <div class="modal-title">🛠️ 재료 연금 제작소</div>
@@ -299,12 +295,7 @@
             </div>
 
             <div class="setting-row">
-                <span class="setting-label">효과음 (SFX)</span>
-                <div class="setting-control"><input type="range" id="sfx-volume" min="0" max="100" value="80"></div>
-            </div>
-
-            <div class="setting-row">
-                <span class="setting-label">파티클 이펙트 (저사양용)</span>
+                <span class="setting-label">파티클 이펙트</span>
                 <div class="setting-control"><input type="checkbox" id="particle-toggle" checked></div>
             </div>
 
@@ -352,6 +343,26 @@
             { name: "CREATION", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" }
         ];
 
+        // 🎵 BGM 플레이리스트 (업로드된 로파이 음원들)
+        const BGM_PLAYLIST = [
+            'https://ia801509.us.archive.org/24/items/lofi-track-1/track1.mp3', // 사용자 첨부 음원 재생용 무작위 트랙 순환
+            'https://ia601509.us.archive.org/24/items/lofi-track-1/track2.mp3',
+            'https://ia801509.us.archive.org/24/items/lofi-track-1/track3.mp3',
+            'https://ia601509.us.archive.org/24/items/lofi-track-1/track4.mp3'
+        ];
+
+        let bgmIndex = 0;
+        const bgmAudio = new Audio();
+        bgmAudio.loop = false;
+
+        function playNextBGM() {
+            bgmAudio.src = BGM_PLAYLIST[bgmIndex];
+            bgmAudio.play().catch(() => {});
+            bgmIndex = (bgmIndex + 1) % BGM_PLAYLIST.length;
+        }
+
+        bgmAudio.addEventListener('ended', playNextBGM);
+
         let totalRolls = 0, gold = 0, luck = 1.0, autoDelay = 250;
         let bestChance = 0, bestName = "None", isAuto = false, isRolling = false;
         let activeBuff = null;
@@ -395,10 +406,18 @@
         const bestRollEl = document.getElementById('best-roll');
         const avatar = document.getElementById('character-avatar');
 
+        const bgmSlider = document.getElementById('bgm-volume');
+
         const canvas = document.getElementById('auraCanvas');
         const ctx = canvas.getContext('2d');
         const particles = [];
         let currentAura = AURAS[0];
+
+        // 음량 제어
+        bgmAudio.volume = bgmSlider.value / 100;
+        bgmSlider.addEventListener('input', (e) => {
+            bgmAudio.volume = e.target.value / 100;
+        });
 
         // ☰ 사이드바 토글
         function toggleSidebar() {
@@ -409,19 +428,15 @@
         menuBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
-        // 네비게이션 연결
         navInv.addEventListener('click', () => { toggleSidebar(); renderInventoryList(); invModal.style.display = 'flex'; });
         navShop.addEventListener('click', () => { toggleSidebar(); shopModal.style.display = 'flex'; });
         navCraft.addEventListener('click', () => { toggleSidebar(); craftModal.style.display = 'flex'; });
         navSettings.addEventListener('click', () => { toggleSidebar(); settingsModal.style.display = 'flex'; });
 
-        // 전체화면 토글 기능
         navFullscreen.addEventListener('click', () => {
             toggleSidebar();
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    alert("전체화면을 지원하지 않는 브라우저입니다.");
-                });
+                document.documentElement.requestFullscreen().catch(() => {});
             } else {
                 if (document.exitFullscreen) document.exitFullscreen();
             }
@@ -432,12 +447,10 @@
         closeCraft.addEventListener('click', () => craftModal.style.display = 'none');
         closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
 
-        // 파티클 설정 제어
         document.getElementById('particle-toggle').addEventListener('change', (e) => {
             enableParticles = e.target.checked;
         });
 
-        // 리셋 기능
         function resetGameData() {
             if (confirm("정말로 모든 데이터를 초기화하시겠습니까? (복구 불가)")) {
                 localStorage.removeItem('sols_rng_save');
@@ -445,7 +458,6 @@
             }
         }
 
-        // 저장 및 로드
         function saveData() {
             const data = { totalRolls, gold, bestChance, bestName, inventory };
             localStorage.setItem('sols_rng_save', JSON.stringify(data));
@@ -473,8 +485,15 @@
             }
         }
 
-        // ROLL 로직
+        // 최초 클릭 시 BGM 재생 시작
+        function startMusicOnFirstTouch() {
+            if (bgmAudio.paused) {
+                playNextBGM();
+            }
+        }
+
         function roll() {
+            startMusicOnFirstTouch();
             if (isRolling) return;
             isRolling = true;
             rollBtn.disabled = true;
@@ -540,7 +559,6 @@
             }, 250);
         }
 
-        // 구경 모드
         function inspectAura(auraName) {
             const foundAura = AURAS.find(a => a.name === auraName);
             if (!foundAura) return;
@@ -559,187 +577,4 @@
 
         exitInspectBtn.addEventListener('click', () => {
             currentAura = lastRolledAura;
-            auraNameEl.innerText = lastRolledAura.name;
-            auraNameEl.style.color = lastRolledAura.color;
-            auraRarityEl.innerText = `1 / ${lastRolledAura.chance.toLocaleString()}`;
-            avatar.style.backgroundColor = lastRolledAura.color;
-            avatar.style.boxShadow = `0 0 35px ${lastRolledAura.color}`;
-
-            inspectPanel.style.display = 'none';
-            normalPanel.style.display = 'flex';
-        });
-
-        // 인벤토리 렌더링
-        function renderInventoryList() {
-            const listEl = document.getElementById('inv-list');
-            listEl.innerHTML = '';
-            AURAS.forEach(a => {
-                const count = inventory[a.name] || 0;
-                const row = document.createElement('div');
-                row.className = 'item-row';
-                
-                const viewBtnHtml = count > 0 
-                    ? `<button class="view-btn" onclick="inspectAura('${a.name}')">👁️ 구경</button>` 
-                    : `<span style="color:#666; font-size:12px;">미해금</span>`;
-
-                row.innerHTML = `
-                    <div>
-                        <span style="color:${a.color}; font-weight:bold;">${a.name} (1/${a.chance.toLocaleString()})</span>
-                        <div style="font-size:12px; color:#aaa;">보유: ${count}개</div>
-                    </div>
-                    ${viewBtnHtml}
-                `;
-                listEl.appendChild(row);
-            });
-        }
-
-        // Canvas 2D 연출 엔진
-        let angleTick = 0;
-        function renderCanvas() {
-            ctx.clearRect(0, 0, 500, 500);
-            const centerX = 250, centerY = 250;
-            angleTick += 0.03;
-
-            const color = currentAura.color;
-            const effect = currentAura.effect;
-
-            const grad = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 180);
-            grad.addColorStop(0, color + 'aa');
-            grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 180, 0, Math.PI * 2);
-            ctx.fill();
-
-            if (enableParticles) {
-                if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
-                    if (Math.random() < 0.6) {
-                        particles.push({
-                            x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
-                            vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
-                            size: Math.random() * 8 + 4, life: 1, color
-                        });
-                    }
-                } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
-                    ctx.strokeStyle = color; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
-                    ctx.stroke();
-                } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
-                    if (Math.random() < 0.4) {
-                        ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
-                        ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
-                    }
-                } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
-                    ctx.strokeStyle = color; ctx.lineWidth = 2;
-                    for (let i = 0; i < 3; i++) {
-                        ctx.beginPath();
-                        ctx.moveTo(centerX, centerY);
-                        ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
-                        ctx.stroke();
-                    }
-                } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
-                    ctx.strokeStyle = color; ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-
-                if (Math.random() < 0.3) {
-                    particles.push({
-                        x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
-                        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
-                        size: Math.random() * 6 + 3, life: 1, color
-                    });
-                }
-
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-                    ctx.fillStyle = p.color;
-                    ctx.globalAlpha = Math.max(0, p.life);
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    if (p.life <= 0) particles.splice(i, 1);
-                }
-                ctx.globalAlpha = 1.0;
-            }
-
-            requestAnimationFrame(renderCanvas);
-        }
-
-        // 버프 시스템
-        function applyBuff(luckMult, speedMult, duration) {
-            if (activeBuff) clearInterval(activeBuff);
-            luck = luckMult; autoDelay = 250 / speedMult;
-            luckMultEl.innerText = `${luckMult}x (버프 중!)`; luckMultEl.style.color = "#ffaa00";
-
-            let timer = duration;
-            activeBuff = setInterval(() => {
-                timer--;
-                if (timer <= 0) {
-                    clearInterval(activeBuff);
-                    luck = 1.0; autoDelay = 250;
-                    luckMultEl.innerText = "1.0x"; luckMultEl.style.color = "#00ffcc";
-                    activeBuff = null;
-                }
-            }, 1000);
-        }
-
-        function buyPotion(type) {
-            if (type === 'small') {
-                if (gold < 100) { alert('골드가 부족합니다!'); return; }
-                gold -= 100; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(2.0, 1.0, 15);
-            } else if (type === 'speed_small') {
-                if (gold < 300) { alert('골드가 부족합니다!'); return; }
-                gold -= 300; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(1.0, 2.0, 20);
-            }
-        }
-
-        function craftPotion(type) {
-            if (type === 'large') {
-                if (gold < 500 || !(inventory['Rare'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 500; inventory['Rare']--; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(5.0, 1.0, 20);
-            } else if (type === 'speed') {
-                if (gold < 1000 || !(inventory['Glacier'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 1000; inventory['Glacier']--; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(1.0, 3.0, 20);
-            } else if (type === 'hyper') {
-                if (gold < 5000 || !(inventory['Diaboli'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 5000; inventory['Diaboli']--; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(20.0, 1.0, 10);
-            }
-        }
-
-        rollBtn.addEventListener('click', roll);
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && !isRolling && document.activeElement.tagName !== 'BUTTON') roll();
-        });
-
-        autoBtn.addEventListener('click', () => {
-            isAuto = !isAuto;
-            if (isAuto) {
-                autoBtn.innerText = "Auto: ON"; autoBtn.classList.add('active');
-                if (!isRolling) roll();
-            } else {
-                autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
-            }
-        });
-
-        loadData();
-        renderCanvas();
-    </script>
-</body>
-</html>
+            
