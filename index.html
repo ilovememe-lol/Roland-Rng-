@@ -127,7 +127,7 @@
         }
         .exit-btn:active { transform: scale(0.95); }
 
-        /* 모달 시스템 전체 공통 스타일 */
+        /* 모달 시스템 공통 스타일 */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.85); z-index: 999; justify-content: center; align-items: center;
@@ -172,8 +172,9 @@
 </head>
 <body>
 
-    <!-- 오디오 플레이어 태그 -->
+    <!-- 오디오 오디오 플레이어 -->
     <audio id="bgm-player" preload="auto"></audio>
+    <!-- 보스전 전용 OST 연동 (boss_bgm.mp3) -->
     <audio id="boss-bgm-player" src="./boss_bgm.mp3" loop preload="auto"></audio>
 
     <button id="menu-toggle-btn" class="menu-btn">☰</button>
