@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Roland RNG - Music Edition</title>
+    <title>Roland RNG - Original Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         
@@ -172,13 +172,16 @@
 </head>
 <body>
 
+    <!-- BGM 플레이어 태그 -->
+    <audio id="bgm-player" preload="auto"></audio>
+
     <!-- ☰ 좌측 상단 메뉴 버튼 -->
     <button id="menu-toggle-btn" class="menu-btn">☰</button>
 
     <!-- 사이드바 배경 오버레이 -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <!-- 👈 왼쪽 메뉴 -->
+    <!-- 👈 왼쪽 사이드바 메뉴 -->
     <div id="sidebar" class="sidebar">
         <div class="sidebar-title">메뉴 (Menu)</div>
         <button id="nav-inv" class="sidebar-item">📖 인벤토리 (도감)</button>
@@ -309,7 +312,7 @@
     </div>
 
     <script>
-        // 원본 오라 데이터베이스 (CREATION 1/1,000,000,000)
+        // 원본 근본 오라 데이터베이스
         const AURAS = [
             { name: "Common", chance: 2, color: "#a0a0a0", effect: "dust" },
             { name: "Uncommon", chance: 4, color: "#55ff55", effect: "leaf" },
@@ -343,26 +346,15 @@
             { name: "CREATION", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" }
         ];
 
-        // 🎵 BGM 플레이리스트 (업로드된 로파이 음원들)
+        // 🎵 업로드된 MP3 플레이리스트 (인코딩 안전 처리)
         const BGM_PLAYLIST = [
-            'https://ia801509.us.archive.org/24/items/lofi-track-1/track1.mp3', // 사용자 첨부 음원 재생용 무작위 트랙 순환
-            'https://ia601509.us.archive.org/24/items/lofi-track-1/track2.mp3',
-            'https://ia801509.us.archive.org/24/items/lofi-track-1/track3.mp3',
-            'https://ia601509.us.archive.org/24/items/lofi-track-1/track4.mp3'
+            "./[Blue Archive] Luminous Memory lofi mix - ChestnutWhale.mp3",
+            "./[blue archive] target for love but chill lofi - TiHA Studio.mp3",
+            "./[blue archive] usagi flap but chill lofi - TiHA Studio.mp3",
+            "./hifumi daisuki but it's a chill lofi mix loop for study ♪✨ [blue archive] - TiHA Studio.mp3"
         ];
 
         let bgmIndex = 0;
-        const bgmAudio = new Audio();
-        bgmAudio.loop = false;
-
-        function playNextBGM() {
-            bgmAudio.src = BGM_PLAYLIST[bgmIndex];
-            bgmAudio.play().catch(() => {});
-            bgmIndex = (bgmIndex + 1) % BGM_PLAYLIST.length;
-        }
-
-        bgmAudio.addEventListener('ended', playNextBGM);
-
         let totalRolls = 0, gold = 0, luck = 1.0, autoDelay = 250;
         let bestChance = 0, bestName = "None", isAuto = false, isRolling = false;
         let activeBuff = null;
@@ -406,6 +398,7 @@
         const bestRollEl = document.getElementById('best-roll');
         const avatar = document.getElementById('character-avatar');
 
+        const bgmPlayer = document.getElementById('bgm-player');
         const bgmSlider = document.getElementById('bgm-volume');
 
         const canvas = document.getElementById('auraCanvas');
@@ -413,11 +406,29 @@
         const particles = [];
         let currentAura = AURAS[0];
 
-        // 음량 제어
-        bgmAudio.volume = bgmSlider.value / 100;
-        bgmSlider.addEventListener('input', (e) => {
-            bgmAudio.volume = e.target.value / 100;
-        });
+        // BGM 플레이어 음량 연동
+        if (bgmPlayer && bgmSlider) {
+            bgmPlayer.volume = bgmSlider.value / 100;
+            bgmSlider.addEventListener('input', (e) => {
+                bgmPlayer.volume = e.target.value / 100;
+            });
+
+            // 한 곡이 끝나면 다음 곡 자동 연속 재생
+            bgmPlayer.addEventListener('ended', playNextBGM);
+        }
+
+        function playNextBGM() {
+            if (!bgmPlayer) return;
+            bgmPlayer.src = encodeURI(BGM_PLAYLIST[bgmIndex]);
+            bgmPlayer.play().catch(() => {});
+            bgmIndex = (bgmIndex + 1) % BGM_PLAYLIST.length;
+        }
+
+        function tryPlayMusic() {
+            if (bgmPlayer && bgmPlayer.paused) {
+                playNextBGM();
+            }
+        }
 
         // ☰ 사이드바 토글
         function toggleSidebar() {
@@ -485,15 +496,9 @@
             }
         }
 
-        // 최초 클릭 시 BGM 재생 시작
-        function startMusicOnFirstTouch() {
-            if (bgmAudio.paused) {
-                playNextBGM();
-            }
-        }
-
+        // ROLL 동작
         function roll() {
-            startMusicOnFirstTouch();
+            tryPlayMusic();
             if (isRolling) return;
             isRolling = true;
             rollBtn.disabled = true;
@@ -577,4 +582,185 @@
 
         exitInspectBtn.addEventListener('click', () => {
             currentAura = lastRolledAura;
-            
+            auraNameEl.innerText = lastRolledAura.name;
+            auraNameEl.style.color = lastRolledAura.color;
+            auraRarityEl.innerText = `1 / ${lastRolledAura.chance.toLocaleString()}`;
+            avatar.style.backgroundColor = lastRolledAura.color;
+            avatar.style.boxShadow = `0 0 35px ${lastRolledAura.color}`;
+
+            inspectPanel.style.display = 'none';
+            normalPanel.style.display = 'flex';
+        });
+
+        function renderInventoryList() {
+            const listEl = document.getElementById('inv-list');
+            listEl.innerHTML = '';
+            AURAS.forEach(a => {
+                const count = inventory[a.name] || 0;
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                
+                const viewBtnHtml = count > 0 
+                    ? `<button class="view-btn" onclick="inspectAura('${a.name}')">👁️ 구경</button>` 
+                    : `<span style="color:#666; font-size:12px;">미해금</span>`;
+
+                row.innerHTML = `
+                    <div>
+                        <span style="color:${a.color}; font-weight:bold;">${a.name} (1/${a.chance.toLocaleString()})</span>
+                        <div style="font-size:12px; color:#aaa;">보유: ${count}개</div>
+                    </div>
+                    ${viewBtnHtml}
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        let angleTick = 0;
+        function renderCanvas() {
+            ctx.clearRect(0, 0, 500, 500);
+            const centerX = 250, centerY = 250;
+            angleTick += 0.03;
+
+            const color = currentAura.color;
+            const effect = currentAura.effect;
+
+            const grad = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 180);
+            grad.addColorStop(0, color + 'aa');
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 180, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (enableParticles) {
+                if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
+                    if (Math.random() < 0.6) {
+                        particles.push({
+                            x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
+                            vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
+                            size: Math.random() * 8 + 4, life: 1, color
+                        });
+                    }
+                } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
+                    ctx.strokeStyle = color; ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
+                    ctx.stroke();
+                } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
+                    if (Math.random() < 0.4) {
+                        ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
+                        ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
+                    }
+                } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
+                    ctx.strokeStyle = color; ctx.lineWidth = 2;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
+                        ctx.stroke();
+                    }
+                } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
+                    ctx.strokeStyle = color; ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                if (Math.random() < 0.3) {
+                    particles.push({
+                        x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
+                        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
+                        size: Math.random() * 6 + 3, life: 1, color
+                    });
+                }
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = Math.max(0, p.life);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (p.life <= 0) particles.splice(i, 1);
+                }
+                ctx.globalAlpha = 1.0;
+            }
+
+            requestAnimationFrame(renderCanvas);
+        }
+
+        function applyBuff(luckMult, speedMult, duration) {
+            if (activeBuff) clearInterval(activeBuff);
+            luck = luckMult; autoDelay = 250 / speedMult;
+            luckMultEl.innerText = `${luckMult}x (버프 중!)`; luckMultEl.style.color = "#ffaa00";
+
+            let timer = duration;
+            activeBuff = setInterval(() => {
+                timer--;
+                if (timer <= 0) {
+                    clearInterval(activeBuff);
+                    luck = 1.0; autoDelay = 250;
+                    luckMultEl.innerText = "1.0x"; luckMultEl.style.color = "#00ffcc";
+                    activeBuff = null;
+                }
+            }, 1000);
+        }
+
+        function buyPotion(type) {
+            if (type === 'small') {
+                if (gold < 100) { alert('골드가 부족합니다!'); return; }
+                gold -= 100; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(2.0, 1.0, 15);
+            } else if (type === 'speed_small') {
+                if (gold < 300) { alert('골드가 부족합니다!'); return; }
+                gold -= 300; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(1.0, 2.0, 20);
+            }
+        }
+
+        function craftPotion(type) {
+            if (type === 'large') {
+                if (gold < 500 || !(inventory['Rare'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 500; inventory['Rare']--; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(5.0, 1.0, 20);
+            } else if (type === 'speed') {
+                if (gold < 1000 || !(inventory['Glacier'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 1000; inventory['Glacier']--; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(1.0, 3.0, 20);
+            } else if (type === 'hyper') {
+                if (gold < 5000 || !(inventory['Diaboli'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 5000; inventory['Diaboli']--; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(20.0, 1.0, 10);
+            }
+        }
+
+        rollBtn.addEventListener('click', roll);
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !isRolling && document.activeElement.tagName !== 'BUTTON') roll();
+        });
+
+        autoBtn.addEventListener('click', () => {
+            tryPlayMusic();
+            isAuto = !isAuto;
+            if (isAuto) {
+                autoBtn.innerText = "Auto: ON"; autoBtn.classList.add('active');
+                if (!isRolling) roll();
+            } else {
+                autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
+            }
+        });
+
+        loadData();
+        renderCanvas();
+    </script>
+</body>
+</html>
