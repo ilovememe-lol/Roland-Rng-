@@ -28,19 +28,22 @@
         .sidebar {
             position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
             background: rgba(15, 15, 25, 0.95); border-right: 1px solid #333; z-index: 200;
-            display: flex; flex-direction: column; padding: 60px 20px 20px; gap: 15px;
+            display: flex; flex-direction: column; padding: 60px 20px 20px; gap: 12px;
             backdrop-filter: blur(12px); transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             box-shadow: 10px 0 30px rgba(0,0,0,0.8);
         }
         .sidebar.open { left: 0; }
 
-        .sidebar-title { font-size: 18px; font-weight: bold; color: #00ffcc; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .sidebar-title { font-size: 18px; font-weight: bold; color: #00ffcc; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .sidebar-item {
             background: rgba(30, 30, 45, 0.8); border: 1px solid #444; color: #eee;
             padding: 14px 18px; border-radius: 12px; font-size: 15px; font-weight: bold;
             cursor: pointer; text-align: left; transition: 0.2s; display: flex; align-items: center; gap: 10px;
         }
         .sidebar-item:active { background: #00ffcc; color: #000; border-color: #00ffcc; }
+
+        /* 하단 고정 메뉴 분리 */
+        .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #333; padding-top: 15px; }
 
         /* 사이드바 배경 오버레이 */
         .sidebar-overlay {
@@ -146,6 +149,13 @@
         .craft-info { display: flex; flex-direction: column; gap: 4px; }
         .craft-req { font-size: 11px; color: #aaa; }
 
+        /* 설정 모달 전용 스타일 */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #222; }
+        .setting-label { font-size: 14px; font-weight: bold; color: #ddd; }
+        .setting-control input[type="range"] { width: 110px; accent-color: #00ffcc; }
+        .setting-control input[type="checkbox"] { width: 20px; height: 20px; accent-color: #00ffcc; cursor: pointer; }
+        .danger-btn { background: #ff3333; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
         @media (max-width: 768px) {
             body { padding: 12px; }
             #aura-canvas-container { width: 340px; height: 340px; top: 34%; }
@@ -177,6 +187,12 @@
         <button id="nav-inv" class="sidebar-item">📖 인벤토리 (도감)</button>
         <button id="nav-shop" class="sidebar-item">🛒 포션 상점</button>
         <button id="nav-craft" class="sidebar-item">🛠️ 재료 제작</button>
+
+        <!-- 메뉴 하단 위치 (전체화면 & 설정) -->
+        <div class="sidebar-bottom">
+            <button id="nav-fullscreen" class="sidebar-item">🖥️ 전체화면</button>
+            <button id="nav-settings" class="sidebar-item">⚙️ 설정</button>
+        </div>
     </div>
 
     <!-- 캔버스 이펙트 -->
@@ -272,8 +288,37 @@
         </div>
     </div>
 
+    <!-- 4. 설정 모달 -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">⚙️ 게임 설정</div>
+            
+            <div class="setting-row">
+                <span class="setting-label">BGM 배경음악</span>
+                <div class="setting-control"><input type="range" id="bgm-volume" min="0" max="100" value="50"></div>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">효과음 (SFX)</span>
+                <div class="setting-control"><input type="range" id="sfx-volume" min="0" max="100" value="80"></div>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">파티클 이펙트 (저사양용)</span>
+                <div class="setting-control"><input type="checkbox" id="particle-toggle" checked></div>
+            </div>
+
+            <div class="setting-row">
+                <span class="setting-label">데이터 초기화</span>
+                <div class="setting-control"><button class="danger-btn" onclick="resetGameData()">초기화</button></div>
+            </div>
+
+            <button id="close-settings" class="sub-btn" style="width:100%; margin-top:20px; padding: 12px 0;">닫기</button>
+        </div>
+    </div>
+
     <script>
-        // 원본 오라 데이터베이스 (CREATION 1/1,000,000,000 포함)
+        // 원본 오라 데이터베이스 (CREATION 1/1,000,000,000)
         const AURAS = [
             { name: "Common", chance: 2, color: "#a0a0a0", effect: "dust" },
             { name: "Uncommon", chance: 4, color: "#55ff55", effect: "leaf" },
@@ -310,6 +355,7 @@
         let totalRolls = 0, gold = 0, luck = 1.0, autoDelay = 250;
         let bestChance = 0, bestName = "None", isAuto = false, isRolling = false;
         let activeBuff = null;
+        let enableParticles = true;
         let lastRolledAura = AURAS[0];
         const inventory = {};
 
@@ -321,14 +367,18 @@
         const navInv = document.getElementById('nav-inv');
         const navShop = document.getElementById('nav-shop');
         const navCraft = document.getElementById('nav-craft');
+        const navFullscreen = document.getElementById('nav-fullscreen');
+        const navSettings = document.getElementById('nav-settings');
 
         const invModal = document.getElementById('inv-modal');
         const shopModal = document.getElementById('shop-modal');
         const craftModal = document.getElementById('craft-modal');
+        const settingsModal = document.getElementById('settings-modal');
 
         const closeInv = document.getElementById('close-inv');
         const closeShop = document.getElementById('close-shop');
         const closeCraft = document.getElementById('close-craft');
+        const closeSettings = document.getElementById('close-settings');
 
         const rollBtn = document.getElementById('roll-btn');
         const autoBtn = document.getElementById('auto-btn');
@@ -350,7 +400,7 @@
         const particles = [];
         let currentAura = AURAS[0];
 
-        // ☰ 사이드바 관련 토글
+        // ☰ 사이드바 토글
         function toggleSidebar() {
             sidebar.classList.toggle('open');
             sidebarOverlay.classList.toggle('active');
@@ -359,26 +409,41 @@
         menuBtn.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
 
-        // 사이드바 버튼 연결 (각 모달 독립 실행)
-        navInv.addEventListener('click', () => {
-            toggleSidebar();
-            renderInventoryList();
-            invModal.style.display = 'flex';
-        });
+        // 네비게이션 연결
+        navInv.addEventListener('click', () => { toggleSidebar(); renderInventoryList(); invModal.style.display = 'flex'; });
+        navShop.addEventListener('click', () => { toggleSidebar(); shopModal.style.display = 'flex'; });
+        navCraft.addEventListener('click', () => { toggleSidebar(); craftModal.style.display = 'flex'; });
+        navSettings.addEventListener('click', () => { toggleSidebar(); settingsModal.style.display = 'flex'; });
 
-        navShop.addEventListener('click', () => {
+        // 전체화면 토글 기능
+        navFullscreen.addEventListener('click', () => {
             toggleSidebar();
-            shopModal.style.display = 'flex';
-        });
-
-        navCraft.addEventListener('click', () => {
-            toggleSidebar();
-            craftModal.style.display = 'flex';
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert("전체화면을 지원하지 않는 브라우저입니다.");
+                });
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
         });
 
         closeInv.addEventListener('click', () => invModal.style.display = 'none');
         closeShop.addEventListener('click', () => shopModal.style.display = 'none');
         closeCraft.addEventListener('click', () => craftModal.style.display = 'none');
+        closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
+
+        // 파티클 설정 제어
+        document.getElementById('particle-toggle').addEventListener('change', (e) => {
+            enableParticles = e.target.checked;
+        });
+
+        // 리셋 기능
+        function resetGameData() {
+            if (confirm("정말로 모든 데이터를 초기화하시겠습니까? (복구 불가)")) {
+                localStorage.removeItem('sols_rng_save');
+                location.reload();
+            }
+        }
 
         // 저장 및 로드
         function saveData() {
@@ -546,61 +611,63 @@
             ctx.arc(centerX, centerY, 180, 0, Math.PI * 2);
             ctx.fill();
 
-            if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
-                if (Math.random() < 0.6) {
-                    particles.push({
-                        x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
-                        vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
-                        size: Math.random() * 8 + 4, life: 1, color
-                    });
-                }
-            } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
-                ctx.strokeStyle = color; ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
-                ctx.stroke();
-            } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
-                if (Math.random() < 0.4) {
-                    ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
-                    ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
-                }
-            } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
-                ctx.strokeStyle = color; ctx.lineWidth = 2;
-                for (let i = 0; i < 3; i++) {
+            if (enableParticles) {
+                if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
+                    if (Math.random() < 0.6) {
+                        particles.push({
+                            x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
+                            vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
+                            size: Math.random() * 8 + 4, life: 1, color
+                        });
+                    }
+                } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
+                    ctx.strokeStyle = color; ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
+                    ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
+                    ctx.stroke();
+                } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
+                    if (Math.random() < 0.4) {
+                        ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
+                        ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
+                    }
+                } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
+                    ctx.strokeStyle = color; ctx.lineWidth = 2;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
+                        ctx.stroke();
+                    }
+                } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
+                    ctx.strokeStyle = color; ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
                     ctx.stroke();
                 }
-            } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
-                ctx.strokeStyle = color; ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
-                ctx.stroke();
-            }
 
-            if (Math.random() < 0.3) {
-                particles.push({
-                    x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
-                    vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
-                    size: Math.random() * 6 + 3, life: 1, color
-                });
-            }
+                if (Math.random() < 0.3) {
+                    particles.push({
+                        x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
+                        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
+                        size: Math.random() * 6 + 3, life: 1, color
+                    });
+                }
 
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-                ctx.fillStyle = p.color;
-                ctx.globalAlpha = Math.max(0, p.life);
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                if (p.life <= 0) particles.splice(i, 1);
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = Math.max(0, p.life);
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    if (p.life <= 0) particles.splice(i, 1);
+                }
+                ctx.globalAlpha = 1.0;
             }
-            ctx.globalAlpha = 1.0;
 
             requestAnimationFrame(renderCanvas);
         }
