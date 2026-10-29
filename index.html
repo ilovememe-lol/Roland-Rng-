@@ -14,6 +14,7 @@
             padding: 20px; position: relative;
         }
 
+        /* ☰ 좌측 상단 햄버거 메뉴 버튼 */
         .menu-btn {
             position: absolute; top: 15px; left: 15px; z-index: 100;
             background: rgba(15, 15, 25, 0.85); border: 1px solid #444; color: #fff;
@@ -23,6 +24,7 @@
         }
         .menu-btn:active { transform: scale(0.92); }
 
+        /* 👈 슬라이드 사이드바 메뉴 */
         .sidebar {
             position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
             background: rgba(15, 15, 25, 0.95); border-right: 1px solid #333; z-index: 200;
@@ -48,6 +50,7 @@
         }
         .sidebar-overlay.active { display: block; }
 
+        /* 캔버스 및 캐릭터 메인 이펙트 */
         #aura-canvas-container {
             position: absolute; top: 38%; left: 50%;
             transform: translate(-50%, -50%);
@@ -64,6 +67,7 @@
             box-shadow: 0 0 35px rgba(255, 255, 255, 0.9); transition: all 0.5s ease;
         }
 
+        /* 상단 정보 바 */
         .top-bar {
             z-index: 10; display: flex; gap: 12px; background: rgba(15, 15, 25, 0.85);
             padding: 10px 20px; border-radius: 30px; border: 1px solid #333;
@@ -73,6 +77,7 @@
         .stat-item { font-size: 13px; font-weight: bold; }
         .stat-val { color: #00ffcc; }
 
+        /* 메인 오라 타이틀 디스플레이 */
         .main-display {
             z-index: 10; text-align: center; display: flex; flex-direction: column;
             align-items: center; justify-content: center; margin-top: 250px;
@@ -88,6 +93,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px);
         }
 
+        /* 하단 컨트롤 영역 */
         .control-panel {
             z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 10px;
             margin-bottom: 15px; width: 100%; max-width: 480px;
@@ -121,6 +127,7 @@
         }
         .exit-btn:active { transform: scale(0.95); }
 
+        /* 모달 시스템 전체 공통 스타일 */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.85); z-index: 999; justify-content: center; align-items: center;
@@ -165,7 +172,7 @@
 </head>
 <body>
 
-    <!-- 오디오 오디오 플레이어 -->
+    <!-- 오디오 플레이어 태그 -->
     <audio id="bgm-player" preload="auto"></audio>
     <audio id="boss-bgm-player" src="./boss_bgm.mp3" loop preload="auto"></audio>
 
@@ -697,4 +704,376 @@
                 if (gold < 300) { alert('골드가 부족합니다!'); return; }
                 gold -= 300; goldValEl.innerText = gold.toLocaleString();
                 saveData();
-                applyBuff(1.0,
+                applyBuff(1.0, 2.0, 20);
+            }
+        }
+
+        function craftPotion(type) {
+            if (type === 'large') {
+                if (gold < 500 || !(inventory['Rare'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 500; inventory['Rare']--; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(5.0, 1.0, 20);
+            } else if (type === 'speed') {
+                if (gold < 1000 || !(inventory['Glacier'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 1000; inventory['Glacier']--; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(1.0, 3.0, 20);
+            } else if (type === 'hyper') {
+                if (gold < 5000 || !(inventory['Diaboli'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 5000; inventory['Diaboli']--; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(20.0, 1.0, 10);
+            }
+        }
+
+        rollBtn.addEventListener('click', roll);
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !isRolling && document.activeElement.tagName !== 'BUTTON') roll();
+        });
+
+        autoBtn.addEventListener('click', () => {
+            tryPlayMusic();
+            isAuto = !isAuto;
+            if (isAuto) {
+                autoBtn.innerText = "Auto: ON"; autoBtn.classList.add('active');
+                if (!isRolling) roll();
+            } else {
+                autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
+            }
+        });
+
+        loadData();
+        renderCanvas();
+
+        /* ==========================================================================
+           [Boss Encounter] 루미너스 (Luminous) - 보스전 및 전용 BGM 제어
+           ========================================================================== */
+
+        const bossStyles = `
+            #boss-modal {
+                display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                background: #040812; z-index: 10000; flex-direction: column;
+                justify-content: center; align-items: center; touch-action: none; overflow: hidden;
+            }
+            #boss-canvas {
+                background: radial-gradient(circle, #0a1526 0%, #03060d 100%);
+                border: 2px solid #aef3ff; border-radius: 12px;
+                box-shadow: 0 0 30px rgba(174, 243, 255, 0.2); touch-action: none;
+            }
+            .boss-ui-top {
+                position: absolute; top: 20px; width: 90%; max-width: 600px;
+                display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 10001;
+            }
+            .boss-title { font-size: 22px; font-weight: 900; color: #e1f9ff; text-shadow: 0 0 12px #aef3ff; }
+            .boss-hp-bar {
+                width: 100%; height: 18px; background: rgba(255, 255, 255, 0.1);
+                border: 1px solid #aef3ff; border-radius: 10px; overflow: hidden; position: relative;
+            }
+            .boss-hp-fill {
+                width: 100%; height: 100%; background: linear-gradient(90deg, #aef3ff, #80d8ff);
+                transition: width 0.1s linear; box-shadow: 0 0 15px #aef3ff;
+            }
+            .player-hp-text { font-size: 13px; font-weight: bold; color: #aef3ff; margin-top: 4px; }
+            .boss-exit-btn {
+                position: absolute; bottom: 20px; background: rgba(174, 243, 255, 0.15);
+                color: #e1f9ff; border: 1px solid #aef3ff; padding: 10px 24px; border-radius: 20px;
+                font-size: 14px; font-weight: bold; cursor: pointer; backdrop-filter: blur(5px); z-index: 10001;
+            }
+        `;
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = bossStyles;
+        document.head.appendChild(styleSheet);
+
+        const bossModalHtml = `
+            <div id="boss-modal">
+                <div class="boss-ui-top">
+                    <div class="boss-title">✨ 루미너스 (Luminous)</div>
+                    <div class="boss-hp-bar"><div id="boss-hp-fill" class="boss-hp-fill"></div></div>
+                    <div id="player-hp-text" class="player-hp-text">플레이어 체력: 100 / 100</div>
+                </div>
+                <canvas id="bossCanvas" width="360" height="520"></canvas>
+                <button id="close-boss-btn" class="boss-exit-btn">포기하고 돌아가기</button>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', bossModalHtml);
+
+        if (sidebar) {
+            const bossNavBtn = document.createElement('button');
+            bossNavBtn.className = 'sidebar-item';
+            bossNavBtn.style.color = '#aef3ff';
+            bossNavBtn.style.borderColor = '#aef3ff';
+            bossNavBtn.innerHTML = '⚔️ 보스전 : 루미너스';
+            bossNavBtn.onclick = () => {
+                toggleSidebar();
+                startBossBattle();
+            };
+            sidebar.insertBefore(bossNavBtn, sidebar.querySelector('.sidebar-bottom'));
+        }
+
+        class LuminousBossBattle {
+            constructor() {
+                this.canvas = document.getElementById('bossCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.modal = document.getElementById('boss-modal');
+                this.hpFill = document.getElementById('boss-hp-fill');
+                this.playerHpText = document.getElementById('player-hp-text');
+                
+                this.isRunning = false;
+                this.animId = null;
+
+                this.maxHp = 1000;
+                this.hp = 1000;
+                this.x = 180;
+                this.y = 90;
+
+                this.player = { x: 180, y: 420, radius: 10, hp: 100, maxHp: 100, invulnerable: 0 };
+                this.patterns = [];
+                this.timer = 0;
+
+                this.initControls();
+            }
+
+            initControls() {
+                const updatePos = (e) => {
+                    if (!this.isRunning) return;
+                    const rect = this.canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    this.player.x = Math.max(15, Math.min(345, clientX - rect.left));
+                    this.player.y = Math.max(15, Math.min(505, clientY - rect.top));
+                };
+
+                this.canvas.addEventListener('mousemove', updatePos);
+                this.canvas.addEventListener('touchmove', (e) => {
+                    updatePos(e);
+                    e.preventDefault();
+                }, { passive: false });
+            }
+
+            start() {
+                this.isRunning = true;
+                this.hp = this.maxHp;
+                this.player.hp = this.player.maxHp;
+                this.patterns = [];
+                this.timer = 0;
+                this.modal.style.display = 'flex';
+
+                if (bgmPlayer) bgmPlayer.pause();
+                if (bossBgmPlayer) {
+                    bossBgmPlayer.currentTime = 0;
+                    bossBgmPlayer.play().catch(() => {});
+                }
+
+                this.updateUI();
+                this.loop();
+            }
+
+            stop() {
+                this.isRunning = false;
+                cancelAnimationFrame(this.animId);
+                this.modal.style.display = 'none';
+
+                if (bossBgmPlayer) bossBgmPlayer.pause();
+                if (bgmPlayer) bgmPlayer.play().catch(() => {});
+            }
+
+            castRandomSkill() {
+                const skillType = Math.floor(Math.random() * 5);
+                
+                if (skillType === 0) {
+                    const safeX = Math.random() * 260 + 50;
+                    this.patterns.push({
+                        type: 'grid', time: 0, maxTime: 90, safeX, safeWidth: 60,
+                        damage: 25
+                    });
+                }
+                else if (skillType === 1) {
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (Math.PI * 2 / 8) * i + Math.random() * 0.2;
+                        this.patterns.push({
+                            type: 'orb', x: this.x, y: this.y,
+                            vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5,
+                            radius: 7, damage: 12
+                        });
+                    }
+                }
+                else if (skillType === 2) {
+                    this.patterns.push({
+                        type: 'beam', x: this.player.x, width: 45, time: 0, maxTime: 70,
+                        damage: 35
+                    });
+                }
+                else if (skillType === 3) {
+                    this.patterns.push({
+                        type: 'ring', x: 180, y: 260, radius: 200, speed: 2.2,
+                        safeZoneRadius: 25, damage: 20
+                    });
+                }
+                else if (skillType === 4) {
+                    for (let i = 0; i < 5; i++) {
+                        this.patterns.push({
+                            type: 'mine', x: Math.random() * 300 + 30, y: Math.random() * 300 + 150,
+                            time: 0, maxTime: 180, radius: 14, damage: 15
+                        });
+                    }
+                }
+            }
+
+            update() {
+                this.timer++;
+                if (this.player.invulnerable > 0) this.player.invulnerable--;
+
+                this.hp = Math.max(0, this.hp - 0.7);
+                if (this.hp <= 0) {
+                    alert("✨ 루미너스의 빛을 파회하고 승리했습니다!");
+                    this.stop();
+                    return;
+                }
+
+                if (this.timer % 100 === 0) {
+                    this.castRandomSkill();
+                }
+
+                for (let i = this.patterns.length - 1; i >= 0; i--) {
+                    const p = this.patterns[i];
+
+                    if (p.type === 'orb') {
+                        p.x += p.vx; p.y += p.vy;
+                        const dist = Math.hypot(p.x - this.player.x, p.y - this.player.y);
+                        if (dist < p.radius + this.player.radius) {
+                            this.takeDamage(p.damage);
+                            this.patterns.splice(i, 1);
+                            continue;
+                        }
+                        if (p.x < 0 || p.x > 360 || p.y < 0 || p.y > 520) this.patterns.splice(i, 1);
+                    }
+                    else if (p.type === 'grid') {
+                        p.time++;
+                        if (p.time > p.maxTime) {
+                            const inSafe = this.player.x >= p.safeX && this.player.x <= p.safeX + p.safeWidth;
+                            if (!inSafe) this.takeDamage(p.damage);
+                            this.patterns.splice(i, 1);
+                        }
+                    }
+                    else if (p.type === 'beam') {
+                        p.time++;
+                        if (p.time === p.maxTime) {
+                            if (Math.abs(this.player.x - p.x) < p.width / 2) this.takeDamage(p.damage);
+                        }
+                        if (p.time > p.maxTime + 10) this.patterns.splice(i, 1);
+                    }
+                    else if (p.type === 'ring') {
+                        p.radius -= p.speed;
+                        const dist = Math.hypot(180 - this.player.x, 260 - this.player.y);
+                        if (Math.abs(dist - p.radius) < 6) this.takeDamage(p.damage);
+                        if (p.radius <= p.safeZoneRadius) this.patterns.splice(i, 1);
+                    }
+                    else if (p.type === 'mine') {
+                        p.time++;
+                        const dist = Math.hypot(p.x - this.player.x, p.y - this.player.y);
+                        if (dist < p.radius + this.player.radius) {
+                            this.takeDamage(p.damage);
+                            this.patterns.splice(i, 1);
+                        } else if (p.time > p.maxTime) {
+                            this.patterns.splice(i, 1);
+                        }
+                    }
+                }
+
+                this.updateUI();
+            }
+
+            takeDamage(dmg) {
+                if (this.player.invulnerable > 0) return;
+                this.player.hp = Math.max(0, this.player.hp - dmg);
+                this.player.invulnerable = 30;
+                if (this.player.hp <= 0) {
+                    alert("💀 루미너스의 빛에 삼켜졌습니다...");
+                    this.stop();
+                }
+            }
+
+            updateUI() {
+                this.hpFill.style.width = `${(this.hp / this.maxHp) * 100}%`;
+                this.playerHpText.innerText = `플레이어 체력: ${Math.ceil(this.player.hp)} / ${this.player.maxHp}`;
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, 360, 520);
+
+                this.ctx.fillStyle = '#aef3ff';
+                this.ctx.shadowColor = '#80d8ff';
+                this.ctx.shadowBlur = 20;
+                this.ctx.beginPath();
+                this.ctx.arc(this.x + Math.sin(this.timer * 0.05) * 15, this.y, 22, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.patterns.forEach(p => {
+                    if (p.type === 'orb') {
+                        this.ctx.fillStyle = '#e1f9ff';
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                    else if (p.type === 'grid') {
+                        const alpha = p.time / p.maxTime;
+                        this.ctx.fillStyle = `rgba(174, 243, 255, ${alpha * 0.4})`;
+                        this.ctx.fillRect(0, 200, p.safeX, 200);
+                        this.ctx.fillRect(p.safeX + p.safeWidth, 200, 360 - (p.safeX + p.safeWidth), 200);
+                    }
+                    else if (p.type === 'beam') {
+                        if (p.time < p.maxTime) {
+                            this.ctx.strokeStyle = 'rgba(174, 243, 255, 0.4)';
+                            this.ctx.lineWidth = 2;
+                            this.ctx.strokeRect(p.x - p.width / 2, 0, p.width, 520);
+                        } else {
+                            this.ctx.fillStyle = '#aef3ff';
+                            this.ctx.fillRect(p.x - p.width / 2, 0, p.width, 520);
+                        }
+                    }
+                    else if (p.type === 'ring') {
+                        this.ctx.strokeStyle = '#aef3ff';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, Math.max(0, p.radius), 0, Math.PI * 2);
+                        this.ctx.stroke();
+                    }
+                    else if (p.type === 'mine') {
+                        this.ctx.fillStyle = p.time % 10 < 5 ? '#b3f0ff' : '#4dd0e1';
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+
+                this.ctx.fillStyle = this.player.invulnerable % 4 < 2 ? '#ffffff' : '#ff4d4d';
+                this.ctx.shadowBlur = 10;
+                this.ctx.shadowColor = '#ffffff';
+                this.ctx.beginPath();
+                this.ctx.arc(this.player.x, this.player.y, this.player.radius, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.shadowBlur = 0;
+            }
+
+            loop() {
+                if (!this.isRunning) return;
+                this.update();
+                this.render();
+                this.animId = requestAnimationFrame(() => this.loop());
+            }
+        }
+
+        const bossBattleInstance = new LuminousBossBattle();
+
+        function startBossBattle() {
+            bossBattleInstance.start();
+        }
+
+        document.getElementById('close-boss-btn').addEventListener('click', () => {
+            bossBattleInstance.stop();
+        });
+    </script>
+</body>
+</html>
