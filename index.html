@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Roland RNG - Project Moon Edition</title>
+    <title>Roland RNG - Original Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         
@@ -188,9 +188,9 @@
     <!-- 상단 스탯 -->
     <div class="top-bar">
         <div class="stat-item">총 ROLL: <span id="total-rolls" class="stat-val">0</span>회</div>
-        <div class="stat-item">안젤리카의 유산: <span id="gold-val" class="stat-val" style="color:#ffd700;">0</span> G</div>
-        <div class="stat-item">공명 배율: <span id="luck-mult" class="stat-val">1.0x</span></div>
-        <div class="stat-item">최고 도달: <span id="best-roll" class="stat-val">None</span></div>
+        <div class="stat-item">골드: <span id="gold-val" class="stat-val" style="color:#ffd700;">0</span> G</div>
+        <div class="stat-item">행운 배율: <span id="luck-mult" class="stat-val">1.0x</span></div>
+        <div class="stat-item">최고 등급: <span id="best-roll" class="stat-val">None</span></div>
     </div>
 
     <!-- 메인 오라 표시 -->
@@ -201,7 +201,7 @@
 
     <!-- 메인 하단 패널 -->
     <div id="normal-panel" class="control-panel">
-        <button id="roll-btn" class="roll-btn">ROLL</button>
+        <button id="roll-btn" class="roll-btn">ROLL (Space)</button>
         <div class="btn-group">
             <button id="auto-btn" class="sub-btn">Auto: OFF</button>
         </div>
@@ -215,7 +215,7 @@
     <!-- 1. 인벤토리(도감) 모달 -->
     <div id="inv-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">📖 해결사 & 조직 도감</div>
+            <div class="modal-title">✨ 획득한 오라 도감 (30종)</div>
             <div id="inv-list"></div>
             <button id="close-inv" class="sub-btn" style="width:100%; margin-top:15px; padding: 12px 0;">닫기</button>
         </div>
@@ -224,18 +224,18 @@
     <!-- 2. 상점 모달 (골드 구매) -->
     <div id="shop-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">🛒 물약 상점 (골드 구매)</div>
+            <div class="modal-title">🛒 포션 상점 (골드 구매)</div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>소형 행운 물약 (+2x 공명 / 15초)</strong>
-                    <span class="craft-req">비용: 100 G</span>
+                    <strong>소형 행운 포션 (+2x Luck / 15초)</strong>
+                    <span class="craft-req">비용: 100 Gold</span>
                 </div>
                 <button class="sub-btn" onclick="buyPotion('small')">구매</button>
             </div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>가속의 물약 (Auto 속도 2배 / 20초)</strong>
-                    <span class="craft-req">비용: 300 G</span>
+                    <strong>초스피드 포션 (Auto 속도 2배 / 20초)</strong>
+                    <span class="craft-req">비용: 300 Gold</span>
                 </div>
                 <button class="sub-btn" onclick="buyPotion('speed_small')">구매</button>
             </div>
@@ -249,22 +249,22 @@
             <div class="modal-title">🛠️ 재료 연금 제작소</div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>대형 행운 물약 (+5x 공명 / 20초)</strong>
-                    <span class="craft-req">재료: 500 G + 6급 해결사 1개</span>
+                    <strong>대형 행운 포션 (+5x Luck / 20초)</strong>
+                    <span class="craft-req">재료: 500 Gold + Rare 1개</span>
                 </div>
                 <button class="sub-btn" onclick="craftPotion('large')">제작</button>
             </div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>초스피드 물약 (Auto 속도 3배 / 20초)</strong>
-                    <span class="craft-req">재료: 1,000 G + 3급 해결사 1개</span>
+                    <strong>초스피드 포션 (Auto 속도 3배 / 20초)</strong>
+                    <span class="craft-req">재료: 1,000 Gold + Glacier 1개</span>
                 </div>
                 <button class="sub-btn" onclick="craftPotion('speed')">제작</button>
             </div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>초월 물약 (+20x 공명 / 10초)</strong>
-                    <span class="craft-req">재료: 5,000 G + 1급 해결사 1개</span>
+                    <strong>초월의 연금 포션 (+20x Luck / 10초)</strong>
+                    <span class="craft-req">재료: 5,000 Gold + Diaboli 1개</span>
                 </div>
                 <button class="sub-btn" onclick="craftPotion('hyper')">제작</button>
             </div>
@@ -273,37 +273,38 @@
     </div>
 
     <script>
-        // 오라 데이터베이스
+        // 원본 오라 데이터베이스 (CREATION 1/1,000,000,000 포함)
         const AURAS = [
-            { name: "9급 해결사", chance: 10, color: "#888888", effect: "dust" },
-            { name: "8급 해결사", chance: 25, color: "#a0a0a0", effect: "leaf" },
-            { name: "7급 해결사", chance: 60, color: "#bbbbbb", effect: "sparkle" },
-            { name: "청소부", chance: 150, color: "#555555", effect: "blackHole" },
-
-            { name: "6급 해결사", chance: 300, color: "#cccccc", effect: "floatCircle" },
-            { name: "5급 해결사", chance: 600, color: "#55ff55", effect: "orbitDots" },
-            { name: "4급 해결사", chance: 1200, color: "#00ccff", effect: "crystalShard" },
-            { name: "엄지: 조직원", chance: 2200, color: "#996633", effect: "orbitDots" },
-            { name: "검지: 방랑자", chance: 3500, color: "#e0e0e0", effect: "pixelNoise" },
-
-            { name: "3급 해결사", chance: 5500, color: "#3388ff", effect: "holyCross" },
-            { name: "2급 해결사", chance: 8500, color: "#aa44ff", effect: "fireFlame" },
-            { name: "시 협회 3과 해결사", chance: 12000, color: "#ff3333", effect: "fireFlame" },
-            { name: "세븐 협회 해결사", chance: 16000, color: "#00ffaa", effect: "swirlVortex" },
-            { name: "엄지: 솔다토", chance: 21000, color: "#cc9933", effect: "goldRune" },
-            { name: "리우 협회 2과 해결사", chance: 27000, color: "#ff6600", effect: "sunExplosion" },
-
-            { name: "검지: 전령", chance: 34000, color: "#ffffff", effect: "cyberGlitch" },
-            { name: "유진 (시 협회 2과 부장)", chance: 42000, color: "#cc0000", effect: "demonHellfire" },
-            { name: "1급 해결사", chance: 50000, color: "#ffaa00", effect: "goldenBeam" },
-
-            { name: "특색 : 주황", chance: 60000, color: "#ff8c00", effect: "sunExplosion" },
-            { name: "특색 : 노랑", chance: 68000, color: "#ffee00", effect: "starMeteor" },
-            { name: "특색 : 초록", chance: 76000, color: "#00ff66", effect: "swirlVortex" },
-            { name: "특색 : 파랑", chance: 84000, color: "#00bfff", effect: "cosmicRings" },
-            { name: "특색 : 보라", chance: 90000, color: "#ff00ff", effect: "rainbowPrism" },
-            { name: "특색 : 검은색", chance: 95000, color: "#333333", effect: "lightningSpark" },
-            { name: "특색 : 빨간색", chance: 100000, color: "#ff0033", effect: "darkBloodPillar" }
+            { name: "Common", chance: 2, color: "#a0a0a0", effect: "dust" },
+            { name: "Uncommon", chance: 4, color: "#55ff55", effect: "leaf" },
+            { name: "Good", chance: 8, color: "#55ffff", effect: "sparkle" },
+            { name: "Natural", chance: 16, color: "#88ff88", effect: "floatCircle" },
+            { name: "Rare", chance: 32, color: "#5555ff", effect: "orbitDots" },
+            { name: "Divinus", chance: 64, color: "#ffff55", effect: "holyCross" },
+            { name: "Crystallized", chance: 128, color: "#00ffff", effect: "crystalShard" },
+            { name: "Rage", chance: 256, color: "#ff3333", effect: "fireFlame" },
+            { name: "Topaz", chance: 500, color: "#ffaa00", effect: "goldenBeam" },
+            { name: "Glacier", chance: 1024, color: "#aaffff", effect: "snowBurst" },
+            { name: "Wind", chance: 2500, color: "#88ffff", effect: "swirlVortex" },
+            { name: "Gilded", chance: 5000, color: "#ffd700", effect: "goldRune" },
+            { name: "JACKPOT", chance: 7777, color: "#00ffaa", effect: "coinShower" },
+            { name: "Diaboli", chance: 10000, color: "#990000", effect: "demonHellfire" },
+            { name: "Undefined", chance: 20000, color: "#e0e0e0", effect: "pixelNoise" },
+            { name: "PERMAFROST", chance: 35000, color: "#00bfff", effect: "iceAura" },
+            { name: "FLARE", chance: 50000, color: "#ff4500", effect: "sunExplosion" },
+            { name: "STarlight", chance: 80000, color: "#ffffaa", effect: "starMeteor" },
+            { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: "voidNebula" },
+            { name: "GLITCH", chance: 250000, color: "#00ff66", effect: "cyberGlitch" },
+            { name: "CELESTIAL", chance: 500000, color: "#00bfff", effect: "cosmicRings" },
+            { name: "OVERDRIVE", chance: 850000, color: "#ff00aa", effect: "lightningSpark" },
+            { name: "KRAAK ROLAND", chance: 1500000, color: "#ff0055", effect: "darkBloodPillar" },
+            { name: "AURA OF RUIN", chance: 3000000, color: "#8b0000", effect: "blackHole" },
+            { name: "SOLARIS", chance: 7500000, color: "#ff8c00", effect: "solarCrown" },
+            { name: "CHROMATIC", chance: 15000000, color: "#ff00ff", effect: "rainbowPrism" },
+            { name: "ECLIPSE", chance: 40000000, color: "#4b0082", effect: "shadowEclipse" },
+            { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: "absoluteRedStorm" },
+            { name: "THE ONE", chance: 300000000, color: "#ffffff", effect: "whiteGodLight" },
+            { name: "CREATION", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" }
         ];
 
         let totalRolls = 0, gold = 0, luck = 1.0, autoDelay = 250;
@@ -382,11 +383,11 @@
         // 저장 및 로드
         function saveData() {
             const data = { totalRolls, gold, bestChance, bestName, inventory };
-            localStorage.setItem('sols_rng_pm_save', JSON.stringify(data));
+            localStorage.setItem('sols_rng_save', JSON.stringify(data));
         }
 
         function loadData() {
-            const saved = localStorage.getItem('sols_rng_pm_save');
+            const saved = localStorage.getItem('sols_rng_save');
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
@@ -418,7 +419,7 @@
 
             let rollCount = 0;
             const rollInterval = setInterval(() => {
-                const tempAura = AURAS[Math.floor(Math.random() * 5)];
+                const tempAura = AURAS[Math.floor(Math.random() * 6)];
                 auraNameEl.innerText = tempAura.name;
                 auraNameEl.style.color = tempAura.color;
                 auraRarityEl.innerText = `1 / ${tempAura.chance.toLocaleString()}`;
@@ -608,7 +609,7 @@
         function applyBuff(luckMult, speedMult, duration) {
             if (activeBuff) clearInterval(activeBuff);
             luck = luckMult; autoDelay = 250 / speedMult;
-            luckMultEl.innerText = `${luckMult}x (공명 중!)`; luckMultEl.style.color = "#ffaa00";
+            luckMultEl.innerText = `${luckMult}x (버프 중!)`; luckMultEl.style.color = "#ffaa00";
 
             let timer = duration;
             activeBuff = setInterval(() => {
@@ -624,12 +625,12 @@
 
         function buyPotion(type) {
             if (type === 'small') {
-                if (gold < 100) { alert('안젤리카의 유산(G)이 부족합니다!'); return; }
+                if (gold < 100) { alert('골드가 부족합니다!'); return; }
                 gold -= 100; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(2.0, 1.0, 15);
             } else if (type === 'speed_small') {
-                if (gold < 300) { alert('안젤리카의 유산(G)이 부족합니다!'); return; }
+                if (gold < 300) { alert('골드가 부족합니다!'); return; }
                 gold -= 300; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(1.0, 2.0, 20);
@@ -638,18 +639,18 @@
 
         function craftPotion(type) {
             if (type === 'large') {
-                if (gold < 500 || !(inventory['6급 해결사'] >= 1)) { alert('재료 부족! (6급 해결사 1개 필요)'); return; }
-                gold -= 500; inventory['6급 해결사']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 500 || !(inventory['Rare'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 500; inventory['Rare']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(5.0, 1.0, 20);
             } else if (type === 'speed') {
-                if (gold < 1000 || !(inventory['3급 해결사'] >= 1)) { alert('재료 부족! (3급 해결사 1개 필요)'); return; }
-                gold -= 1000; inventory['3급 해결사']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 1000 || !(inventory['Glacier'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 1000; inventory['Glacier']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(1.0, 3.0, 20);
             } else if (type === 'hyper') {
-                if (gold < 5000 || !(inventory['1급 해결사'] >= 1)) { alert('재료 부족! (1급 해결사 1개 필요)'); return; }
-                gold -= 5000; inventory['1급 해결사']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 5000 || !(inventory['Diaboli'] >= 1)) { alert('재료 부족!'); return; }
+                gold -= 5000; inventory['Diaboli']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(20.0, 1.0, 10);
             }
