@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Roland RNG - Boss Edition</title>
+    <title>Roland RNG - Spider Boss Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         
@@ -34,13 +34,13 @@
         }
         .sidebar.open { left: 0; }
 
-        .sidebar-title { font-size: 18px; font-weight: bold; color: #00ffcc; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .sidebar-title { font-size: 18px; font-weight: bold; color: #ff3344; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .sidebar-item {
             background: rgba(30, 30, 45, 0.8); border: 1px solid #444; color: #eee;
             padding: 14px 18px; border-radius: 12px; font-size: 15px; font-weight: bold;
             cursor: pointer; text-align: left; transition: 0.2s; display: flex; align-items: center; gap: 10px;
         }
-        .sidebar-item:active { background: #00ffcc; color: #000; border-color: #00ffcc; }
+        .sidebar-item:active { background: #ff3344; color: #000; border-color: #ff3344; }
 
         .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #333; padding-top: 15px; }
 
@@ -142,7 +142,6 @@
             background: rgba(0, 255, 204, 0.15); color: #00ffcc; border: 1px solid #00ffcc;
             padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; font-weight: bold;
         }
-        .view-btn:hover { background: #00ffcc; color: #000; }
         .craft-card { background: #1a1a28; border: 1px solid #333; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .craft-info { display: flex; flex-direction: column; gap: 4px; }
         .craft-req { font-size: 11px; color: #aaa; }
@@ -151,30 +150,22 @@
         .setting-label { font-size: 14px; font-weight: bold; color: #ddd; }
         .setting-control input[type="range"] { width: 110px; accent-color: #00ffcc; }
         .setting-control input[type="checkbox"] { width: 20px; height: 20px; accent-color: #00ffcc; cursor: pointer; }
-        .danger-btn { background: #ff3333; color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         @media (max-width: 768px) {
             body { padding: 12px; }
             #aura-canvas-container { width: 340px; height: 340px; top: 34%; }
             #character-avatar { width: 46px; height: 46px; }
             .top-bar { padding: 6px 12px; gap: 6px 10px; border-radius: 18px; font-size: 11px; margin-left: 30px; }
-            .stat-item { font-size: 11px; }
             .main-display { margin-top: 180px; }
             .aura-title { font-size: 28px; }
-            .aura-rarity { font-size: 14px; padding: 4px 14px; }
             .control-panel { gap: 8px; margin-bottom: 10px; }
-            .roll-btn { padding: 15px 0; font-size: 22px; border-radius: 30px; }
-            .sub-btn { padding: 10px 4px; font-size: 11px; border-radius: 14px; }
-            .exit-btn { padding: 14px 0; font-size: 18px; }
-            .modal-content { width: 95%; padding: 18px; max-height: 85vh; }
+            .roll-btn { padding: 15px 0; font-size: 22px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 오디오 오디오 플레이어 -->
     <audio id="bgm-player" preload="auto"></audio>
-    <!-- 보스전 전용 OST 연동 (boss_bgm.mp3) -->
     <audio id="boss-bgm-player" src="./boss_bgm.mp3" loop preload="auto"></audio>
 
     <button id="menu-toggle-btn" class="menu-btn">☰</button>
@@ -238,13 +229,6 @@
                 </div>
                 <button class="sub-btn" onclick="buyPotion('small')">구매</button>
             </div>
-            <div class="craft-card">
-                <div class="craft-info">
-                    <strong>초스피드 포션 (Auto 속도 2배 / 20초)</strong>
-                    <span class="craft-req">비용: 300 Gold</span>
-                </div>
-                <button class="sub-btn" onclick="buyPotion('speed_small')">구매</button>
-            </div>
             <button id="close-shop" class="sub-btn" style="width:100%; margin-top:15px; padding: 12px 0;">닫기</button>
         </div>
     </div>
@@ -259,20 +243,6 @@
                 </div>
                 <button class="sub-btn" onclick="craftPotion('large')">제작</button>
             </div>
-            <div class="craft-card">
-                <div class="craft-info">
-                    <strong>초스피드 포션 (Auto 속도 3배 / 20초)</strong>
-                    <span class="craft-req">재료: 1,000 Gold + Glacier 1개</span>
-                </div>
-                <button class="sub-btn" onclick="craftPotion('speed')">제작</button>
-            </div>
-            <div class="craft-card">
-                <div class="craft-info">
-                    <strong>초월의 연금 포션 (+20x Luck / 10초)</strong>
-                    <span class="craft-req">재료: 5,000 Gold + Diaboli 1개</span>
-                </div>
-                <button class="sub-btn" onclick="craftPotion('hyper')">제작</button>
-            </div>
             <button id="close-craft" class="sub-btn" style="width:100%; margin-top:15px; padding: 12px 0;">닫기</button>
         </div>
     </div>
@@ -280,22 +250,10 @@
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <div class="modal-title">⚙️ 게임 설정</div>
-            
             <div class="setting-row">
                 <span class="setting-label">BGM 배경음악</span>
                 <div class="setting-control"><input type="range" id="bgm-volume" min="0" max="100" value="50"></div>
             </div>
-
-            <div class="setting-row">
-                <span class="setting-label">파티클 이펙트</span>
-                <div class="setting-control"><input type="checkbox" id="particle-toggle" checked></div>
-            </div>
-
-            <div class="setting-row">
-                <span class="setting-label">데이터 초기화</span>
-                <div class="setting-control"><button class="danger-btn" onclick="resetGameData()">초기화</button></div>
-            </div>
-
             <button id="close-settings" class="sub-btn" style="width:100%; margin-top:20px; padding: 12px 0;">닫기</button>
         </div>
     </div>
@@ -308,226 +266,43 @@
             { name: "Natural", chance: 16, color: "#88ff88", effect: "floatCircle" },
             { name: "Rare", chance: 32, color: "#5555ff", effect: "orbitDots" },
             { name: "Divinus", chance: 64, color: "#ffff55", effect: "holyCross" },
-            { name: "Crystallized", chance: 128, color: "#00ffff", effect: "crystalShard" },
             { name: "Rage", chance: 256, color: "#ff3333", effect: "fireFlame" },
-            { name: "Topaz", chance: 500, color: "#ffaa00", effect: "goldenBeam" },
-            { name: "Glacier", chance: 1024, color: "#aaffff", effect: "snowBurst" },
-            { name: "Wind", chance: 2500, color: "#88ffff", effect: "swirlVortex" },
-            { name: "Gilded", chance: 5000, color: "#ffd700", effect: "goldRune" },
             { name: "JACKPOT", chance: 7777, color: "#00ffaa", effect: "coinShower" },
-            { name: "Diaboli", chance: 10000, color: "#990000", effect: "demonHellfire" },
-            { name: "Undefined", chance: 20000, color: "#e0e0e0", effect: "pixelNoise" },
-            { name: "PERMAFROST", chance: 35000, color: "#00bfff", effect: "iceAura" },
-            { name: "FLARE", chance: 50000, color: "#ff4500", effect: "sunExplosion" },
-            { name: "STarlight", chance: 80000, color: "#ffffaa", effect: "starMeteor" },
-            { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: "voidNebula" },
-            { name: "GLITCH", chance: 250000, color: "#00ff66", effect: "cyberGlitch" },
-            { name: "CELESTIAL", chance: 500000, color: "#00bfff", effect: "cosmicRings" },
-            { name: "OVERDRIVE", chance: 850000, color: "#ff00aa", effect: "lightningSpark" },
-            { name: "KRAAK ROLAND", chance: 1500000, color: "#ff0055", effect: "darkBloodPillar" },
-            { name: "AURA OF RUIN", chance: 3000000, color: "#8b0000", effect: "blackHole" },
-            { name: "SOLARIS", chance: 7500000, color: "#ff8c00", effect: "solarCrown" },
-            { name: "CHROMATIC", chance: 15000000, color: "#ff00ff", effect: "rainbowPrism" },
-            { name: "ECLIPSE", chance: 40000000, color: "#4b0082", effect: "shadowEclipse" },
             { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: "absoluteRedStorm" },
-            { name: "THE ONE", chance: 300000000, color: "#ffffff", effect: "whiteGodLight" },
             { name: "CREATION", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" }
         ];
 
-        const BGM_PLAYLIST = [
-            "./[Blue Archive] Luminous Memory lofi mix - ChestnutWhale.mp3",
-            "./[blue archive] target for love but chill lofi - TiHA Studio.mp3",
-            "./[blue archive] usagi flap but chill lofi - TiHA Studio.mp3",
-            "./hifumi daisuki but it's a chill lofi mix loop for study ♪✨ [blue archive] - TiHA Studio.mp3"
-        ];
-
-        let bgmIndex = 0;
-        let totalRolls = 0, gold = 0, luck = 1.0, autoDelay = 250;
-        let bestChance = 0, bestName = "None", isAuto = false, isRolling = false;
-        let activeBuff = null;
-        let enableParticles = true;
-        let lastRolledAura = AURAS[0];
+        let totalRolls = 0, gold = 0, luck = 1.0, isAuto = false, isRolling = false;
+        let bestChance = 0, bestName = "None";
         const inventory = {};
-
-        const menuBtn = document.getElementById('menu-toggle-btn');
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-        const navInv = document.getElementById('nav-inv');
-        const navShop = document.getElementById('nav-shop');
-        const navCraft = document.getElementById('nav-craft');
-        const navFullscreen = document.getElementById('nav-fullscreen');
-        const navSettings = document.getElementById('nav-settings');
-
-        const invModal = document.getElementById('inv-modal');
-        const shopModal = document.getElementById('shop-modal');
-        const craftModal = document.getElementById('craft-modal');
-        const settingsModal = document.getElementById('settings-modal');
-
-        const closeInv = document.getElementById('close-inv');
-        const closeShop = document.getElementById('close-shop');
-        const closeCraft = document.getElementById('close-craft');
-        const closeSettings = document.getElementById('close-settings');
-
-        const rollBtn = document.getElementById('roll-btn');
-        const autoBtn = document.getElementById('auto-btn');
-
-        const normalPanel = document.getElementById('normal-panel');
-        const inspectPanel = document.getElementById('inspect-panel');
-        const exitInspectBtn = document.getElementById('exit-inspect-btn');
 
         const auraNameEl = document.getElementById('aura-name');
         const auraRarityEl = document.getElementById('aura-rarity');
         const totalRollsEl = document.getElementById('total-rolls');
         const goldValEl = document.getElementById('gold-val');
-        const luckMultEl = document.getElementById('luck-mult');
         const bestRollEl = document.getElementById('best-roll');
         const avatar = document.getElementById('character-avatar');
 
-        const bgmPlayer = document.getElementById('bgm-player');
-        const bossBgmPlayer = document.getElementById('boss-bgm-player');
-        const bgmSlider = document.getElementById('bgm-volume');
-
-        const canvas = document.getElementById('auraCanvas');
-        const ctx = canvas.getContext('2d');
-        const particles = [];
-        let currentAura = AURAS[0];
-
-        if (bgmPlayer && bgmSlider) {
-            bgmPlayer.volume = bgmSlider.value / 100;
-            if (bossBgmPlayer) bossBgmPlayer.volume = bgmSlider.value / 100;
-            bgmSlider.addEventListener('input', (e) => {
-                const vol = e.target.value / 100;
-                if (bgmPlayer) bgmPlayer.volume = vol;
-                if (bossBgmPlayer) bossBgmPlayer.volume = vol;
-            });
-            bgmPlayer.addEventListener('ended', playNextBGM);
-        }
-
-        function playNextBGM() {
-            if (!bgmPlayer) return;
-            bgmPlayer.src = encodeURI(BGM_PLAYLIST[bgmIndex]);
-            bgmPlayer.play().catch(() => {});
-            bgmIndex = (bgmIndex + 1) % BGM_PLAYLIST.length;
-        }
-
-        function tryPlayMusic() {
-            if (bgmPlayer && bgmPlayer.paused && (!bossBattleInstance || !bossBattleInstance.isRunning)) {
-                playNextBGM();
-            }
-        }
-
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-            sidebarOverlay.classList.toggle('active');
-        }
-
-        menuBtn.addEventListener('click', toggleSidebar);
-        sidebarOverlay.addEventListener('click', toggleSidebar);
-
-        navInv.addEventListener('click', () => { toggleSidebar(); renderInventoryList(); invModal.style.display = 'flex'; });
-        navShop.addEventListener('click', () => { toggleSidebar(); shopModal.style.display = 'flex'; });
-        navCraft.addEventListener('click', () => { toggleSidebar(); craftModal.style.display = 'flex'; });
-        navSettings.addEventListener('click', () => { toggleSidebar(); settingsModal.style.display = 'flex'; });
-
-        navFullscreen.addEventListener('click', () => {
-            toggleSidebar();
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
-        });
-
-        closeInv.addEventListener('click', () => invModal.style.display = 'none');
-        closeShop.addEventListener('click', () => shopModal.style.display = 'none');
-        closeCraft.addEventListener('click', () => craftModal.style.display = 'none');
-        closeSettings.addEventListener('click', () => settingsModal.style.display = 'none');
-
-        document.getElementById('particle-toggle').addEventListener('change', (e) => {
-            enableParticles = e.target.checked;
-        });
-
-        function resetGameData() {
-            if (confirm("정말로 모든 데이터를 초기화하시겠습니까? (복구 불가)")) {
-                localStorage.removeItem('sols_rng_save');
-                location.reload();
-            }
-        }
-
-        function saveData() {
-            const data = { totalRolls, gold, bestChance, bestName, inventory };
-            localStorage.setItem('sols_rng_save', JSON.stringify(data));
-        }
-
-        function loadData() {
-            const saved = localStorage.getItem('sols_rng_save');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    totalRolls = data.totalRolls || 0;
-                    gold = data.gold || 0;
-                    bestChance = data.bestChance || 0;
-                    bestName = data.bestName || "None";
-                    Object.assign(inventory, data.inventory || {});
-
-                    totalRollsEl.innerText = totalRolls.toLocaleString();
-                    goldValEl.innerText = gold.toLocaleString();
-                    if (bestChance > 0) {
-                        bestRollEl.innerText = `${bestName} (1/${bestChance.toLocaleString()})`;
-                        const bestAura = AURAS.find(a => a.name === bestName);
-                        if (bestAura) bestRollEl.style.color = bestAura.color;
-                    }
-                } catch(e) {}
-            }
-        }
-
         function roll() {
-            tryPlayMusic();
             if (isRolling) return;
             isRolling = true;
-            rollBtn.disabled = true;
-
             totalRolls++;
             totalRollsEl.innerText = totalRolls.toLocaleString();
 
-            let rollCount = 0;
-            const rollInterval = setInterval(() => {
-                const tempAura = AURAS[Math.floor(Math.random() * 6)];
-                auraNameEl.innerText = tempAura.name;
-                auraNameEl.style.color = tempAura.color;
-                auraRarityEl.innerText = `1 / ${tempAura.chance.toLocaleString()}`;
-                rollCount++;
-
-                if (rollCount > 7) {
-                    clearInterval(rollInterval);
-                    finalizeRoll();
-                }
-            }, 45);
-        }
-
-        function finalizeRoll() {
             let selectedAura = AURAS[0];
             for (let i = AURAS.length - 1; i >= 0; i--) {
-                const effectiveChance = AURAS[i].chance / luck;
-                if (Math.random() < (1 / effectiveChance)) {
+                if (Math.random() < (1 / (AURAS[i].chance / luck))) {
                     selectedAura = AURAS[i];
                     break;
                 }
             }
 
-            const earnedGold = Math.max(1, Math.floor(Math.log2(selectedAura.chance)));
-            gold += earnedGold;
+            gold += Math.max(1, Math.floor(Math.log2(selectedAura.chance)));
             goldValEl.innerText = gold.toLocaleString();
 
             auraNameEl.innerText = selectedAura.name;
             auraNameEl.style.color = selectedAura.color;
-            auraNameEl.style.transform = "scale(1.2)";
-            setTimeout(() => auraNameEl.style.transform = "scale(1)", 150);
             auraRarityEl.innerText = `1 / ${selectedAura.chance.toLocaleString()}`;
-
-            currentAura = selectedAura;
-            lastRolledAura = selectedAura;
             avatar.style.backgroundColor = selectedAura.color;
             avatar.style.boxShadow = `0 0 35px ${selectedAura.color}`;
 
@@ -540,246 +315,59 @@
                 bestRollEl.style.color = selectedAura.color;
             }
 
-            saveData();
-
             setTimeout(() => {
                 isRolling = false;
-                rollBtn.disabled = false;
-                if (isAuto) setTimeout(roll, autoDelay);
-            }, 250);
+                if (isAuto) roll();
+            }, 200);
         }
 
-        function inspectAura(auraName) {
-            const foundAura = AURAS.find(a => a.name === auraName);
-            if (!foundAura) return;
-
-            currentAura = foundAura;
-            auraNameEl.innerText = foundAura.name;
-            auraNameEl.style.color = foundAura.color;
-            auraRarityEl.innerText = `1 / ${foundAura.chance.toLocaleString()} (관전 모드)`;
-            avatar.style.backgroundColor = foundAura.color;
-            avatar.style.boxShadow = `0 0 35px ${foundAura.color}`;
-
-            invModal.style.display = 'none';
-            normalPanel.style.display = 'none';
-            inspectPanel.style.display = 'flex';
-        }
-
-        exitInspectBtn.addEventListener('click', () => {
-            currentAura = lastRolledAura;
-            auraNameEl.innerText = lastRolledAura.name;
-            auraNameEl.style.color = lastRolledAura.color;
-            auraRarityEl.innerText = `1 / ${lastRolledAura.chance.toLocaleString()}`;
-            avatar.style.backgroundColor = lastRolledAura.color;
-            avatar.style.boxShadow = `0 0 35px ${lastRolledAura.color}`;
-
-            inspectPanel.style.display = 'none';
-            normalPanel.style.display = 'flex';
-        });
-
-        function renderInventoryList() {
-            const listEl = document.getElementById('inv-list');
-            listEl.innerHTML = '';
-            AURAS.forEach(a => {
-                const count = inventory[a.name] || 0;
-                const row = document.createElement('div');
-                row.className = 'item-row';
-                
-                const viewBtnHtml = count > 0 
-                    ? `<button class="view-btn" onclick="inspectAura('${a.name}')">👁️ 구경</button>` 
-                    : `<span style="color:#666; font-size:12px;">미해금</span>`;
-
-                row.innerHTML = `
-                    <div>
-                        <span style="color:${a.color}; font-weight:bold;">${a.name} (1/${a.chance.toLocaleString()})</span>
-                        <div style="font-size:12px; color:#aaa;">보유: ${count}개</div>
-                    </div>
-                    ${viewBtnHtml}
-                `;
-                listEl.appendChild(row);
-            });
-        }
-
-        let angleTick = 0;
-        function renderCanvas() {
-            ctx.clearRect(0, 0, 500, 500);
-            const centerX = 250, centerY = 250;
-            angleTick += 0.03;
-
-            const color = currentAura.color;
-            const effect = currentAura.effect;
-
-            const grad = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 180);
-            grad.addColorStop(0, color + 'aa');
-            grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 180, 0, Math.PI * 2);
-            ctx.fill();
-
-            if (enableParticles) {
-                if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
-                    if (Math.random() < 0.6) {
-                        particles.push({
-                            x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
-                            vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
-                            size: Math.random() * 8 + 4, life: 1, color
-                        });
-                    }
-                } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
-                    ctx.strokeStyle = color; ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
-                    ctx.stroke();
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
-                    ctx.stroke();
-                } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
-                    if (Math.random() < 0.4) {
-                        ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
-                        ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
-                    }
-                } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
-                    ctx.strokeStyle = color; ctx.lineWidth = 2;
-                    for (let i = 0; i < 3; i++) {
-                        ctx.beginPath();
-                        ctx.moveTo(centerX, centerY);
-                        ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
-                        ctx.stroke();
-                    }
-                } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
-                    ctx.strokeStyle = color; ctx.lineWidth = 4;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-
-                if (Math.random() < 0.3) {
-                    particles.push({
-                        x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
-                        vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
-                        size: Math.random() * 6 + 3, life: 1, color
-                    });
-                }
-
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-                    ctx.fillStyle = p.color;
-                    ctx.globalAlpha = Math.max(0, p.life);
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    if (p.life <= 0) particles.splice(i, 1);
-                }
-                ctx.globalAlpha = 1.0;
-            }
-
-            requestAnimationFrame(renderCanvas);
-        }
-
-        function applyBuff(luckMult, speedMult, duration) {
-            if (activeBuff) clearInterval(activeBuff);
-            luck = luckMult; autoDelay = 250 / speedMult;
-            luckMultEl.innerText = `${luckMult}x (버프 중!)`; luckMultEl.style.color = "#ffaa00";
-
-            let timer = duration;
-            activeBuff = setInterval(() => {
-                timer--;
-                if (timer <= 0) {
-                    clearInterval(activeBuff);
-                    luck = 1.0; autoDelay = 250;
-                    luckMultEl.innerText = "1.0x"; luckMultEl.style.color = "#00ffcc";
-                    activeBuff = null;
-                }
-            }, 1000);
-        }
-
-        function buyPotion(type) {
-            if (type === 'small') {
-                if (gold < 100) { alert('골드가 부족합니다!'); return; }
-                gold -= 100; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(2.0, 1.0, 15);
-            } else if (type === 'speed_small') {
-                if (gold < 300) { alert('골드가 부족합니다!'); return; }
-                gold -= 300; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(1.0, 2.0, 20);
-            }
-        }
-
-        function craftPotion(type) {
-            if (type === 'large') {
-                if (gold < 500 || !(inventory['Rare'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 500; inventory['Rare']--; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(5.0, 1.0, 20);
-            } else if (type === 'speed') {
-                if (gold < 1000 || !(inventory['Glacier'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 1000; inventory['Glacier']--; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(1.0, 3.0, 20);
-            } else if (type === 'hyper') {
-                if (gold < 5000 || !(inventory['Diaboli'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 5000; inventory['Diaboli']--; goldValEl.innerText = gold.toLocaleString();
-                saveData();
-                applyBuff(20.0, 1.0, 10);
-            }
-        }
-
-        rollBtn.addEventListener('click', roll);
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && !isRolling && document.activeElement.tagName !== 'BUTTON') roll();
-        });
-
-        autoBtn.addEventListener('click', () => {
-            tryPlayMusic();
+        document.getElementById('roll-btn').addEventListener('click', roll);
+        document.getElementById('auto-btn').addEventListener('click', () => {
             isAuto = !isAuto;
-            if (isAuto) {
-                autoBtn.innerText = "Auto: ON"; autoBtn.classList.add('active');
-                if (!isRolling) roll();
-            } else {
-                autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
-            }
+            document.getElementById('auto-btn').innerText = `Auto: ${isAuto ? 'ON' : 'OFF'}`;
+            if (isAuto && !isRolling) roll();
         });
-
-        loadData();
-        renderCanvas();
 
         /* ==========================================================================
-           [Boss Encounter] 루미너스 (Luminous) - 보스전 및 전용 BGM 제어
+           [Boss Encounter] 거미집 style 언더테일 닷지 보스전 기믹
            ========================================================================== */
 
         const bossStyles = `
             #boss-modal {
                 display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: #040812; z-index: 10000; flex-direction: column;
-                justify-content: center; align-items: center; touch-action: none; overflow: hidden;
-            }
-            #boss-canvas {
-                background: radial-gradient(circle, #0a1526 0%, #03060d 100%);
-                border: 2px solid #aef3ff; border-radius: 12px;
-                box-shadow: 0 0 30px rgba(174, 243, 255, 0.2); touch-action: none;
+                background: #000; z-index: 10000; flex-direction: column;
+                justify-content: center; align-items: center; overflow: hidden;
             }
             .boss-ui-top {
-                position: absolute; top: 20px; width: 90%; max-width: 600px;
+                position: absolute; top: 20px; width: 90%; max-width: 400px;
                 display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 10001;
             }
-            .boss-title { font-size: 22px; font-weight: 900; color: #e1f9ff; text-shadow: 0 0 12px #aef3ff; }
+            .boss-title { font-size: 20px; font-weight: 900; color: #ff3344; letter-spacing: 2px; }
             .boss-hp-bar {
-                width: 100%; height: 18px; background: rgba(255, 255, 255, 0.1);
-                border: 1px solid #aef3ff; border-radius: 10px; overflow: hidden; position: relative;
+                width: 100%; height: 12px; background: rgba(255,255,255,0.1);
+                border: 1px solid #ff3344; border-radius: 6px; overflow: hidden;
             }
-            .boss-hp-fill {
-                width: 100%; height: 100%; background: linear-gradient(90deg, #aef3ff, #80d8ff);
-                transition: width 0.1s linear; box-shadow: 0 0 15px #aef3ff;
+            .boss-hp-fill { width: 100%; height: 100%; background: #ff3344; transition: width 0.1s linear; }
+            .boss-stage-text { font-size: 13px; color: #aaa; font-weight: bold; }
+            #spider-box {
+                position: relative; width: 320px; height: 320px;
+                border: 2px solid #ff3344; background: #080305;
+                box-shadow: 0 0 25px rgba(255, 51, 68, 0.3); overflow: hidden;
             }
-            .player-hp-text { font-size: 13px; font-weight: bold; color: #aef3ff; margin-top: 4px; }
+            #spiderCanvas { width: 100%; height: 100%; cursor: crosshair; }
+            .boss-msg-box {
+                margin-top: 12px; color: #fff; font-size: 13px; height: 20px; font-weight: bold; text-align: center;
+            }
+            .attack-action-btn {
+                display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background: #ff3344; color: #fff; border: none; padding: 12px 30px; font-size: 18px;
+                font-weight: 900; border-radius: 25px; cursor: pointer; box-shadow: 0 0 20px #ff3344;
+                z-index: 10002;
+            }
             .boss-exit-btn {
-                position: absolute; bottom: 20px; background: rgba(174, 243, 255, 0.15);
-                color: #e1f9ff; border: 1px solid #aef3ff; padding: 10px 24px; border-radius: 20px;
-                font-size: 14px; font-weight: bold; cursor: pointer; backdrop-filter: blur(5px); z-index: 10001;
+                position: absolute; bottom: 20px; background: rgba(255,255,255,0.1);
+                color: #888; border: 1px solid #444; padding: 8px 20px; border-radius: 20px;
+                font-size: 13px; cursor: pointer;
             }
         `;
         const styleSheet = document.createElement("style");
@@ -789,83 +377,96 @@
         const bossModalHtml = `
             <div id="boss-modal">
                 <div class="boss-ui-top">
-                    <div class="boss-title">✨ 루미너스 (Luminous)</div>
+                    <div class="boss-title">🕸️ 거미집의 검 (Spider's Web)</div>
                     <div class="boss-hp-bar"><div id="boss-hp-fill" class="boss-hp-fill"></div></div>
-                    <div id="player-hp-text" class="player-hp-text">플레이어 체력: 100 / 100</div>
+                    <div id="boss-stage-text" class="boss-stage-text">단계 1 / 3</div>
                 </div>
-                <canvas id="bossCanvas" width="360" height="520"></canvas>
-                <button id="close-boss-btn" class="boss-exit-btn">포기하고 돌아가기</button>
+                <div id="spider-box">
+                    <canvas id="spiderCanvas" width="320" height="320"></canvas>
+                    <button id="boss-slash-btn" class="attack-action-btn">🗡️ 베기!</button>
+                </div>
+                <div id="boss-msg" class="boss-msg-box">공격을 피하세요!</div>
+                <button id="close-boss-btn" class="boss-exit-btn">도망치기</button>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', bossModalHtml);
 
+        const sidebar = document.getElementById('sidebar');
         if (sidebar) {
             const bossNavBtn = document.createElement('button');
             bossNavBtn.className = 'sidebar-item';
-            bossNavBtn.style.color = '#aef3ff';
-            bossNavBtn.style.borderColor = '#aef3ff';
-            bossNavBtn.innerHTML = '⚔️ 보스전 : 루미너스';
+            bossNavBtn.style.color = '#ff3344';
+            bossNavBtn.style.borderColor = '#ff3344';
+            bossNavBtn.innerHTML = '⚔️ 거미집 보스전';
             bossNavBtn.onclick = () => {
-                toggleSidebar();
-                startBossBattle();
+                sidebar.classList.remove('open');
+                document.getElementById('sidebar-overlay').classList.remove('active');
+                startSpiderBoss();
             };
             sidebar.insertBefore(bossNavBtn, sidebar.querySelector('.sidebar-bottom'));
         }
 
-        class LuminousBossBattle {
+        class SpiderBossGame {
             constructor() {
-                this.canvas = document.getElementById('bossCanvas');
+                this.canvas = document.getElementById('spiderCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.modal = document.getElementById('boss-modal');
                 this.hpFill = document.getElementById('boss-hp-fill');
-                this.playerHpText = document.getElementById('player-hp-text');
-                
+                this.stageText = document.getElementById('boss-stage-text');
+                this.msgEl = document.getElementById('boss-msg');
+                this.slashBtn = document.getElementById('boss-slash-btn');
+
                 this.isRunning = false;
                 this.animId = null;
 
-                this.maxHp = 1000;
-                this.hp = 1000;
-                this.x = 180;
-                this.y = 90;
-
-                this.player = { x: 180, y: 420, radius: 10, hp: 100, maxHp: 100, invulnerable: 0 };
-                this.patterns = [];
+                this.stage = 1;
+                this.bossHp = 100;
+                this.player = { x: 160, y: 160, radius: 5 };
+                this.lines = [];
                 this.timer = 0;
+                this.phaseTimer = 0;
+                this.isAttackOpportunity = false;
 
                 this.initControls();
             }
 
             initControls() {
-                const updatePos = (e) => {
+                const movePlayer = (e) => {
                     if (!this.isRunning) return;
                     const rect = this.canvas.getBoundingClientRect();
                     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                    
-                    this.player.x = Math.max(15, Math.min(345, clientX - rect.left));
-                    this.player.y = Math.max(15, Math.min(505, clientY - rect.top));
+
+                    this.player.x = Math.max(8, Math.min(312, clientX - rect.left));
+                    this.player.y = Math.max(8, Math.min(312, clientY - rect.top));
                 };
 
-                this.canvas.addEventListener('mousemove', updatePos);
+                this.canvas.addEventListener('mousemove', movePlayer);
                 this.canvas.addEventListener('touchmove', (e) => {
-                    updatePos(e);
+                    movePlayer(e);
                     e.preventDefault();
                 }, { passive: false });
+
+                this.slashBtn.addEventListener('click', () => this.executeSlash());
             }
 
             start() {
                 this.isRunning = true;
-                this.hp = this.maxHp;
-                this.player.hp = this.player.maxHp;
-                this.patterns = [];
+                this.stage = 1;
+                this.bossHp = 100;
+                this.player = { x: 160, y: 160, radius: 5 };
+                this.lines = [];
                 this.timer = 0;
-                this.modal.style.display = 'flex';
+                this.phaseTimer = 0;
+                this.isAttackOpportunity = false;
 
-                if (bgmPlayer) bgmPlayer.pause();
-                if (bossBgmPlayer) {
-                    bossBgmPlayer.currentTime = 0;
-                    bossBgmPlayer.play().catch(() => {});
-                }
+                this.modal.style.display = 'flex';
+                this.slashBtn.style.display = 'none';
+
+                const bossBgm = document.getElementById('boss-bgm-player');
+                const mainBgm = document.getElementById('bgm-player');
+                if (mainBgm) mainBgm.pause();
+                if (bossBgm) { bossBgm.currentTime = 0; bossBgm.play().catch(() => {}); }
 
                 this.updateUI();
                 this.loop();
@@ -876,47 +477,42 @@
                 cancelAnimationFrame(this.animId);
                 this.modal.style.display = 'none';
 
-                if (bossBgmPlayer) bossBgmPlayer.pause();
-                if (bgmPlayer) bgmPlayer.play().catch(() => {});
+                const bossBgm = document.getElementById('boss-bgm-player');
+                const mainBgm = document.getElementById('bgm-player');
+                if (bossBgm) bossBgm.pause();
+                if (mainBgm) mainBgm.play().catch(() => {});
             }
 
-            castRandomSkill() {
-                const skillType = Math.floor(Math.random() * 5);
-                
-                if (skillType === 0) {
-                    const safeX = Math.random() * 260 + 50;
-                    this.patterns.push({
-                        type: 'grid', time: 0, maxTime: 90, safeX, safeWidth: 60,
-                        damage: 25
-                    });
-                }
-                else if (skillType === 1) {
-                    for (let i = 0; i < 8; i++) {
-                        const angle = (Math.PI * 2 / 8) * i + Math.random() * 0.2;
-                        this.patterns.push({
-                            type: 'orb', x: this.x, y: this.y,
-                            vx: Math.cos(angle) * 2.5, vy: Math.sin(angle) * 2.5,
-                            radius: 7, damage: 12
+            spawnLines() {
+                if (this.stage === 1) {
+                    // 1페이즈: 세 갈래 참격
+                    if (this.timer % 30 === 0) {
+                        const angle = Math.random() * Math.PI;
+                        this.lines.push({
+                            x1: 160 + Math.cos(angle) * 200, y1: 160 + Math.sin(angle) * 200,
+                            x2: 160 - Math.cos(angle) * 200, y2: 160 - Math.sin(angle) * 200,
+                            warn: 25, active: 10, width: 3
                         });
                     }
-                }
-                else if (skillType === 2) {
-                    this.patterns.push({
-                        type: 'beam', x: this.player.x, width: 45, time: 0, maxTime: 70,
-                        damage: 35
-                    });
-                }
-                else if (skillType === 3) {
-                    this.patterns.push({
-                        type: 'ring', x: 180, y: 260, radius: 200, speed: 2.2,
-                        safeZoneRadius: 25, damage: 20
-                    });
-                }
-                else if (skillType === 4) {
-                    for (let i = 0; i < 5; i++) {
-                        this.patterns.push({
-                            type: 'mine', x: Math.random() * 300 + 30, y: Math.random() * 300 + 150,
-                            time: 0, maxTime: 180, radius: 14, damage: 15
+                } else if (this.stage === 2) {
+                    // 2페이즈: 거미줄 십자 및 사선 참격
+                    if (this.timer % 20 === 0) {
+                        const isHorizontal = Math.random() < 0.5;
+                        this.lines.push({
+                            x1: isHorizontal ? 0 : Math.random() * 320,
+                            y1: isHorizontal ? Math.random() * 320 : 0,
+                            x2: isHorizontal ? 320 : Math.random() * 320,
+                            y2: isHorizontal ? Math.random() * 320 : 320,
+                            warn: 20, active: 8, width: 4
+                        });
+                    }
+                } else if (this.stage === 3) {
+                    // 3페이즈: 난사 참격
+                    if (this.timer % 12 === 0) {
+                        this.lines.push({
+                            x1: Math.random() * 320, y1: 0,
+                            x2: Math.random() * 320, y2: 320,
+                            warn: 15, active: 6, width: 5
                         });
                     }
                 }
@@ -924,134 +520,118 @@
 
             update() {
                 this.timer++;
-                if (this.player.invulnerable > 0) this.player.invulnerable--;
+                this.phaseTimer++;
 
-                this.hp = Math.max(0, this.hp - 0.7);
-                if (this.hp <= 0) {
-                    alert("✨ 루미너스의 빛을 파회하고 승리했습니다!");
+                // 틈이 열리는 타이밍 (공격 기회)
+                if (this.phaseTimer > 250 && !this.isAttackOpportunity) {
+                    this.isAttackOpportunity = true;
+                    this.slashBtn.style.display = 'block';
+                    this.msgEl.innerText = "틈이 열렸다! 지금 베어라!";
+                    this.msgEl.style.color = "#00ffcc";
+                }
+
+                if (!this.isAttackOpportunity) {
+                    this.spawnLines();
+                }
+
+                // 참격 업데이트 및 충돌 판정
+                for (let i = this.lines.length - 1; i >= 0; i--) {
+                    const l = this.lines[i];
+                    if (l.warn > 0) {
+                        l.warn--;
+                    } else {
+                        // 참격 발동 상태에서 캐릭터에 닿았는지 판정
+                        if (this.checkLineCollision(l)) {
+                            alert("💀 참격에 베였습니다! 피격 없이 베어야 승리합니다.");
+                            this.stop();
+                            return;
+                        }
+                        l.active--;
+                        if (l.active <= 0) this.lines.splice(i, 1);
+                    }
+                }
+            }
+
+            checkLineCollision(l) {
+                const A = this.player.x - l.x1;
+                const B = this.player.y - l.y1;
+                const C = l.x2 - l.x1;
+                const D = l.y2 - l.y1;
+
+                const dot = A * C + B * D;
+                const len_sq = C * C + D * D;
+                let param = -1;
+                if (len_sq !== 0) param = dot / len_sq;
+
+                let xx, yy;
+                if (param < 0) { xx = l.x1; yy = l.y1; }
+                else if (param > 1) { xx = l.x2; yy = l.y2; }
+                else { xx = l.x1 + param * C; yy = l.y1 + param * D; }
+
+                const dx = this.player.x - xx;
+                const dy = this.player.y - yy;
+                return Math.sqrt(dx * dx + dy * dy) < (this.player.radius + l.width / 2);
+            }
+
+            executeSlash() {
+                this.isAttackOpportunity = false;
+                this.slashBtn.style.display = 'none';
+                this.lines = [];
+                this.phaseTimer = 0;
+
+                this.bossHp -= 34;
+                if (this.bossHp <= 0) {
+                    alert("✨ 거미집의 아비들을 노히트로 베어내고 [기적] 업적을 달성했습니다!");
                     this.stop();
                     return;
                 }
 
-                if (this.timer % 100 === 0) {
-                    this.castRandomSkill();
-                }
-
-                for (let i = this.patterns.length - 1; i >= 0; i--) {
-                    const p = this.patterns[i];
-
-                    if (p.type === 'orb') {
-                        p.x += p.vx; p.y += p.vy;
-                        const dist = Math.hypot(p.x - this.player.x, p.y - this.player.y);
-                        if (dist < p.radius + this.player.radius) {
-                            this.takeDamage(p.damage);
-                            this.patterns.splice(i, 1);
-                            continue;
-                        }
-                        if (p.x < 0 || p.x > 360 || p.y < 0 || p.y > 520) this.patterns.splice(i, 1);
-                    }
-                    else if (p.type === 'grid') {
-                        p.time++;
-                        if (p.time > p.maxTime) {
-                            const inSafe = this.player.x >= p.safeX && this.player.x <= p.safeX + p.safeWidth;
-                            if (!inSafe) this.takeDamage(p.damage);
-                            this.patterns.splice(i, 1);
-                        }
-                    }
-                    else if (p.type === 'beam') {
-                        p.time++;
-                        if (p.time === p.maxTime) {
-                            if (Math.abs(this.player.x - p.x) < p.width / 2) this.takeDamage(p.damage);
-                        }
-                        if (p.time > p.maxTime + 10) this.patterns.splice(i, 1);
-                    }
-                    else if (p.type === 'ring') {
-                        p.radius -= p.speed;
-                        const dist = Math.hypot(180 - this.player.x, 260 - this.player.y);
-                        if (Math.abs(dist - p.radius) < 6) this.takeDamage(p.damage);
-                        if (p.radius <= p.safeZoneRadius) this.patterns.splice(i, 1);
-                    }
-                    else if (p.type === 'mine') {
-                        p.time++;
-                        const dist = Math.hypot(p.x - this.player.x, p.y - this.player.y);
-                        if (dist < p.radius + this.player.radius) {
-                            this.takeDamage(p.damage);
-                            this.patterns.splice(i, 1);
-                        } else if (p.time > p.maxTime) {
-                            this.patterns.splice(i, 1);
-                        }
-                    }
-                }
-
+                this.stage++;
+                this.msgEl.innerText = `${this.stage}페이즈 시작! 적의 공격이 거세집니다.`;
+                this.msgEl.style.color = "#ff3344";
                 this.updateUI();
             }
 
-            takeDamage(dmg) {
-                if (this.player.invulnerable > 0) return;
-                this.player.hp = Math.max(0, this.player.hp - dmg);
-                this.player.invulnerable = 30;
-                if (this.player.hp <= 0) {
-                    alert("💀 루미너스의 빛에 삼켜졌습니다...");
-                    this.stop();
-                }
-            }
-
             updateUI() {
-                this.hpFill.style.width = `${(this.hp / this.maxHp) * 100}%`;
-                this.playerHpText.innerText = `플레이어 체력: ${Math.ceil(this.player.hp)} / ${this.player.maxHp}`;
+                this.hpFill.style.width = `${Math.max(0, this.bossHp)}%`;
+                this.stageText.innerText = `단계 ${this.stage} / 3`;
             }
 
             render() {
-                this.ctx.clearRect(0, 0, 360, 520);
+                this.ctx.clearRect(0, 0, 320, 320);
 
-                this.ctx.fillStyle = '#aef3ff';
-                this.ctx.shadowColor = '#80d8ff';
-                this.ctx.shadowBlur = 20;
-                this.ctx.beginPath();
-                this.ctx.arc(this.x + Math.sin(this.timer * 0.05) * 15, this.y, 22, 0, Math.PI * 2);
-                this.ctx.fill();
+                // 배경 거미줄 연출
+                this.ctx.strokeStyle = 'rgba(255, 51, 68, 0.15)';
+                this.ctx.lineWidth = 1;
+                for (let i = 0; i < 4; i++) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(160, 160, (i + 1) * 35, 0, Math.PI * 2);
+                    this.ctx.stroke();
+                }
 
-                this.patterns.forEach(p => {
-                    if (p.type === 'orb') {
-                        this.ctx.fillStyle = '#e1f9ff';
-                        this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                        this.ctx.fill();
+                // 참격 (경고선 및 실제 참격)
+                this.lines.forEach(l => {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(l.x1, l.y1);
+                    this.ctx.lineTo(l.x2, l.y2);
+
+                    if (l.warn > 0) {
+                        this.ctx.strokeStyle = 'rgba(255, 51, 68, 0.3)';
+                        this.ctx.lineWidth = 1;
+                    } else {
+                        this.ctx.strokeStyle = '#ffffff';
+                        this.ctx.lineWidth = l.width;
+                        this.ctx.shadowColor = '#ff3344';
+                        this.ctx.shadowBlur = 10;
                     }
-                    else if (p.type === 'grid') {
-                        const alpha = p.time / p.maxTime;
-                        this.ctx.fillStyle = `rgba(174, 243, 255, ${alpha * 0.4})`;
-                        this.ctx.fillRect(0, 200, p.safeX, 200);
-                        this.ctx.fillRect(p.safeX + p.safeWidth, 200, 360 - (p.safeX + p.safeWidth), 200);
-                    }
-                    else if (p.type === 'beam') {
-                        if (p.time < p.maxTime) {
-                            this.ctx.strokeStyle = 'rgba(174, 243, 255, 0.4)';
-                            this.ctx.lineWidth = 2;
-                            this.ctx.strokeRect(p.x - p.width / 2, 0, p.width, 520);
-                        } else {
-                            this.ctx.fillStyle = '#aef3ff';
-                            this.ctx.fillRect(p.x - p.width / 2, 0, p.width, 520);
-                        }
-                    }
-                    else if (p.type === 'ring') {
-                        this.ctx.strokeStyle = '#aef3ff';
-                        this.ctx.lineWidth = 3;
-                        this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, Math.max(0, p.radius), 0, Math.PI * 2);
-                        this.ctx.stroke();
-                    }
-                    else if (p.type === 'mine') {
-                        this.ctx.fillStyle = p.time % 10 < 5 ? '#b3f0ff' : '#4dd0e1';
-                        this.ctx.beginPath();
-                        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                        this.ctx.fill();
-                    }
+                    this.ctx.stroke();
+                    this.ctx.shadowBlur = 0;
                 });
 
-                this.ctx.fillStyle = this.player.invulnerable % 4 < 2 ? '#ffffff' : '#ff4d4d';
-                this.ctx.shadowBlur = 10;
+                // 플레이어 (흰색 피격점)
+                this.ctx.fillStyle = '#ffffff';
                 this.ctx.shadowColor = '#ffffff';
+                this.ctx.shadowBlur = 8;
                 this.ctx.beginPath();
                 this.ctx.arc(this.player.x, this.player.y, this.player.radius, 0, Math.PI * 2);
                 this.ctx.fill();
@@ -1066,15 +646,9 @@
             }
         }
 
-        const bossBattleInstance = new LuminousBossBattle();
-
-        function startBossBattle() {
-            bossBattleInstance.start();
-        }
-
-        document.getElementById('close-boss-btn').addEventListener('click', () => {
-            bossBattleInstance.stop();
-        });
+        const spiderBoss = new SpiderBossGame();
+        function startSpiderBoss() { spiderBoss.start(); }
+        document.getElementById('close-boss-btn').addEventListener('click', () => spiderBoss.stop());
     </script>
 </body>
 </html>
