@@ -14,6 +14,42 @@
             padding: 20px; position: relative;
         }
 
+        /* ☰ 좌측 상단 햄버거 메뉴 버튼 */
+        .menu-btn {
+            position: absolute; top: 15px; left: 15px; z-index: 100;
+            background: rgba(15, 15, 25, 0.85); border: 1px solid #444; color: #fff;
+            font-size: 22px; width: 44px; height: 44px; border-radius: 12px;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            backdrop-filter: blur(8px); transition: 0.2s;
+        }
+        .menu-btn:active { transform: scale(0.92); }
+
+        /* 👈 옆에서 튀어나오는 사이드바 메뉴 */
+        .sidebar {
+            position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
+            background: rgba(15, 15, 25, 0.95); border-right: 1px solid #333; z-index: 200;
+            display: flex; flex-direction: column; padding: 60px 20px 20px; gap: 15px;
+            backdrop-filter: blur(12px); transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+        }
+        .sidebar.open { left: 0; }
+
+        .sidebar-title { font-size: 18px; font-weight: bold; color: #00ffcc; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .sidebar-item {
+            background: rgba(30, 30, 45, 0.8); border: 1px solid #444; color: #eee;
+            padding: 14px 18px; border-radius: 12px; font-size: 15px; font-weight: bold;
+            cursor: pointer; text-align: left; transition: 0.2s; display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar-item:active { background: #00ffcc; color: #000; border-color: #00ffcc; }
+
+        /* 사이드바 배경 오버레이 */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.6); z-index: 150; backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* 캔버스 이펙트 */
         #aura-canvas-container {
             position: absolute; top: 38%; left: 50%;
             transform: translate(-50%, -50%);
@@ -30,14 +66,17 @@
             box-shadow: 0 0 35px rgba(255, 255, 255, 0.9); transition: all 0.5s ease;
         }
 
+        /* 상단 스탯 */
         .top-bar {
-            z-index: 10; display: flex; gap: 15px; background: rgba(15, 15, 25, 0.85);
-            padding: 12px 24px; border-radius: 30px; border: 1px solid #333;
-            backdrop-filter: blur(10px); flex-wrap: wrap; justify-content: center; max-width: 90%;
+            z-index: 10; display: flex; gap: 12px; background: rgba(15, 15, 25, 0.85);
+            padding: 10px 20px; border-radius: 30px; border: 1px solid #333;
+            backdrop-filter: blur(10px); flex-wrap: wrap; justify-content: center; max-width: 85%;
+            margin-left: 40px;
         }
-        .stat-item { font-size: 14px; font-weight: bold; }
+        .stat-item { font-size: 13px; font-weight: bold; }
         .stat-val { color: #00ffcc; }
 
+        /* 중앙 메인 */
         .main-display {
             z-index: 10; text-align: center; display: flex; flex-direction: column;
             align-items: center; justify-content: center; margin-top: 250px;
@@ -53,8 +92,9 @@
             border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px);
         }
 
+        /* 하단 제어 */
         .control-panel {
-            z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 12px;
+            z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 10px;
             margin-bottom: 15px; width: 100%; max-width: 480px;
         }
         .roll-btn {
@@ -86,6 +126,7 @@
         }
         .exit-btn:active { transform: scale(0.95); }
 
+        /* 모달 시스템 */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.85); z-index: 999; justify-content: center; align-items: center;
@@ -109,8 +150,8 @@
             body { padding: 12px; }
             #aura-canvas-container { width: 340px; height: 340px; top: 34%; }
             #character-avatar { width: 46px; height: 46px; }
-            .top-bar { padding: 8px 14px; gap: 8px 12px; border-radius: 18px; font-size: 12px; }
-            .stat-item { font-size: 12px; }
+            .top-bar { padding: 6px 12px; gap: 6px 10px; border-radius: 18px; font-size: 11px; margin-left: 30px; }
+            .stat-item { font-size: 11px; }
             .main-display { margin-top: 180px; }
             .aura-title { font-size: 28px; }
             .aura-rarity { font-size: 14px; padding: 4px 14px; }
@@ -124,11 +165,27 @@
 </head>
 <body>
 
+    <!-- ☰ 좌측 상단 메뉴 버튼 -->
+    <button id="menu-toggle-btn" class="menu-btn">☰</button>
+
+    <!-- 사이드바 배경 어둡게 -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- 👈 왼쪽에서 열리는 슬라이드 메뉴 -->
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-title">메뉴 (Menu)</div>
+        <button id="nav-inv" class="sidebar-item">📖 인벤토리 (도감)</button>
+        <button id="nav-shop" class="sidebar-item">🛒 포션 상점</button>
+        <button id="nav-craft" class="sidebar-item">🛠️ 재료 제작</button>
+    </div>
+
+    <!-- 캔버스 이펙트 -->
     <div id="aura-canvas-container">
         <canvas id="auraCanvas" width="500" height="500"></canvas>
         <div id="character-avatar"></div>
     </div>
 
+    <!-- 상단 스탯 -->
     <div class="top-bar">
         <div class="stat-item">총 ROLL: <span id="total-rolls" class="stat-val">0</span>회</div>
         <div class="stat-item">안젤리카의 유산: <span id="gold-val" class="stat-val" style="color:#ffd700;">0</span> G</div>
@@ -136,100 +193,117 @@
         <div class="stat-item">최고 도달: <span id="best-roll" class="stat-val">None</span></div>
     </div>
 
+    <!-- 메인 오라 표시 -->
     <div class="main-display">
         <div id="aura-name" class="aura-title" style="color: #888;">ROLL을 눌러주세요</div>
         <div id="aura-rarity" class="aura-rarity">1 / 1</div>
     </div>
 
+    <!-- 메인 하단 패널 -->
     <div id="normal-panel" class="control-panel">
-        <button id="roll-btn" class="roll-btn">ROLL (도서관 추출)</button>
+        <button id="roll-btn" class="roll-btn">ROLL</button>
         <div class="btn-group">
             <button id="auto-btn" class="sub-btn">Auto: OFF</button>
-            <button id="shop-btn" class="sub-btn">🧪 뇌혈관 상점</button>
-            <button id="inv-btn" class="sub-btn">📖 도감</button>
         </div>
     </div>
 
+    <!-- 구경 모드 하단 패널 -->
     <div id="inspect-panel">
         <button id="exit-inspect-btn" class="exit-btn">🚪 구경 종료 (돌아가기)</button>
     </div>
 
+    <!-- 1. 인벤토리(도감) 모달 -->
     <div id="inv-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">📖 도서관 책장 수집 도감 (30종)</div>
+            <div class="modal-title">📖 해결사 & 조직 도감</div>
             <div id="inv-list"></div>
             <button id="close-inv" class="sub-btn" style="width:100%; margin-top:15px; padding: 12px 0;">닫기</button>
         </div>
     </div>
 
+    <!-- 2. 상점 모달 (골드 구매) -->
     <div id="shop-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">🧪 엔케팔린 물약 연금소</div>
+            <div class="modal-title">🛒 물약 상점 (골드 구매)</div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>엔케팔린 샷 (+2x 공명 / 15초)</strong>
+                    <strong>소형 행운 물약 (+2x 공명 / 15초)</strong>
                     <span class="craft-req">비용: 100 G</span>
                 </div>
-                <button class="sub-btn" onclick="buyPotion('small')">추출</button>
+                <button class="sub-btn" onclick="buyPotion('small')">구매</button>
             </div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>정제된 뇌수 (+5x 공명 / 20초)</strong>
-                    <span class="craft-req">재료: 500 G + 단악수선 1개</span>
+                    <strong>가속의 물약 (Auto 속도 2배 / 20초)</strong>
+                    <span class="craft-req">비용: 300 G</span>
                 </div>
-                <button class="sub-btn" onclick="craftPotion('large')">제작</button>
-            </div>
-            <div class="craft-card">
-                <div class="craft-info">
-                    <strong>빛의 물결 (Auto 속도 3배 / 20초)</strong>
-                    <span class="craft-req">재료: 1,000 G + 눈의 여왕 1개</span>
-                </div>
-                <button class="sub-btn" onclick="craftPotion('speed')">제작</button>
-            </div>
-            <div class="craft-card">
-                <div class="craft-info">
-                    <strong>검은침묵의 가호 (+20x 공명 / 10초)</strong>
-                    <span class="craft-req">재료: 5,000 G + 알리우네 1개</span>
-                </div>
-                <button class="sub-btn" onclick="craftPotion('hyper')">제작</button>
+                <button class="sub-btn" onclick="buyPotion('speed_small')">구매</button>
             </div>
             <button id="close-shop" class="sub-btn" style="width:100%; margin-top:15px; padding: 12px 0;">닫기</button>
         </div>
     </div>
 
+    <!-- 3. 제작 모달 (재료 연금) -->
+    <div id="craft-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">🛠️ 재료 연금 제작소</div>
+            <div class="craft-card">
+                <div class="craft-info">
+                    <strong>대형 행운 물약 (+5x 공명 / 20초)</strong>
+                    <span class="craft-req">재료: 500 G + 6급 해결사 1개</span>
+                </div>
+                <button class="sub-btn" onclick="craftPotion('large')">제작</button>
+            </div>
+            <div class="craft-card">
+                <div class="craft-info">
+                    <strong>초스피드 물약 (Auto 속도 3배 / 20초)</strong>
+                    <span class="craft-req">재료: 1,000 G + 3급 해결사 1개</span>
+                </div>
+                <button class="sub-btn" onclick="craftPotion('speed')">제작</button>
+            </div>
+            <div class="craft-card">
+                <div class="craft-info">
+                    <strong>초월 물약 (+20x 공명 / 10초)</strong>
+                    <span class="craft-req">재료: 5,000 G + 1급 해결사 1개</span>
+                </div>
+                <button class="sub-btn" onclick="craftPotion('hyper')">제작</button>
+            </div>
+            <button id="close-craft" class="sub-btn" style="width:100%; margin-top:15px; padding: 12px 0;">닫기</button>
+        </div>
+    </div>
+
     <script>
-        // 프로젝트 문 전체 기믹 / 환상체 / 책장 등급표
+        // 오라 데이터베이스
         const AURAS = [
-            { name: "쥐", chance: 2, color: "#888888", effect: "dust" },
-            { name: "9급 해결사", chance: 4, color: "#a0a0ff", effect: "holyCross" },
-            { name: "8급 해결사", chance: 8, color: "#ff88cc", effect: "leaf" },
-            { name: "엄지 산하 : 흑운회", chance: 16, color: "#00ccff", effect: "orbitDots" },
-            { name: "7급 해결사", chance: 32, color: "#88ffff", effect: "snowBurst" },
-            { name: "6급 해결사", chance: 64, color: "#ff66cc", effect: "sparkle" },
-            { name: "츠바이 협회 : 5과", chance: 128, color: "#4488ff", effect: "crystalShard" },
-            { name: "5급 해결사", chance: 256, color: "#ffaa00", effect: "goldenBeam" },
-            { name: "4급 해결사", chance: 500, color: "#ff3333", effect: "fireFlame" },
-            { name: "3급 해결사", chance: 1024, color: "#cccccc", effect: "floatCircle" },
-            { name: "2급 해결사", chance: 2500, color: "#222222", effect: "demonHellfire" },
-            { name: "1급 해결사", chance: 5000, color: "#00ffff", effect: "swirlVortex" },
-            { name: "느티나무 공방 : 메이스", chance: 20000, color: "#ff0000", effect: "pixelNoise" },
-            { name: "느티나무 공방 : 도끼", chance: 20000, color: "#330033", effect: "blackHole" },
-            { name: "로직 아틀리에 : 샷건", chance: 20000, color: "#aaaaaa", effect: "orbitDots" },
-            { name: "로직 아틀리에 : 권총", chance: 20000, color: "#ff9933", effect: "goldRune" },
-            { name: "올드보이 공방 : 해머", chance: 20000, color: "#66ff66", effect: "cyberGlitch" },
-            { name: "알라스 공방 : 랜스", chance: 20000, color: "#aaffff", effect: "iceAura" },
-            { name: "휠스 인더스트리 : 대검", chance: 120000, color: "#ff4400", effect: "sunExplosion" },
-            { name: "랑아 공방 : 건틀렛", chance: 20000, color: "#ffff88", effect: "starMeteor" },
-            { name: "크리스탈 아틀리에 : 쌍검", chance: 20000, color: "#00ffff", effect: "crystalShard" },
-            { name: "묵 공방 : 태도", chance: 20000, color: "#ff00ff", effect: "lightningSpark" },
-            { name: "뒤랑달", chance: 100000, color: "#ff0055", effect: "darkBloodPillar" },
-            { name: "머리 : 발톱", chance: 3000000, color: "#aa0000", effect: "demonHellfire" },
-            { name: "특색", chance: 20000, color: "#ffd700", effect: "goldRune" },
-            { name: "Golden Bough", chance: 15000000, color: "#ffffaa", effect: "solarCrown" },
-            { name: "Roland", chance: 40000000, color: "#ffffff", effect: "rainbowPrism" },
-            { name: "Carmen", chance: 100000000, color: "#cc0000", effect: "absoluteRedStorm" },
-            { name: "Seed of Light", chance: 300000000, color: "#ffffff", effect: "whiteGodLight" },
-            { name: "크아악 롤랑", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" }
+            { name: "9급 해결사", chance: 10, color: "#888888", effect: "dust" },
+            { name: "8급 해결사", chance: 25, color: "#a0a0a0", effect: "leaf" },
+            { name: "7급 해결사", chance: 60, color: "#bbbbbb", effect: "sparkle" },
+            { name: "청소부", chance: 150, color: "#555555", effect: "blackHole" },
+
+            { name: "6급 해결사", chance: 300, color: "#cccccc", effect: "floatCircle" },
+            { name: "5급 해결사", chance: 600, color: "#55ff55", effect: "orbitDots" },
+            { name: "4급 해결사", chance: 1200, color: "#00ccff", effect: "crystalShard" },
+            { name: "엄지: 조직원", chance: 2200, color: "#996633", effect: "orbitDots" },
+            { name: "검지: 방랑자", chance: 3500, color: "#e0e0e0", effect: "pixelNoise" },
+
+            { name: "3급 해결사", chance: 5500, color: "#3388ff", effect: "holyCross" },
+            { name: "2급 해결사", chance: 8500, color: "#aa44ff", effect: "fireFlame" },
+            { name: "시 협회 3과 해결사", chance: 12000, color: "#ff3333", effect: "fireFlame" },
+            { name: "세븐 협회 해결사", chance: 16000, color: "#00ffaa", effect: "swirlVortex" },
+            { name: "엄지: 솔다토", chance: 21000, color: "#cc9933", effect: "goldRune" },
+            { name: "리우 협회 2과 해결사", chance: 27000, color: "#ff6600", effect: "sunExplosion" },
+
+            { name: "검지: 전령", chance: 34000, color: "#ffffff", effect: "cyberGlitch" },
+            { name: "유진 (시 협회 2과 부장)", chance: 42000, color: "#cc0000", effect: "demonHellfire" },
+            { name: "1급 해결사", chance: 50000, color: "#ffaa00", effect: "goldenBeam" },
+
+            { name: "특색 : 주황", chance: 60000, color: "#ff8c00", effect: "sunExplosion" },
+            { name: "특색 : 노랑", chance: 68000, color: "#ffee00", effect: "starMeteor" },
+            { name: "특색 : 초록", chance: 76000, color: "#00ff66", effect: "swirlVortex" },
+            { name: "특색 : 파랑", chance: 84000, color: "#00bfff", effect: "cosmicRings" },
+            { name: "특색 : 보라", chance: 90000, color: "#ff00ff", effect: "rainbowPrism" },
+            { name: "특색 : 검은색", chance: 95000, color: "#333333", effect: "lightningSpark" },
+            { name: "특색 : 빨간색", chance: 100000, color: "#ff0033", effect: "darkBloodPillar" }
         ];
 
         let totalRolls = 0, gold = 0, luck = 1.0, autoDelay = 250;
@@ -238,14 +312,25 @@
         let lastRolledAura = AURAS[0];
         const inventory = {};
 
-        const rollBtn = document.getElementById('roll-btn');
-        const autoBtn = document.getElementById('auto-btn');
-        const shopBtn = document.getElementById('shop-btn');
-        const invBtn = document.getElementById('inv-btn');
+        // DOM 선택자
+        const menuBtn = document.getElementById('menu-toggle-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        const navInv = document.getElementById('nav-inv');
+        const navShop = document.getElementById('nav-shop');
+        const navCraft = document.getElementById('nav-craft');
+
         const invModal = document.getElementById('inv-modal');
         const shopModal = document.getElementById('shop-modal');
+        const craftModal = document.getElementById('craft-modal');
+
         const closeInv = document.getElementById('close-inv');
         const closeShop = document.getElementById('close-shop');
+        const closeCraft = document.getElementById('close-craft');
+
+        const rollBtn = document.getElementById('roll-btn');
+        const autoBtn = document.getElementById('auto-btn');
 
         const normalPanel = document.getElementById('normal-panel');
         const inspectPanel = document.getElementById('inspect-panel');
@@ -264,6 +349,37 @@
         const particles = [];
         let currentAura = AURAS[0];
 
+        // ☰ 사이드바 관련 토글
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('active');
+        }
+
+        menuBtn.addEventListener('click', toggleSidebar);
+        sidebarOverlay.addEventListener('click', toggleSidebar);
+
+        // 사이드바 버튼 연결 (각 모달 독립 실행)
+        navInv.addEventListener('click', () => {
+            toggleSidebar();
+            renderInventoryList();
+            invModal.style.display = 'flex';
+        });
+
+        navShop.addEventListener('click', () => {
+            toggleSidebar();
+            shopModal.style.display = 'flex';
+        });
+
+        navCraft.addEventListener('click', () => {
+            toggleSidebar();
+            craftModal.style.display = 'flex';
+        });
+
+        closeInv.addEventListener('click', () => invModal.style.display = 'none');
+        closeShop.addEventListener('click', () => shopModal.style.display = 'none');
+        closeCraft.addEventListener('click', () => craftModal.style.display = 'none');
+
+        // 저장 및 로드
         function saveData() {
             const data = { totalRolls, gold, bestChance, bestName, inventory };
             localStorage.setItem('sols_rng_pm_save', JSON.stringify(data));
@@ -291,6 +407,7 @@
             }
         }
 
+        // ROLL 로직
         function roll() {
             if (isRolling) return;
             isRolling = true;
@@ -301,7 +418,7 @@
 
             let rollCount = 0;
             const rollInterval = setInterval(() => {
-                const tempAura = AURAS[Math.floor(Math.random() * 6)];
+                const tempAura = AURAS[Math.floor(Math.random() * 5)];
                 auraNameEl.innerText = tempAura.name;
                 auraNameEl.style.color = tempAura.color;
                 auraRarityEl.innerText = `1 / ${tempAura.chance.toLocaleString()}`;
@@ -357,6 +474,7 @@
             }, 250);
         }
 
+        // 구경 모드
         function inspectAura(auraName) {
             const foundAura = AURAS.find(a => a.name === auraName);
             if (!foundAura) return;
@@ -385,8 +503,32 @@
             normalPanel.style.display = 'flex';
         });
 
-        let angleTick = 0;
+        // 인벤토리 렌더링
+        function renderInventoryList() {
+            const listEl = document.getElementById('inv-list');
+            listEl.innerHTML = '';
+            AURAS.forEach(a => {
+                const count = inventory[a.name] || 0;
+                const row = document.createElement('div');
+                row.className = 'item-row';
+                
+                const viewBtnHtml = count > 0 
+                    ? `<button class="view-btn" onclick="inspectAura('${a.name}')">👁️ 구경</button>` 
+                    : `<span style="color:#666; font-size:12px;">미해금</span>`;
 
+                row.innerHTML = `
+                    <div>
+                        <span style="color:${a.color}; font-weight:bold;">${a.name} (1/${a.chance.toLocaleString()})</span>
+                        <div style="font-size:12px; color:#aaa;">보유: ${count}개</div>
+                    </div>
+                    ${viewBtnHtml}
+                `;
+                listEl.appendChild(row);
+            });
+        }
+
+        // Canvas 2D 연출 엔진
+        let angleTick = 0;
         function renderCanvas() {
             ctx.clearRect(0, 0, 500, 500);
             const centerX = 250, centerY = 250;
@@ -462,6 +604,7 @@
             requestAnimationFrame(renderCanvas);
         }
 
+        // 버프 시스템
         function applyBuff(luckMult, speedMult, duration) {
             if (activeBuff) clearInterval(activeBuff);
             luck = luckMult; autoDelay = 250 / speedMult;
@@ -485,23 +628,28 @@
                 gold -= 100; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(2.0, 1.0, 15);
+            } else if (type === 'speed_small') {
+                if (gold < 300) { alert('안젤리카의 유산(G)이 부족합니다!'); return; }
+                gold -= 300; goldValEl.innerText = gold.toLocaleString();
+                saveData();
+                applyBuff(1.0, 2.0, 20);
             }
         }
 
         function craftPotion(type) {
             if (type === 'large') {
-                if (gold < 500 || !(inventory['TETH: 단악수선'] >= 1)) { alert('재료 부족! (단악수선 1개 필요)'); return; }
-                gold -= 500; inventory['TETH: 단악수선']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 500 || !(inventory['6급 해결사'] >= 1)) { alert('재료 부족! (6급 해결사 1개 필요)'); return; }
+                gold -= 500; inventory['6급 해결사']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(5.0, 1.0, 20);
             } else if (type === 'speed') {
-                if (gold < 1000 || !(inventory['HE: 눈의 여왕'] >= 1)) { alert('재료 부족! (눈의 여왕 1개 필요)'); return; }
-                gold -= 1000; inventory['HE: 눈의 여왕']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 1000 || !(inventory['3급 해결사'] >= 1)) { alert('재료 부족! (3급 해결사 1개 필요)'); return; }
+                gold -= 1000; inventory['3급 해결사']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(1.0, 3.0, 20);
             } else if (type === 'hyper') {
-                if (gold < 5000 || !(inventory['HE: 알리우네'] >= 1)) { alert('재료 부족! (알리우네 1개 필요)'); return; }
-                gold -= 5000; inventory['HE: 알리우네']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 5000 || !(inventory['1급 해결사'] >= 1)) { alert('재료 부족! (1급 해결사 1개 필요)'); return; }
+                gold -= 5000; inventory['1급 해결사']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(20.0, 1.0, 10);
             }
@@ -521,34 +669,6 @@
                 autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
             }
         });
-
-        invBtn.addEventListener('click', () => {
-            const listEl = document.getElementById('inv-list');
-            listEl.innerHTML = '';
-            AURAS.forEach(a => {
-                const count = inventory[a.name] || 0;
-                const row = document.createElement('div');
-                row.className = 'item-row';
-                
-                const viewBtnHtml = count > 0 
-                    ? `<button class="view-btn" onclick="inspectAura('${a.name}')">👁️ 구경</button>` 
-                    : `<span style="color:#666; font-size:12px;">미해금</span>`;
-
-                row.innerHTML = `
-                    <div>
-                        <span style="color:${a.color}; font-weight:bold;">${a.name} (1/${a.chance.toLocaleString()})</span>
-                        <div style="font-size:12px; color:#aaa;">보유: ${count}개</div>
-                    </div>
-                    ${viewBtnHtml}
-                `;
-                listEl.appendChild(row);
-            });
-            invModal.style.display = 'flex';
-        });
-
-        shopBtn.addEventListener('click', () => shopModal.style.display = 'flex');
-        closeInv.addEventListener('click', () => invModal.style.display = 'none');
-        closeShop.addEventListener('click', () => shopModal.style.display = 'none');
 
         loadData();
         renderCanvas();
