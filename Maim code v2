@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>크아악 RNG - 자동 저장 및 반응형 적용</title>
+    <title>Roland RNG - Project Moon Edition</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         
@@ -14,7 +14,6 @@
             padding: 20px; position: relative;
         }
 
-        /* 캔버스 아우라 이펙트 (중앙 배치) */
         #aura-canvas-container {
             position: absolute; top: 38%; left: 50%;
             transform: translate(-50%, -50%);
@@ -31,7 +30,6 @@
             box-shadow: 0 0 35px rgba(255, 255, 255, 0.9); transition: all 0.5s ease;
         }
 
-        /* 상단 스탯 */
         .top-bar {
             z-index: 10; display: flex; gap: 15px; background: rgba(15, 15, 25, 0.85);
             padding: 12px 24px; border-radius: 30px; border: 1px solid #333;
@@ -40,13 +38,12 @@
         .stat-item { font-size: 14px; font-weight: bold; }
         .stat-val { color: #00ffcc; }
 
-        /* 중앙 결과창 */
         .main-display {
             z-index: 10; text-align: center; display: flex; flex-direction: column;
             align-items: center; justify-content: center; margin-top: 250px;
         }
         .aura-title {
-            font-size: 44px; font-weight: 900; letter-spacing: 2px;
+            font-size: 42px; font-weight: 900; letter-spacing: 2px;
             margin-bottom: 8px; text-shadow: 0 0 25px currentColor;
             transition: transform 0.15s ease; word-break: keep-all;
         }
@@ -56,7 +53,6 @@
             border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px);
         }
 
-        /* 하단 제어 */
         .control-panel {
             z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 12px;
             margin-bottom: 15px; width: 100%; max-width: 480px;
@@ -78,7 +74,6 @@
         }
         .sub-btn.active { background: #00ffcc; color: #000; border-color: #00ffcc; }
 
-        /* 구경 모드 전용 하단 나가기 패널 */
         #inspect-panel {
             display: none; z-index: 10; flex-direction: column; align-items: center; gap: 10px;
             margin-bottom: 25px; width: 100%; max-width: 480px;
@@ -91,7 +86,6 @@
         }
         .exit-btn:active { transform: scale(0.95); }
 
-        /* 모달 */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 0, 0, 0.85); z-index: 999; justify-content: center; align-items: center;
@@ -111,41 +105,20 @@
         .craft-info { display: flex; flex-direction: column; gap: 4px; }
         .craft-req { font-size: 11px; color: #aaa; }
 
-        /* ================= 📱 모바일 전용 UI 커스텀 스타일 ================= */
         @media (max-width: 768px) {
             body { padding: 12px; }
-            
-            #aura-canvas-container {
-                width: 340px; height: 340px; top: 34%;
-            }
-
-            #character-avatar {
-                width: 46px; height: 46px;
-            }
-
-            .top-bar {
-                padding: 8px 14px; gap: 8px 12px;
-                border-radius: 18px; font-size: 12px;
-            }
+            #aura-canvas-container { width: 340px; height: 340px; top: 34%; }
+            #character-avatar { width: 46px; height: 46px; }
+            .top-bar { padding: 8px 14px; gap: 8px 12px; border-radius: 18px; font-size: 12px; }
             .stat-item { font-size: 12px; }
-
             .main-display { margin-top: 180px; }
-            .aura-title { font-size: 30px; }
+            .aura-title { font-size: 28px; }
             .aura-rarity { font-size: 14px; padding: 4px 14px; }
-
             .control-panel { gap: 8px; margin-bottom: 10px; }
-            .roll-btn {
-                padding: 15px 0; font-size: 22px; border-radius: 30px;
-            }
-            .sub-btn {
-                padding: 10px 4px; font-size: 11px; border-radius: 14px;
-            }
-            .exit-btn {
-                padding: 14px 0; font-size: 18px;
-            }
-            .modal-content {
-                width: 95%; padding: 18px; max-height: 85vh;
-            }
+            .roll-btn { padding: 15px 0; font-size: 22px; border-radius: 30px; }
+            .sub-btn { padding: 10px 4px; font-size: 11px; border-radius: 14px; }
+            .exit-btn { padding: 14px 0; font-size: 18px; }
+            .modal-content { width: 95%; padding: 18px; max-height: 85vh; }
         }
     </style>
 </head>
@@ -156,39 +129,34 @@
         <div id="character-avatar"></div>
     </div>
 
-    <!-- 스탯 -->
     <div class="top-bar">
         <div class="stat-item">총 ROLL: <span id="total-rolls" class="stat-val">0</span>회</div>
-        <div class="stat-item">골드: <span id="gold-val" class="stat-val" style="color:#ffd700;">0</span> G</div>
-        <div class="stat-item">행운 배율: <span id="luck-mult" class="stat-val">1.0x</span></div>
-        <div class="stat-item">최고 등급: <span id="best-roll" class="stat-val">None</span></div>
+        <div class="stat-item">안젤리카의 유산: <span id="gold-val" class="stat-val" style="color:#ffd700;">0</span> G</div>
+        <div class="stat-item">공명 배율: <span id="luck-mult" class="stat-val">1.0x</span></div>
+        <div class="stat-item">최고 도달: <span id="best-roll" class="stat-val">None</span></div>
     </div>
 
-    <!-- 결과창 -->
     <div class="main-display">
         <div id="aura-name" class="aura-title" style="color: #888;">ROLL을 눌러주세요</div>
         <div id="aura-rarity" class="aura-rarity">1 / 1</div>
     </div>
 
-    <!-- 일반 인게임 제어 버튼 -->
     <div id="normal-panel" class="control-panel">
-        <button id="roll-btn" class="roll-btn">ROLL</button>
+        <button id="roll-btn" class="roll-btn">ROLL (도서관 추출)</button>
         <div class="btn-group">
             <button id="auto-btn" class="sub-btn">Auto: OFF</button>
-            <button id="shop-btn" class="sub-btn">🧪 포션 상점</button>
+            <button id="shop-btn" class="sub-btn">🧪 뇌혈관 상점</button>
             <button id="inv-btn" class="sub-btn">📖 도감</button>
         </div>
     </div>
 
-    <!-- 오라 구경 모드 전용 제어 버튼 -->
     <div id="inspect-panel">
         <button id="exit-inspect-btn" class="exit-btn">🚪 구경 종료 (돌아가기)</button>
     </div>
 
-    <!-- 모달들 -->
     <div id="inv-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">✨ 획득한 오라 도감 (30종)</div>
+            <div class="modal-title">📖 도서관 책장 수집 도감 (30종)</div>
             <div id="inv-list"></div>
             <button id="close-inv" class="sub-btn" style="width:100%; margin-top:15px; padding: 12px 0;">닫기</button>
         </div>
@@ -196,32 +164,32 @@
 
     <div id="shop-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">🧪 포션 연금술 상점</div>
+            <div class="modal-title">🧪 엔케팔린 물약 연금소</div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>소형 행운 포션 (+2x Luck / 15초)</strong>
-                    <span class="craft-req">비용: 100 Gold</span>
+                    <strong>엔케팔린 샷 (+2x 공명 / 15초)</strong>
+                    <span class="craft-req">비용: 100 G</span>
                 </div>
-                <button class="sub-btn" onclick="buyPotion('small')">구매</button>
+                <button class="sub-btn" onclick="buyPotion('small')">추출</button>
             </div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>대형 행운 포션 (+5x Luck / 20초)</strong>
-                    <span class="craft-req">재료: 500 Gold + Rare 1개</span>
+                    <strong>정제된 뇌수 (+5x 공명 / 20초)</strong>
+                    <span class="craft-req">재료: 500 G + 단악수선 1개</span>
                 </div>
                 <button class="sub-btn" onclick="craftPotion('large')">제작</button>
             </div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>초스피드 포션 (Auto 속도 3배 / 20초)</strong>
-                    <span class="craft-req">재료: 1,000 Gold + Glacier 1개</span>
+                    <strong>빛의 물결 (Auto 속도 3배 / 20초)</strong>
+                    <span class="craft-req">재료: 1,000 G + 눈의 여왕 1개</span>
                 </div>
                 <button class="sub-btn" onclick="craftPotion('speed')">제작</button>
             </div>
             <div class="craft-card">
                 <div class="craft-info">
-                    <strong>초월의 연금 포션 (+20x Luck / 10초)</strong>
-                    <span class="craft-req">재료: 5,000 Gold + Diaboli 1개</span>
+                    <strong>검은침묵의 가호 (+20x 공명 / 10초)</strong>
+                    <span class="craft-req">재료: 5,000 G + 알리우네 1개</span>
                 </div>
                 <button class="sub-btn" onclick="craftPotion('hyper')">제작</button>
             </div>
@@ -230,37 +198,38 @@
     </div>
 
     <script>
+        // 프로젝트 문 전체 기믹 / 환상체 / 책장 등급표
         const AURAS = [
-            { name: "Common", chance: 2, color: "#a0a0a0", effect: "dust" },
-            { name: "Uncommon", chance: 4, color: "#55ff55", effect: "leaf" },
-            { name: "Good", chance: 8, color: "#55ffff", effect: "sparkle" },
-            { name: "Natural", chance: 16, color: "#88ff88", effect: "floatCircle" },
-            { name: "Rare", chance: 32, color: "#5555ff", effect: "orbitDots" },
-            { name: "Divinus", chance: 64, color: "#ffff55", effect: "holyCross" },
-            { name: "Crystallized", chance: 128, color: "#00ffff", effect: "crystalShard" },
-            { name: "Rage", chance: 256, color: "#ff3333", effect: "fireFlame" },
-            { name: "Topaz", chance: 500, color: "#ffaa00", effect: "goldenBeam" },
-            { name: "Glacier", chance: 1024, color: "#aaffff", effect: "snowBurst" },
-            { name: "Wind", chance: 2500, color: "#88ffff", effect: "swirlVortex" },
-            { name: "Gilded", chance: 5000, color: "#ffd700", effect: "goldRune" },
-            { name: "JACKPOT", chance: 7777, color: "#00ffaa", effect: "coinShower" },
-            { name: "Diaboli", chance: 10000, color: "#990000", effect: "demonHellfire" },
-            { name: "Undefined", chance: 20000, color: "#e0e0e0", effect: "pixelNoise" },
-            { name: "PERMAFROST", chance: 35000, color: "#00bfff", effect: "iceAura" },
-            { name: "FLARE", chance: 50000, color: "#ff4500", effect: "sunExplosion" },
-            { name: "STarlight", chance: 80000, color: "#ffffaa", effect: "starMeteor" },
-            { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: "voidNebula" },
-            { name: "GLITCH", chance: 250000, color: "#00ff66", effect: "cyberGlitch" },
-            { name: "CELESTIAL", chance: 500000, color: "#00bfff", effect: "cosmicRings" },
-            { name: "OVERDRIVE", chance: 850000, color: "#ff00aa", effect: "lightningSpark" },
-            { name: "KRAAK ROLAND", chance: 1500000, color: "#ff0055", effect: "darkBloodPillar" },
-            { name: "AURA OF RUIN", chance: 3000000, color: "#8b0000", effect: "blackHole" },
-            { name: "SOLARIS", chance: 7500000, color: "#ff8c00", effect: "solarCrown" },
-            { name: "CHROMATIC", chance: 15000000, color: "#ff00ff", effect: "rainbowPrism" },
-            { name: "ECLIPSE", chance: 40000000, color: "#4b0082", effect: "shadowEclipse" },
-            { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: "absoluteRedStorm" },
-            { name: "THE ONE", chance: 300000000, color: "#ffffff", effect: "whiteGodLight" },
-            { name: "CREATION", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" }
+            { name: "쥐", chance: 2, color: "#888888", effect: "dust" },
+            { name: "9급 해결사", chance: 4, color: "#a0a0ff", effect: "holyCross" },
+            { name: "8급 해결사", chance: 8, color: "#ff88cc", effect: "leaf" },
+            { name: "엄지 산하 : 흑운회", chance: 16, color: "#00ccff", effect: "orbitDots" },
+            { name: "7급 해결사", chance: 32, color: "#88ffff", effect: "snowBurst" },
+            { name: "6급 해결사", chance: 64, color: "#ff66cc", effect: "sparkle" },
+            { name: "츠바이 협회 : 5과", chance: 128, color: "#4488ff", effect: "crystalShard" },
+            { name: "5급 해결사", chance: 256, color: "#ffaa00", effect: "goldenBeam" },
+            { name: "4급 해결사", chance: 500, color: "#ff3333", effect: "fireFlame" },
+            { name: "3급 해결사", chance: 1024, color: "#cccccc", effect: "floatCircle" },
+            { name: "2급 해결사", chance: 2500, color: "#222222", effect: "demonHellfire" },
+            { name: "1급 해결사", chance: 5000, color: "#00ffff", effect: "swirlVortex" },
+            { name: "느티나무 공방 : 메이스", chance: 20000, color: "#ff0000", effect: "pixelNoise" },
+            { name: "느티나무 공방 : 도끼", chance: 20000, color: "#330033", effect: "blackHole" },
+            { name: "로직 아틀리에 : 샷건", chance: 20000, color: "#aaaaaa", effect: "orbitDots" },
+            { name: "로직 아틀리에 : 권총", chance: 20000, color: "#ff9933", effect: "goldRune" },
+            { name: "올드보이 공방 : 해머", chance: 20000, color: "#66ff66", effect: "cyberGlitch" },
+            { name: "알라스 공방 : 랜스", chance: 20000, color: "#aaffff", effect: "iceAura" },
+            { name: "휠스 인더스트리 : 대검", chance: 120000, color: "#ff4400", effect: "sunExplosion" },
+            { name: "랑아 공방 : 건틀렛", chance: 20000, color: "#ffff88", effect: "starMeteor" },
+            { name: "크리스탈 아틀리에 : 쌍검", chance: 20000, color: "#00ffff", effect: "crystalShard" },
+            { name: "묵 공방 : 태도", chance: 20000, color: "#ff00ff", effect: "lightningSpark" },
+            { name: "뒤랑달", chance: 100000, color: "#ff0055", effect: "darkBloodPillar" },
+            { name: "머리 : 발톱", chance: 3000000, color: "#aa0000", effect: "demonHellfire" },
+            { name: "특색", chance: 20000, color: "#ffd700", effect: "goldRune" },
+            { name: "Golden Bough", chance: 15000000, color: "#ffffaa", effect: "solarCrown" },
+            { name: "Roland", chance: 40000000, color: "#ffffff", effect: "rainbowPrism" },
+            { name: "Carmen", chance: 100000000, color: "#cc0000", effect: "absoluteRedStorm" },
+            { name: "Seed of Light", chance: 300000000, color: "#ffffff", effect: "whiteGodLight" },
+            { name: "크아악 롤랑", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" }
         ];
 
         let totalRolls = 0, gold = 0, luck = 1.0, autoDelay = 250;
@@ -269,7 +238,6 @@
         let lastRolledAura = AURAS[0];
         const inventory = {};
 
-        // DOM
         const rollBtn = document.getElementById('roll-btn');
         const autoBtn = document.getElementById('auto-btn');
         const shopBtn = document.getElementById('shop-btn');
@@ -291,26 +259,18 @@
         const bestRollEl = document.getElementById('best-roll');
         const avatar = document.getElementById('character-avatar');
 
-        // Canvas 2D 엔진
         const canvas = document.getElementById('auraCanvas');
         const ctx = canvas.getContext('2d');
         const particles = [];
         let currentAura = AURAS[0];
 
-        // ================= 저장 & 불러오기 로직 =================
         function saveData() {
-            const data = {
-                totalRolls,
-                gold,
-                bestChance,
-                bestName,
-                inventory
-            };
-            localStorage.setItem('sols_rng_save', JSON.stringify(data));
+            const data = { totalRolls, gold, bestChance, bestName, inventory };
+            localStorage.setItem('sols_rng_pm_save', JSON.stringify(data));
         }
 
         function loadData() {
-            const saved = localStorage.getItem('sols_rng_save');
+            const saved = localStorage.getItem('sols_rng_pm_save');
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
@@ -327,9 +287,7 @@
                         const bestAura = AURAS.find(a => a.name === bestName);
                         if (bestAura) bestRollEl.style.color = bestAura.color;
                     }
-                } catch(e) {
-                    console.error("저장 데이터 로드 실패", e);
-                }
+                } catch(e) {}
             }
         }
 
@@ -399,7 +357,6 @@
             }, 250);
         }
 
-        // ================= 구경 모드 실행 =================
         function inspectAura(auraName) {
             const foundAura = AURAS.find(a => a.name === auraName);
             if (!foundAura) return;
@@ -428,7 +385,6 @@
             normalPanel.style.display = 'flex';
         });
 
-        // ================= Canvas 이펙트 랜더러 =================
         let angleTick = 0;
 
         function renderCanvas() {
@@ -463,7 +419,7 @@
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
                 ctx.stroke();
-            } else if (effect === 'cyberGlitch') {
+            } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
                 if (Math.random() < 0.4) {
                     ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
                     ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
@@ -476,8 +432,8 @@
                     ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
                     ctx.stroke();
                 }
-            } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight') {
-                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 4;
+            } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
+                ctx.strokeStyle = color; ctx.lineWidth = 4;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
                 ctx.stroke();
@@ -506,11 +462,10 @@
             requestAnimationFrame(renderCanvas);
         }
 
-        // 포션
         function applyBuff(luckMult, speedMult, duration) {
             if (activeBuff) clearInterval(activeBuff);
             luck = luckMult; autoDelay = 250 / speedMult;
-            luckMultEl.innerText = `${luckMult}x (버프 중!)`; luckMultEl.style.color = "#ffaa00";
+            luckMultEl.innerText = `${luckMult}x (공명 중!)`; luckMultEl.style.color = "#ffaa00";
 
             let timer = duration;
             activeBuff = setInterval(() => {
@@ -526,7 +481,7 @@
 
         function buyPotion(type) {
             if (type === 'small') {
-                if (gold < 100) { alert('골드가 부족합니다!'); return; }
+                if (gold < 100) { alert('안젤리카의 유산(G)이 부족합니다!'); return; }
                 gold -= 100; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(2.0, 1.0, 15);
@@ -535,24 +490,23 @@
 
         function craftPotion(type) {
             if (type === 'large') {
-                if (gold < 500 || !(inventory['Rare'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 500; inventory['Rare']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 500 || !(inventory['TETH: 단악수선'] >= 1)) { alert('재료 부족! (단악수선 1개 필요)'); return; }
+                gold -= 500; inventory['TETH: 단악수선']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(5.0, 1.0, 20);
             } else if (type === 'speed') {
-                if (gold < 1000 || !(inventory['Glacier'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 1000; inventory['Glacier']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 1000 || !(inventory['HE: 눈의 여왕'] >= 1)) { alert('재료 부족! (눈의 여왕 1개 필요)'); return; }
+                gold -= 1000; inventory['HE: 눈의 여왕']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(1.0, 3.0, 20);
             } else if (type === 'hyper') {
-                if (gold < 5000 || !(inventory['Diaboli'] >= 1)) { alert('재료 부족!'); return; }
-                gold -= 5000; inventory['Diaboli']--; goldValEl.innerText = gold.toLocaleString();
+                if (gold < 5000 || !(inventory['HE: 알리우네'] >= 1)) { alert('재료 부족! (알리우네 1개 필요)'); return; }
+                gold -= 5000; inventory['HE: 알리우네']--; goldValEl.innerText = gold.toLocaleString();
                 saveData();
                 applyBuff(20.0, 1.0, 10);
             }
         }
 
-        // 이벤트
         rollBtn.addEventListener('click', roll);
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space' && !isRolling && document.activeElement.tagName !== 'BUTTON') roll();
@@ -596,7 +550,6 @@
         closeInv.addEventListener('click', () => invModal.style.display = 'none');
         closeShop.addEventListener('click', () => shopModal.style.display = 'none');
 
-        // 시작 시 데이터 로드 및 랜더링 개시
         loadData();
         renderCanvas();
     </script>
