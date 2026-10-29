@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Roland RNG - Full Edition</title>
+    <title>Roland RNG - Premium Edition</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; user-select: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', -apple-system, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             width: 100vw; height: 100vh; overflow: hidden;
-            background: #050508; color: white;
+            background: #020205; color: white;
             display: flex; flex-direction: column; justify-content: space-between; align-items: center;
             padding: 20px; position: relative;
         }
@@ -17,39 +17,51 @@
         /* ☰ 메뉴 버튼 */
         .menu-btn {
             position: absolute; top: 15px; left: 15px; z-index: 100;
-            background: rgba(20, 20, 30, 0.85); border: 1px solid #444; color: #fff;
+            background: rgba(15, 15, 25, 0.85); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;
             font-size: 22px; width: 44px; height: 44px; border-radius: 12px;
             display: flex; justify-content: center; align-items: center; cursor: pointer;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
         }
+        .menu-btn:active { transform: scale(0.92); }
 
-        /* 👈 슬라이드 메뉴 */
+        /* 👈 사이드바 메뉴 */
         .sidebar {
-            position: fixed; top: 0; left: -280px; width: 260px; height: 100vh;
-            background: rgba(15, 15, 25, 0.95); border-right: 1px solid #333; z-index: 200;
+            position: fixed; top: 0; left: -290px; width: 270px; height: 100vh;
+            background: rgba(10, 10, 18, 0.95); border-right: 1px solid rgba(255, 255, 255, 0.1); z-index: 200;
             display: flex; flex-direction: column; padding: 60px 20px 20px; gap: 12px;
-            backdrop-filter: blur(12px); transition: left 0.3s ease;
+            backdrop-filter: blur(20px); transition: left 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
+            box-shadow: 15px 0 35px rgba(0,0,0,0.8);
         }
         .sidebar.open { left: 0; }
 
-        .sidebar-title { font-size: 18px; font-weight: bold; color: #ff3344; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .sidebar-title { font-size: 18px; font-weight: 800; color: #ff3344; margin-bottom: 5px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 12px; letter-spacing: 1px; }
         .sidebar-item {
-            background: rgba(30, 30, 45, 0.8); border: 1px solid #444; color: #eee;
-            padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: bold;
-            cursor: pointer; text-align: left;
+            background: rgba(25, 25, 40, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); color: #eee;
+            padding: 14px 18px; border-radius: 12px; font-size: 14px; font-weight: 700;
+            cursor: pointer; text-align: left; transition: all 0.2s; display: flex; align-items: center; gap: 10px;
         }
+        .sidebar-item:active { background: #ff3344; color: #fff; border-color: #ff3344; }
 
         .sidebar-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.6); z-index: 150; backdrop-filter: blur(2px);
+            background: rgba(0,0,0,0.7); z-index: 150; backdrop-filter: blur(4px);
         }
         .sidebar-overlay.active { display: block; }
 
-        /* 캔버스 및 아우라 이펙트 */
+        /* 배경 네온 앰비언트 광원 */
+        #ambient-glow {
+            position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%);
+            width: 350px; height: 350px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(136, 136, 136, 0.2) 0%, rgba(0,0,0,0) 70%);
+            pointer-events: none; z-index: 1; transition: background 0.8s ease;
+        }
+
+        /* 캔버스 및 아우라 연출 */
         #aura-canvas-container {
             position: absolute; top: 38%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 400px; height: 400px;
+            width: 500px; height: 500px;
             pointer-events: none; z-index: 2;
             display: flex; justify-content: center; align-items: center;
         }
@@ -57,296 +69,28 @@
         canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
         #character-avatar {
-            width: 60px; height: 60px; background: #ffffff;
+            width: 64px; height: 64px; background: #ffffff;
             border-radius: 50%; z-index: 5;
-            box-shadow: 0 0 35px rgba(255, 255, 255, 0.9); transition: all 0.3s ease;
+            box-shadow: 0 0 45px rgba(255, 255, 255, 0.9); transition: all 0.5s ease;
         }
 
-        /* 글자 이펙트 및 디스플레이 */
+        /* 타이틀 디스플레이 */
         .main-display {
             z-index: 10; text-align: center; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; margin-top: 220px;
+            align-items: center; justify-content: center; margin-top: 240px;
         }
         .aura-title {
-            font-size: 38px; font-weight: 900; letter-spacing: 2px;
-            margin-bottom: 8px; text-shadow: 0 0 20px currentColor;
-            transition: transform 0.15s ease;
+            font-size: 42px; font-weight: 900; letter-spacing: 2px;
+            margin-bottom: 8px; text-shadow: 0 0 30px currentColor;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            word-break: keep-all;
         }
         .aura-rarity {
-            font-size: 16px; font-weight: 700; color: #aaa;
-            background: rgba(0, 0, 0, 0.75); padding: 4px 16px; border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 16px; font-weight: 800; color: #ddd;
+            background: rgba(0, 0, 0, 0.75); padding: 6px 22px; border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(8px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        /* 하단 버튼 */
-        .control-panel { z-index: 10; margin-bottom: 20px; width: 100%; max-width: 320px; }
-        .roll-btn {
-            background: linear-gradient(135deg, #2b2b3d, #151522);
-            color: #fff; border: 2px solid #00ffcc; padding: 16px 0;
-            font-size: 24px; font-weight: 900; border-radius: 40px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3); width: 100%;
-        }
-
-        /* 모달 시스템 */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.85); z-index: 999; justify-content: center; align-items: center;
-        }
-        .modal-content {
-            background: #12121c; border: 1px solid #333; width: 90%; max-width: 400px;
-            border-radius: 20px; padding: 20px;
-        }
-
-        /* 보스전 캔버스 영역 */
-        #spider-box {
-            position: relative; width: 300px; height: 300px;
-            border: 2px solid #ff3344; background: #000; margin: 10px auto;
-        }
-        .attack-action-btn {
-            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #ff3344; color: #fff; border: none; padding: 10px 24px; font-size: 16px;
-            font-weight: 900; border-radius: 20px; cursor: pointer; box-shadow: 0 0 15px #ff3344;
-        }
-    </style>
-</head>
-<body>
-
-    <button id="menu-toggle-btn" class="menu-btn">☰</button>
-    <div id="sidebar-overlay" class="sidebar-overlay"></div>
-
-    <div id="sidebar" class="sidebar">
-        <div class="sidebar-title">메뉴 (Menu)</div>
-        <button id="nav-inv" class="sidebar-item">📖 오라 도감</button>
-        <button id="nav-boss" class="sidebar-item" style="color:#ff3344; border-color:#ff3344;">⚔️ 거미집 보스전</button>
-    </div>
-
-    <div id="aura-canvas-container">
-        <canvas id="auraCanvas" width="400" height="400"></canvas>
-        <div id="character-avatar"></div>
-    </div>
-
-    <div class="main-display">
-        <div id="aura-name" class="aura-title" style="color: #888;">ROLL을 눌러주세요</div>
-        <div id="aura-rarity" class="aura-rarity">1 / 1</div>
-    </div>
-
-    <div class="control-panel">
-        <button id="roll-btn" class="roll-btn">ROLL</button>
-    </div>
-
-    <!-- 도감 모달 -->
-    <div id="inv-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="color:#00ffcc; text-align:center; margin-bottom:12px;">📖 획득한 오라</h3>
-            <div id="inv-list" style="max-height:240px; overflow-y:auto;"></div>
-            <button id="close-inv" style="width:100%; margin-top:15px; padding:10px; background:#333; color:#fff; border:none; border-radius:10px; cursor:pointer;">닫기</button>
-        </div>
-    </div>
-
-    <!-- 보스전 모달 -->
-    <div id="boss-modal" class="modal">
-        <div class="modal-content" style="text-align:center;">
-            <h3 style="color:#ff3344;">🕸️ 거미집 아비들</h3>
-            <div id="boss-stage-text" style="font-size:12px; color:#aaa; margin:5px 0;">단계 1 / 3</div>
-            <div id="spider-box">
-                <canvas id="spiderCanvas" width="300" height="300"></canvas>
-                <button id="boss-slash-btn" class="attack-action-btn">🗡️ 베기!</button>
-            </div>
-            <div id="boss-msg" style="font-size:12px; color:#fff; margin-top:8px;">공격을 피하세요!</div>
-            <button id="close-boss-btn" style="margin-top:12px; padding:8px 20px; background:#222; color:#aaa; border:1px solid #444; border-radius:15px; cursor:pointer;">도망치기</button>
-        </div>
-    </div>
-
-    <script>
-        // 1. 오라 데이터
-        const AURAS = [
-            { name: "Common", chance: 2, color: "#a0a0a0" },
-            { name: "Uncommon", chance: 4, color: "#55ff55" },
-            { name: "Good", chance: 8, color: "#55ffff" },
-            { name: "Natural", chance: 16, color: "#88ff88" },
-            { name: "Rare", chance: 32, color: "#5555ff" },
-            { name: "Divinus", chance: 64, color: "#ffff55" },
-            { name: "Rage", chance: 256, color: "#ff3333" },
-            { name: "JACKPOT", chance: 7777, color: "#00ffaa" },
-            { name: "Roland: Absolute", chance: 100000000, color: "#ff0000" }
-        ];
-
-        let inventory = {};
-        let currentAura = AURAS[0];
-
-        // 2. 메뉴 제어 로직
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const menuBtn = document.getElementById('menu-toggle-btn');
-
-        menuBtn.onclick = () => {
-            sidebar.classList.add('open');
-            overlay.classList.add('active');
-        };
-
-        overlay.onclick = () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-        };
-
-        document.getElementById('nav-inv').onclick = () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            const listEl = document.getElementById('inv-list');
-            listEl.innerHTML = '';
-            AURAS.forEach(a => {
-                const count = inventory[a.name] || 0;
-                listEl.innerHTML += `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #222;">
-                    <span style="color:${a.color}; font-weight:bold;">${a.name}</span>
-                    <span>${count}개</span>
-                </div>`;
-            });
-            document.getElementById('inv-modal').style.display = 'flex';
-        };
-
-        document.getElementById('close-inv').onclick = () => {
-            document.getElementById('inv-modal').style.display = 'none';
-        };
-
-        // 3. 아우라 회전 이펙트 (Canvas)
-        const auraCanvas = document.getElementById('auraCanvas');
-        const ctx = auraCanvas.getContext('2d');
-        let particles = [];
-
-        for(let i=0; i<25; i++) {
-            particles.push({
-                angle: Math.random() * Math.PI * 2,
-                radius: 40 + Math.random() * 50,
-                speed: 0.02 + Math.random() * 0.03,
-                size: 2 + Math.random() * 3
-            });
-        }
-
-        function drawAuraEffect() {
-            ctx.clearRect(0, 0, 400, 400);
-            particles.forEach(p => {
-                p.angle += p.speed;
-                const x = 200 + Math.cos(p.angle) * p.radius;
-                const y = 200 + Math.sin(p.angle) * p.radius;
-
-                ctx.beginPath();
-                ctx.arc(x, y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = currentAura.color;
-                ctx.shadowColor = currentAura.color;
-                ctx.shadowBlur = 10;
-                ctx.fill();
-            });
-            requestAnimationFrame(drawAuraEffect);
-        }
-        drawAuraEffect();
-
-        // 4. ROLL 연동
-        document.getElementById('roll-btn').onclick = () => {
-            let selected = AURAS[0];
-            for (let i = AURAS.length - 1; i >= 0; i--) {
-                if (Math.random() < (1 / AURAS[i].chance)) {
-                    selected = AURAS[i];
-                    break;
-                }
-            }
-            currentAura = selected;
-            inventory[selected.name] = (inventory[selected.name] || 0) + 1;
-
-            const nameEl = document.getElementById('aura-name');
-            nameEl.innerText = selected.name;
-            nameEl.style.color = selected.color;
-            document.getElementById('aura-rarity').innerText = `1 / ${selected.chance.toLocaleString()}`;
-            document.getElementById('character-avatar').style.boxShadow = `0 0 35px ${selected.color}`;
-        };
-
-        // 5. 거미집 보스전 Engine
-        let bossRunning = false, stage = 1, bossHp = 100, player = {x: 150, y: 150}, lines = [], timer = 0, isAttack = false;
-        const spiderCanvas = document.getElementById('spiderCanvas');
-        const sCtx = spiderCanvas.getContext('2d');
-        const slashBtn = document.getElementById('boss-slash-btn');
-
-        document.getElementById('nav-boss').onclick = () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('active');
-            startBoss();
-        };
-
-        function startBoss() {
-            bossRunning = true; stage = 1; bossHp = 100; lines = []; timer = 0; isAttack = false;
-            document.getElementById('boss-modal').style.display = 'flex';
-            slashBtn.style.display = 'none';
-            bossLoop();
-        }
-
-        document.getElementById('close-boss-btn').onclick = () => {
-            bossRunning = false;
-            document.getElementById('boss-modal').style.display = 'none';
-        };
-
-        spiderCanvas.onmousemove = (e) => {
-            const rect = spiderCanvas.getBoundingClientRect();
-            player.x = e.clientX - rect.left;
-            player.y = e.clientY - rect.top;
-        };
-
-        function bossLoop() {
-            if (!bossRunning) return;
-            timer++;
-            sCtx.clearRect(0, 0, 300, 300);
-
-            if (timer % 25 === 0 && !isAttack) {
-                const angle = Math.random() * Math.PI;
-                lines.push({
-                    x1: 150 + Math.cos(angle) * 180, y1: 150 + Math.sin(angle) * 180,
-                    x2: 150 - Math.cos(angle) * 180, y2: 150 - Math.sin(angle) * 180,
-                    warn: 18, active: 6
-                });
-            }
-
-            if (timer > 200 && !isAttack) {
-                isAttack = true;
-                slashBtn.style.display = 'block';
-                document.getElementById('boss-msg').innerText = "틈이 열렸다! 지금 베어라!";
-            }
-
-            lines.forEach((l, idx) => {
-                sCtx.beginPath();
-                sCtx.moveTo(l.x1, l.y1);
-                sCtx.lineTo(l.x2, l.y2);
-                if (l.warn > 0) {
-                    l.warn--;
-                    sCtx.strokeStyle = 'rgba(255, 51, 68, 0.3)';
-                } else {
-                    l.active--;
-                    sCtx.strokeStyle = '#fff';
-                    sCtx.lineWidth = 3;
-                }
-                sCtx.stroke();
-                if (l.active <= 0) lines.splice(idx, 1);
-            });
-
-            sCtx.fillStyle = '#fff';
-            sCtx.beginPath();
-            sCtx.arc(player.x, player.y, 4, 0, Math.PI * 2);
-            sCtx.fill();
-
-            requestAnimationFrame(bossLoop);
-        }
-
-        slashBtn.onclick = () => {
-            bossHp -= 34;
-            isAttack = false;
-            timer = 0;
-            slashBtn.style.display = 'none';
-            if (bossHp <= 0) {
-                alert("✨ 거미집 아비들을 베고 [기적] 업적을 달성했습니다!");
-                bossRunning = false;
-                document.getElementById('boss-modal').style.display = 'none';
-            } else {
-                stage++;
-                document.getElementById('boss-stage-text').innerText = `단계 ${stage} / 3`;
-            }
-        };
-    </script>
-</body>
-</html>
+        /* 하단 컨트롤 영역 */
+        .control-panel { z-index: 10; margin-bottom: 25px; width: 100%; max-width: 34
