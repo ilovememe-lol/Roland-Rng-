@@ -85,30 +85,7 @@ let enableParticles = true, lastRolledAura = AURAS[0];
 
 const inventory = {}, gearInventory = {};
 
-// DOM 요소 식별
-const menuBtn = document.getElementById('menu-toggle-btn');
-const sidebar = document.getElementById('sidebar');
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-const navInv = document.getElementById('nav-inv');
-const navGear = document.getElementById('nav-gear');
-const navShop = document.getElementById('nav-shop');
-const navCraft = document.getElementById('nav-craft');
-const navFullscreen = document.getElementById('nav-fullscreen');
-const navSettings = document.getElementById('nav-settings');
-
-const invModal = document.getElementById('inv-modal');
-const gearModal = document.getElementById('gear-modal');
-const shopModal = document.getElementById('shop-modal');
-const craftModal = document.getElementById('craft-modal');
-const settingsModal = document.getElementById('settings-modal');
-
-const rollBtn = document.getElementById('roll-btn');
-const autoBtn = document.getElementById('auto-btn');
-const normalPanel = document.getElementById('normal-panel');
-const inspectPanel = document.getElementById('inspect-panel');
-const exitInspectBtn = document.getElementById('exit-inspect-btn');
-
+// UI 엘리먼트
 const auraNameEl = document.getElementById('aura-name');
 const auraRarityEl = document.getElementById('aura-rarity');
 const totalRollsEl = document.getElementById('total-rolls');
@@ -117,13 +94,50 @@ const luckMultEl = document.getElementById('luck-mult');
 const equippedGearEl = document.getElementById('equipped-gear');
 const bestRollEl = document.getElementById('best-roll');
 const avatar = document.getElementById('character-avatar');
+const rollBtn = document.getElementById('roll-btn');
+const autoBtn = document.getElementById('auto-btn');
 
 const bgmPlayer = document.getElementById('bgm-player');
 const bgmSlider = document.getElementById('bgm-volume');
 const canvas = document.getElementById('auraCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 const particles = [];
 let currentAura = AURAS[0];
+
+// UI 제어 함수
+window.toggleSidebar = function() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.toggle('open');
+    if (overlay) overlay.classList.toggle('active');
+};
+
+window.openModal = function(id) {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('active');
+
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = 'flex';
+
+    if (id === 'inv-modal') renderInventoryList();
+    if (id === 'gear-modal') renderGearList();
+};
+
+window.closeModal = function(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = 'none';
+};
+
+window.toggleFullscreen = function() {
+    window.toggleSidebar();
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+    }
+};
 
 if (bgmPlayer && bgmSlider) {
     bgmPlayer.volume = bgmSlider.value / 100;
@@ -141,35 +155,6 @@ function playNextBGM() {
 function tryPlayMusic() {
     if (bgmPlayer && bgmPlayer.paused) playNextBGM();
 }
-
-function toggleSidebar() {
-    if (sidebar) sidebar.classList.toggle('open');
-    if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
-}
-
-if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
-if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
-
-if (navInv) navInv.addEventListener('click', () => { toggleSidebar(); renderInventoryList(); if (invModal) invModal.style.display = 'flex'; });
-if (navGear) navGear.addEventListener('click', () => { toggleSidebar(); renderGearList(); if (gearModal) gearModal.style.display = 'flex'; });
-if (navShop) navShop.addEventListener('click', () => { toggleSidebar(); if (shopModal) shopModal.style.display = 'flex'; });
-if (navCraft) navCraft.addEventListener('click', () => { toggleSidebar(); if (craftModal) craftModal.style.display = 'flex'; });
-if (navSettings) navSettings.addEventListener('click', () => { toggleSidebar(); if (settingsModal) settingsModal.style.display = 'flex'; });
-
-if (navFullscreen) {
-    navFullscreen.addEventListener('click', () => {
-        toggleSidebar();
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen();
-        }
-    });
-}
-
-document.querySelectorAll('.modal-close-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => { e.target.closest('.modal').style.display = 'none'; });
-});
 
 const particleToggle = document.getElementById('particle-toggle');
 if (particleToggle) particleToggle.addEventListener('change', (e) => { enableParticles = e.target.checked; });
@@ -343,11 +328,6 @@ function finalizeRoll() {
             bestRollEl.innerText = `${bestName} (1/${bestChance.toLocaleString()})`;
             bestRollEl.style.color = selectedAura.color;
         }
-
-        // online.js 연동 랭킹 업로드 호출
-        if (typeof uploadLeaderboard === 'function') {
-            uploadLeaderboard(bestName, bestChance);
-        }
     }
 
     saveData();
@@ -374,11 +354,12 @@ function inspectAura(auraName) {
         avatar.style.boxShadow = `0 0 35px ${foundAura.color}`;
     }
 
-    if (invModal) invModal.style.display = 'none';
-    if (normalPanel) normalPanel.style.display = 'none';
-    if (inspectPanel) inspectPanel.style.display = 'flex';
+    closeModal('inv-modal');
+    document.getElementById('normal-panel').style.display = 'none';
+    document.getElementById('inspect-panel').style.display = 'flex';
 }
 
+const exitInspectBtn = document.getElementById('exit-inspect-btn');
 if (exitInspectBtn) {
     exitInspectBtn.addEventListener('click', () => {
         currentAura = lastRolledAura;
@@ -392,8 +373,8 @@ if (exitInspectBtn) {
             avatar.style.boxShadow = `0 0 35px ${lastRolledAura.color}`;
         }
 
-        if (inspectPanel) inspectPanel.style.display = 'none';
-        if (normalPanel) normalPanel.style.display = 'flex';
+        document.getElementById('inspect-panel').style.display = 'none';
+        document.getElementById('normal-panel').style.display = 'flex';
     });
 }
 
@@ -595,20 +576,6 @@ function craftPotion(type) {
         if (!(inventory['Rare'] >= 1)) { alert('재료 부족!'); return; }
         inventory['Rare']--;
         applyBuff(3.0, 1.0, 40);
-    } else if (type === 'one_shot_large') {
-        if (!(inventory['Precious'] >= 1) || !(inventory['Sidereum'] >= 1)) { alert('재료 부족!'); return; }
-        inventory['Precious']--; inventory['Sidereum']--;
-        oneShotLuckMult += 50;
-        updateStatsDisplay();
-    } else if (type === 'one_shot_god') {
-        if (!(inventory['Diaboli'] >= 1) || !(inventory['Ether Essence'] >= 1)) { alert('재료 부족!'); return; }
-        inventory['Diaboli']--; inventory['Ether Essence']--;
-        oneShotLuckMult += 200;
-        updateStatsDisplay();
-    } else if (type === 'hyper') {
-        if (!(inventory['Diaboli'] >= 1)) { alert('재료 부족!'); return; }
-        inventory['Diaboli']--;
-        applyBuff(10.0, 1.0, 20);
     }
     saveData();
 }
@@ -618,34 +585,6 @@ function craftGear(key) {
         if (!(inventory['Rare'] >= 5)) { alert('재료가 부족합니다! (Rare 5개)'); return; }
         inventory['Rare'] -= 5; gearInventory[key] = true;
         alert('🛡️ Luck Glove 제작 완료!');
-    } else if (key === 'SpeedDevice') {
-        if (!(inventory['Precious'] >= 3)) { alert('재료가 부족합니다! (Precious 3개)'); return; }
-        inventory['Precious'] -= 3; gearInventory[key] = true;
-        alert('🛡️ Speed Device 제작 완료!');
-    } else if (key === 'JackpotGauntlet') {
-        if (!(inventory['Sidereum'] >= 5) || !(inventory['Gilded'] >= 5)) { alert('재료가 부족합니다! (Sidereum 5개 + Gilded 5개)'); return; }
-        inventory['Sidereum'] -= 5; inventory['Gilded'] -= 5; gearInventory[key] = true;
-        alert('🛡️ Jackpot Gauntlet 제작 완료!');
-    } else if (key === 'FrostRing') {
-        if (!(inventory['Glacier Alloy'] >= 1) || !(inventory['Glacier'] >= 10)) { alert('재료가 부족합니다! (Glacier Alloy 1개 + Glacier 10개)'); return; }
-        inventory['Glacier Alloy'] -= 1; inventory['Glacier'] -= 10; gearInventory[key] = true;
-        alert('🛡️ Frost Ring 제작 완료!');
-    } else if (key === 'MagneticGauntlet') {
-        if (!(inventory['Magnet Core'] >= 1) || !(inventory['Magnetic'] >= 15)) { alert('재료가 부족합니다! (Magnet Core 1개 + Magnetic 15개)'); return; }
-        inventory['Magnet Core'] -= 1; inventory['Magnetic'] -= 15; gearInventory[key] = true;
-        alert('🛡️ Magnetic Gauntlet 제작 완료!');
-    } else if (key === 'ExoflexDevice') {
-        if (!(inventory['Clockwork Core'] >= 1) || !(inventory['Powered'] >= 100)) { alert('재료가 부족합니다! (Clockwork Core 1개 + Powered 100개)'); return; }
-        inventory['Clockwork Core'] -= 1; inventory['Powered'] -= 100; gearInventory[key] = true;
-        alert('🛡️ Exoflex Device 제작 완료!');
-    } else if (key === 'DemonScythe') {
-        if (!(inventory['Demon Ember'] >= 1) || !(inventory['Diaboli'] >= 10)) { alert('재료가 부족합니다! (Demon Ember 1개 + Diaboli 10개)'); return; }
-        inventory['Demon Ember'] -= 1; inventory['Diaboli'] -= 10; gearInventory[key] = true;
-        alert('🛡️ Demon Scythe 제작 완료!');
-    } else if (key === 'CelestialCrown') {
-        if (!(inventory['Celestial Dust'] >= 1) || !(inventory['Cosmic Feather'] >= 1)) { alert('재료가 부족합니다! (Celestial Dust 1개 + Cosmic Feather 1개)'); return; }
-        inventory['Celestial Dust'] -= 1; inventory['Cosmic Feather'] -= 1; gearInventory[key] = true;
-        alert('🛡️ Celestial Crown 제작 완료!');
     }
     saveData();
 }
@@ -682,90 +621,12 @@ function switchCraftTab(tabName) {
 function craftAura(key) {
     if (key === 'AETHER') {
         if (!(inventory['Ether Essence'] >= 1) || !(inventory['Crystallized'] >= 5)) {
-            alert('재료가 부족합니다! (Ether Essence 1개 + Crystallized 5개)'); return;
+            alert('재료가 부족합니다!'); return;
         }
         inventory['Ether Essence'] -= 1; inventory['Crystallized'] -= 5;
         inventory['AETHER'] = (inventory['AETHER'] || 0) + 1;
         alert('✨ AETHER 제작 성공!');
-    } else if (key === 'CHROMA') {
-        if (!(inventory['Prism Fragment'] >= 1) || !(inventory['Precious'] >= 10)) {
-            alert('재료가 부족합니다! (Prism Fragment 1개 + Precious 10개)'); return;
-        }
-        inventory['Prism Fragment'] -= 1; inventory['Precious'] -= 10;
-        inventory['CHROMA'] = (inventory['CHROMA'] || 0) + 1;
-        alert('✨ CHROMA 제작 성공!');
-    } else if (key === 'HYPERION') {
-        if (!(inventory['Solar Core'] >= 1) || !(inventory['Sidereum'] >= 20)) {
-            alert('재료가 부족합니다! (Solar Core 1개 + Sidereum 20개)'); return;
-        }
-        inventory['Solar Core'] -= 1; inventory['Sidereum'] -= 20;
-        inventory['HYPERION'] = (inventory['HYPERION'] || 0) + 1;
-        alert('✨ HYPERION 제작 성공!');
-    } else if (key === 'MatrixSteampunk') {
-        if (!(inventory['Matrix'] >= 1) || !(inventory['Clockwork Core'] >= 1) || !(inventory['Powered'] >= 500)) { 
-            alert('재료가 부족합니다! (Matrix 1개 + Clockwork Core 1개 + Powered 500개)'); return; 
-        }
-        inventory['Matrix'] -= 1; inventory['Clockwork Core'] -= 1; inventory['Powered'] -= 500;
-        inventory['Matrix : Steampunk'] = (inventory['Matrix : Steampunk'] || 0) + 1;
-        alert('✨ Matrix : Steampunk 제작 성공!');
-    } else if (key === 'AbyssalAwakened') {
-        if (!(inventory['AbyssalHunter'] >= 1) || !(inventory['Abyss Orb'] >= 1) || !(inventory['Crystallized'] >= 100)) { 
-            alert('재료가 부족합니다! (AbyssalHunter 1개 + Abyss Orb 1개 + Crystallized 100개)'); return; 
-        }
-        inventory['AbyssalHunter'] -= 1; inventory['Abyss Orb'] -= 1; inventory['Crystallized'] -= 100;
-        inventory['AbyssalHunter : Awakened'] = (inventory['AbyssalHunter : Awakened'] || 0) + 1;
-        alert('✨ AbyssalHunter : Awakened 제작 성공!');
-    } else if (key === 'ATLAS') {
-        if (!(inventory['Atlas'] >= 1) || !(inventory['Titan Relic'] >= 1) || !(inventory['Magnetic'] >= 50)) { 
-            alert('재료가 부족합니다! (Atlas 1개 + Titan Relic 1개 + Magnetic 50개)'); return; 
-        }
-        inventory['Atlas'] -= 1; inventory['Titan Relic'] -= 1; inventory['Magnetic'] -= 50;
-        inventory['A.T.L.A.S.'] = (inventory['A.T.L.A.S.'] || 0) + 1;
-        alert('✨ A.T.L.A.S. 제작 성공!');
-    } else if (key === 'SolarisOverdrive') {
-        if (!(inventory['Solaris'] >= 1) || !(inventory['Flame Spark'] >= 1) || !(inventory['Rage'] >= 150)) {
-            alert('재료가 부족합니다! (Solaris 1개 + Flame Spark 1개 + Rage 150개)'); return;
-        }
-        inventory['Solaris'] -= 1; inventory['Flame Spark'] -= 1; inventory['Rage'] -= 150;
-        inventory['SOLARIS : Overdrive'] = (inventory['SOLARIS : Overdrive'] || 0) + 1;
-        alert('✨ SOLARIS : Overdrive 제작 성공!');
-    } else if (key === 'EclipseVoid') {
-        if (!(inventory['Eclipse'] >= 1) || !(inventory['Void Crystal'] >= 1) || !(inventory['Diaboli'] >= 30)) {
-            alert('재료가 부족합니다! (Eclipse 1개 + Void Crystal 1개 + Diaboli 30개)'); return;
-        }
-        inventory['Eclipse'] -= 1; inventory['Void Crystal'] -= 1; inventory['Diaboli'] -= 30;
-        inventory['ECLIPSE : Void'] = (inventory['ECLIPSE : Void'] || 0) + 1;
-        alert('✨ ECLIPSE : Void 제작 성공!');
-    } else if (key === 'GlitchUnstable') {
-        if (!(inventory['Glitch'] >= 1) || !(inventory['Cyber Chip'] >= 1) || !(inventory['Powered'] >= 500)) {
-            alert('재료가 부족합니다! (Glitch 1개 + Cyber Chip 1개 + Powered 500개)'); return;
-        }
-        inventory['Glitch'] -= 1; inventory['Cyber Chip'] -= 1; inventory['Powered'] -= 500;
-        inventory['GLITCH : Unstable'] = (inventory['GLITCH : Unstable'] || 0) + 1;
-        alert('✨ GLITCH : Unstable 제작 성공!');
-    } else if (key === 'CelestialZenith') {
-        if (!(inventory['Celestial'] >= 1) || !(inventory['Cosmic Feather'] >= 1) || !(inventory['Quartz'] >= 100)) {
-            alert('재료가 부족합니다! (Celestial 1개 + Cosmic Feather 1개 + Quartz 100개)'); return;
-        }
-        inventory['Celestial'] -= 1; inventory['Cosmic Feather'] -= 1; inventory['Quartz'] -= 100;
-        inventory['CELESTIAL : Zenith'] = (inventory['CELESTIAL : Zenith'] || 0) + 1;
-        alert('✨ CELESTIAL : Zenith 제작 성공!');
-    } else if (key === 'RolandInfinity') {
-        if (!(inventory['Roland: Absolute'] >= 1) || !(inventory['Crimson Crest'] >= 1)) {
-            alert('재료가 부족합니다! (Roland: Absolute 1개 + Crimson Crest 1개)'); return;
-        }
-        inventory['Roland: Absolute'] -= 1; inventory['Crimson Crest'] -= 1;
-        inventory['ROLAND : Infinity'] = (inventory['ROLAND : Infinity'] || 0) + 1;
-        alert('✨ ROLAND : Infinity 제작 성공!');
-    } else if (key === 'CreationPrime') {
-        if (!(inventory['Creation'] >= 1) || !(inventory['Genesis Heart'] >= 1) || !(inventory['BOUNDLESS'] >= 50)) {
-            alert('재료가 부족합니다! (Creation 1개 + Genesis Heart 1개 + BOUNDLESS 50개)'); return;
-        }
-        inventory['Creation'] -= 1; inventory['Genesis Heart'] -= 1; inventory['BOUNDLESS'] -= 50;
-        inventory['CREATION : Prime'] = (inventory['CREATION : Prime'] || 0) + 1;
-        alert('✨ CREATION : Prime 제작 성공!');
     }
-
     saveData();
 }
 
