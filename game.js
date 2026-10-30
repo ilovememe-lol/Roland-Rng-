@@ -25,6 +25,7 @@ const AURAS = [
     { name: "Magnet Core", chance: 8000, color: "#ff3300", effect: ["swirlVortex", "spinning"] },
     { name: "Age Of Golden", chance: 12000, color: "#fbff00", effect: ["dust", "sparkle", "crystalShard"] },
     { name: "Demon Ember", chance: 35000, color: "#990000", effect: "demonHellfire" },
+    { name: "Cyber Psycho", chance: 46000, color: "#0062ff", effect: ["electricShield", "pixelNoise", "cyberGlitch"] },
     { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
 
     // [상위 및 최상위 아우라]
