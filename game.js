@@ -8,16 +8,16 @@ const AURAS = [
     { name: "Crystallized", chance: 64, color: "#00ffff", effect: "crystalShard" },
     { name: "Rage", chance: 128, color: "#ff3333", effect: "fireFlame" },
     
-    // [1,000 ~ 10,000대: 화려한 이펙트 보강]
+    // [1,000 ~ 10,000대: 화려한 이펙트 및 다중 이펙트 조합]
     { name: "Glacier", chance: 1024, color: "#aaffff", effect: "snowBurst" },
-    { name: "Precious", chance: 1024, color: "#00bfff", effect: "rainbowPrism" },
-    { name: "Magnetic", chance: 2048, color: "#ff3300", effect: "swirlVortex" },
+    { name: "Precious", chance: 1024, color: "#00bfff", effect: ["rainbowPrism", "sparkle"] },
+    { name: "Magnetic", chance: 2048, color: "#ff3300", effect: ["swirlVortex", "lightningSpark"] },
     { name: "Sidereum", chance: 4096, color: "#ffd700", effect: "goldRune" },
-    { name: "Gilded", chance: 5000, color: "#ffd700", effect: "goldenBeam" },
-    { name: "Quartz", chance: 8192, color: "#ff69b4", effect: "crystalShard" },
-    { name: "Diaboli", chance: 10000, color: "#990000", effect: "demonHellfire" },
+    { name: "Gilded", chance: 5000, color: "#ffd700", effect: ["goldenBeam", "goldRune"] },
+    { name: "Quartz", chance: 8192, color: "#ff69b4", effect: ["crystalShard", "orbitDots"] },
+    { name: "Diaboli", chance: 10000, color: "#990000", effect: ["demonHellfire", "fireFlame"] },
     { name: "Powered", chance: 16384, color: "#ffffff", effect: "lightningSpark" },
-    { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: "voidNebula" },
+    { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: ["voidNebula", "swirlVortex"] },
 
     // [중간 재료 아우라]
     { name: "Glacier Alloy", chance: 3000, color: "#aaffff", effect: "snowBurst" },
@@ -25,43 +25,43 @@ const AURAS = [
     { name: "Demon Ember", chance: 35000, color: "#990000", effect: "demonHellfire" },
     { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: "cosmicRings" },
 
-    // [상위 및 최상위 아우라: 파티클/특수 이펙트 집중]
+    // [상위 및 최상위 아우라: 다중 이펙트 극대화]
     { name: "Ether Essence", chance: 5000, color: "#00ffaa", effect: "swirlVortex" },
     { name: "Prism Fragment", chance: 25000, color: "#ff00ff", effect: "rainbowPrism" },
-    { name: "Solar Core", chance: 100000, color: "#ffcc00", effect: "solarCrown" },
+    { name: "Solar Core", chance: 100000, color: "#ffcc00", effect: ["solarCrown", "goldenBeam"] },
     { name: "Clockwork Core", chance: 500000, color: "#e0e0e0", effect: "pixelNoise" },
-    { name: "Flame Spark", chance: 1200000, color: "#ff4500", effect: "sunExplosion" },
-    { name: "Abyss Orb", chance: 2500000, color: "#00ffff", effect: "blackHole" },
+    { name: "Flame Spark", chance: 1200000, color: "#ff4500", effect: ["sunExplosion", "fireFlame"] },
+    { name: "Abyss Orb", chance: 2500000, color: "#00ffff", effect: ["blackHole", "swirlVortex"] },
     { name: "Void Crystal", chance: 5000000, color: "#4b0082", effect: "shadowEclipse" },
     { name: "Cyber Chip", chance: 8000000, color: "#00ff66", effect: "cyberGlitch" },
-    { name: "Cosmic Feather", chance: 15000000, color: "#ffff00", effect: "cosmicRings" },
-    { name: "Titan Relic", chance: 25000000, color: "#ff0055", effect: "darkBloodPillar" },
-    { name: "Crimson Crest", chance: 50000000, color: "#ff0000", effect: "absoluteRedStorm" },
-    { name: "Genesis Heart", chance: 100000000, color: "#ffffff", effect: "galaxyBigBang" },
+    { name: "Cosmic Feather", chance: 15000000, color: "#ffff00", effect: ["cosmicRings", "sparkle"] },
+    { name: "Titan Relic", chance: 25000000, color: "#ff0055", effect: ["darkBloodPillar", "demonHellfire"] },
+    { name: "Crimson Crest", chance: 50000000, color: "#ff0000", effect: ["absoluteRedStorm", "lightningSpark"] },
+    { name: "Genesis Heart", chance: 100000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism"] },
 
     { name: "Glitch", chance: 250000, color: "#00ff66", effect: "cyberGlitch" },
     { name: "Celestial", chance: 500000, color: "#00bfff", effect: "cosmicRings" },
-    { name: "Solaris", chance: 7500000, color: "#ff8c00", effect: "solarCrown" },
-    { name: "Eclipse", chance: 40000000, color: "#4b0082", effect: "shadowEclipse" },
-    { name: "Matrix", chance: 50000000, color: "#00ff66", effect: "cyberGlitch" },
-    { name: "AbyssalHunter", chance: 100000000, color: "#00ffff", effect: "blackHole" },
-    { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: "absoluteRedStorm" },
-    { name: "Atlas", chance: 360000000, color: "#ffcc00", effect: "goldenBeam" },
-    { name: "Creation", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" },
+    { name: "Solaris", chance: 7500000, color: "#ff8c00", effect: ["solarCrown", "sunExplosion"] },
+    { name: "Eclipse", chance: 40000000, color: "#4b0082", effect: ["shadowEclipse", "blackHole"] },
+    { name: "Matrix", chance: 50000000, color: "#00ff66", effect: ["cyberGlitch", "pixelNoise"] },
+    { name: "AbyssalHunter", chance: 100000000, color: "#00ffff", effect: ["blackHole", "darkBloodPillar"] },
+    { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: ["absoluteRedStorm", "lightningSpark"] },
+    { name: "Atlas", chance: 360000000, color: "#ffcc00", effect: ["goldenBeam", "cosmicRings"] },
+    { name: "Creation", chance: 1000000000, color: "#00ffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam"] },
     
     // [조합 전용 아우라 그룹]
     { name: "AETHER", chance: 15000, color: "#00ffaa", effect: "swirlVortex", craftOnly: true },
     { name: "CHROMA", chance: 80000, color: "#ff00ff", effect: "rainbowPrism", craftOnly: true },
     { name: "HYPERION", chance: 500000, color: "#ffcc00", effect: "goldenBeam", craftOnly: true },
-    { name: "Matrix : Steampunk", chance: 150000000, color: "#e0e0e0", effect: "pixelNoise", craftOnly: true },
-    { name: "SOLARIS : Overdrive", chance: 250000000, color: "#ff4500", effect: "sunExplosion", craftOnly: true },
-    { name: "AbyssalHunter : Awakened", chance: 400000000, color: "#00ffff", effect: "blackHole", craftOnly: true },
-    { name: "ECLIPSE : Void", chance: 500000000, color: "#4b0082", effect: "shadowEclipse", craftOnly: true },
-    { name: "GLITCH : Unstable", chance: 800000000, color: "#00ff66", effect: "cyberGlitch", craftOnly: true },
-    { name: "A.T.L.A.S.", chance: 1000000000, color: "#ff0055", effect: "darkBloodPillar", craftOnly: true },
-    { name: "CELESTIAL : Zenith", chance: 1200000000, color: "#ffff00", effect: "cosmicRings", craftOnly: true },
-    { name: "ROLAND : Infinity", chance: 2000000000, color: "#ff0000", effect: "absoluteRedStorm", craftOnly: true },
-    { name: "CREATION : Prime", chance: 5000000000, color: "#ffffff", effect: "galaxyBigBang", craftOnly: true }
+    { name: "Matrix : Steampunk", chance: 150000000, color: "#e0e0e0", effect: ["pixelNoise", "cyberGlitch"], craftOnly: true },
+    { name: "SOLARIS : Overdrive", chance: 250000000, color: "#ff4500", effect: ["sunExplosion", "solarCrown"], craftOnly: true },
+    { name: "AbyssalHunter : Awakened", chance: 400000000, color: "#00ffff", effect: ["blackHole", "swirlVortex"], craftOnly: true },
+    { name: "ECLIPSE : Void", chance: 500000000, color: "#4b0082", effect: ["shadowEclipse", "darkBloodPillar"], craftOnly: true },
+    { name: "GLITCH : Unstable", chance: 800000000, color: "#00ff66", effect: ["cyberGlitch", "lightningSpark"], craftOnly: true },
+    { name: "A.T.L.A.S.", chance: 1000000000, color: "#ff0055", effect: ["darkBloodPillar", "goldenBeam"], craftOnly: true },
+    { name: "CELESTIAL : Zenith", chance: 1200000000, color: "#ffff00", effect: ["cosmicRings", "rainbowPrism"], craftOnly: true },
+    { name: "ROLAND : Infinity", chance: 2000000000, color: "#ff0000", effect: ["absoluteRedStorm", "demonHellfire"], craftOnly: true },
+    { name: "CREATION : Prime", chance: 5000000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam"], craftOnly: true }
 ];
 
 const GEARS = {
@@ -473,7 +473,8 @@ function renderCanvas() {
     angleTick += 0.03;
 
     const color = currentAura.color;
-    const effect = currentAura.effect;
+    // 이펙트가 단일 문자열이거나 배열이어도 모두 호환되도록 처리
+    const effects = Array.isArray(currentAura.effect) ? currentAura.effect : [currentAura.effect];
 
     const grad = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 180);
     grad.addColorStop(0, color + 'aa');
@@ -484,41 +485,43 @@ function renderCanvas() {
     ctx.fill();
 
     if (enableParticles) {
-        if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
-            if (Math.random() < 0.6) {
-                particles.push({
-                    x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
-                    vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
-                    size: Math.random() * 8 + 4, life: 1, color
-                });
-            }
-        } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
-            ctx.strokeStyle = color; ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
-            ctx.stroke();
-        } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
-            if (Math.random() < 0.4) {
-                ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
-                ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
-            }
-        } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
-            ctx.strokeStyle = color; ctx.lineWidth = 2;
-            for (let i = 0; i < 3; i++) {
+        effects.forEach(effect => {
+            if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
+                if (Math.random() < 0.6) {
+                    particles.push({
+                        x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
+                        vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
+                        size: Math.random() * 8 + 4, life: 1, color
+                    });
+                }
+            } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
+                ctx.strokeStyle = color; ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
+                ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
+                ctx.stroke();
+            } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
+                if (Math.random() < 0.4) {
+                    ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
+                    ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
+                }
+            } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
+                ctx.strokeStyle = color; ctx.lineWidth = 2;
+                for (let i = 0; i < 3; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
+                    ctx.stroke();
+                }
+            } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
+                ctx.strokeStyle = color; ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
                 ctx.stroke();
             }
-        } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
-            ctx.strokeStyle = color; ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
-            ctx.stroke();
-        }
+        });
 
         if (Math.random() < 0.3) {
             particles.push({
