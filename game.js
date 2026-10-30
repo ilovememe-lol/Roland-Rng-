@@ -23,6 +23,7 @@ const AURAS = [
     // [중간 재료 아우라]
     { name: "Glacier Alloy", chance: 3000, color: "#aaffff", effect: "snowBurst" },
     { name: "Magnet Core", chance: 8000, color: "#ff3300", effect: ["swirlVortex", "spinning"] },
+    { name: "Age Of Golden", chance: 12000, color: "#fbff00", effect: ["dust", "sparkle", "crystalShard"] },
     { name: "Demon Ember", chance: 35000, color: "#990000", effect: "demonHellfire" },
     { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
 
