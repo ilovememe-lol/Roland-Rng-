@@ -4,164 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sol's RNG</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body {
+            background-color: #000000; color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            min-height: 100vh; overflow: hidden; padding: 15px; position: relative;
+        }
+
+        /* 상단 네비게이션 버튼 */
+        #top-bar {
+            width: 100%; max-width: 480px; display: flex; justify-content: space-between; align-items: center; z-index: 10;
+        }
+        .menu-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; backdrop-filter: blur(5px);
+        }
+
+        /* 메인 비주얼 영역 (중앙 정렬 완벽 보정) */
+        #display-container {
+            position: relative; width: 320px; height: 320px;
+            display: flex; justify-content: center; align-items: center;
+            margin: auto 0;
+        }
+        #auraCanvas {
+            position: absolute; width: 320px; height: 320px; top: 0; left: 0; z-index: 1; pointer-events: none;
+        }
+        #character-avatar {
+            position: relative; width: 80px; height: 80px; border-radius: 50%;
+            background: #a0a0a0; z-index: 2; box-shadow: 0 0 35px #a0a0a0;
+            background-size: cover; background-position: center; transition: background 0.3s;
+        }
+
+        /* 하단 정보 표시판 */
+        #info-panel {
+            width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 10; margin-bottom: 10px;
+        }
+        #aura-name { font-size: 28px; font-weight: 800; text-shadow: 0 0 15px currentColor; text-align: center; }
+        #aura-rarity { font-size: 16px; color: #aaa; margin-bottom: 10px; }
+        
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; font-size: 13px; color: #ccc; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; }
+        .stat-item { display: flex; justify-content: space-between; }
+
+        /* 하단 조작 버튼 그룹 */
+        #action-bar { width: 100%; max-width: 480px; display: flex; gap: 10px; z-index: 10; }
+        .action-btn {
+            flex: 1; padding: 14px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: #fff;
+        }
+        #roll-btn { background: linear-gradient(135deg, #0088ff, #0044ff); }
+        #auto-btn { background: #333; }
+        #auto-btn.active { background: #00ffcc; color: #000; }
+
+        /* 사이드바 & 모달 기본 스타일 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #181818; border: 1px solid #333; width: 90%; max-width: 420px; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; max-height: 80vh; overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .close-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+    </style>
 </head>
 <body>
 
-    <!-- 상단 헤더 -->
-    <header id="header">
-        <button id="menu-toggle-btn" onclick="toggleSidebar()">☰ 메뉴</button>
-        <div id="user-info">
-            <span>Sol's RNG</span>
+    <!-- 상단 메뉴 -->
+    <div id="top-bar">
+        <div class="menu-btn-group">
+            <button class="menu-btn" onclick="openModal('inv-modal')">🎒 인벤토리</button>
+            <button class="menu-btn" onclick="openModal('gear-modal')">🛡️ 장비 보관함</button>
+            <button class="menu-btn" onclick="openModal('shop-modal')">🛒 상점</button>
+            <button class="menu-btn" onclick="openModal('craft-modal')">⚒️ 조합소</button>
         </div>
-    </header>
+        <button class="menu-btn" onclick="toggleFullscreen()">📺 전체화면</button>
+    </div>
 
-    <!-- 사이드바 오버레이 및 메뉴 -->
-    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
-    <nav id="sidebar">
-        <h2>메뉴</h2>
-        <button id="nav-inv" onclick="openModal('inv-modal')">🎒 인벤토리</button>
-        <button id="nav-gear" onclick="openModal('gear-modal')">🛡️ 장비 보관함</button>
-        <button id="nav-shop" onclick="openModal('shop-modal')">🛒 상점</button>
-        <button id="nav-craft" onclick="openModal('craft-modal')">⚒️ 조합소</button>
-        <button id="nav-fullscreen" onclick="toggleFullscreen()">📺 전체화면</button>
-        <button id="nav-settings" onclick="openModal('settings-modal')">⚙️ 설정</button>
-    </nav>
+    <!-- 중앙 캔버스 및 캐릭터 영역 -->
+    <div id="display-container">
+        <canvas id="auraCanvas" width="500" height="500"></canvas>
+        <div id="character-avatar"></div>
+    </div>
 
-    <!-- 메인 게임 컨테이너 -->
-    <main id="game-container">
-        <!-- 캔버스 / 비주얼 -->
-        <div id="visual-area">
-            <canvas id="auraCanvas" width="500" height="500"></canvas>
-            <div id="character-avatar"></div>
+    <!-- 하단 정보 표시 영역 -->
+    <div id="info-panel">
+        <div id="aura-name">Common</div>
+        <div id="aura-rarity">1 / 2</div>
+
+        <div class="stat-grid">
+            <div class="stat-item"><span>총 ROLL:</span> <strong id="total-rolls">0</strong></div>
+            <div class="stat-item"><span>골드:</span> <strong id="gold-val">0 G</strong></div>
+            <div class="stat-item"><span>행운:</span> <strong id="luck-mult" style="color:#00ffcc;">1.0x</strong></div>
+            <div class="stat-item"><span>장착 장비:</span> <strong id="equipped-gear">없음</strong></div>
         </div>
+    </div>
 
-        <!-- 아우라 이름 및 확률 -->
-        <div id="aura-display">
-            <h1 id="aura-name">Common</h1>
-            <p id="aura-rarity">1 / 2</p>
-        </div>
+    <!-- 버튼 영역 -->
+    <div id="action-bar">
+        <button id="roll-btn" class="action-btn">ROLL</button>
+        <button id="auto-btn" class="action-btn">Auto: OFF</button>
+    </div>
 
-        <!-- 상태창 -->
-        <div id="stats-panel">
-            <div>총 ROLL: <span id="total-rolls">0</span></div>
-            <div>골드: <span id="gold-val">0</span> G</div>
-            <div>행운: <span id="luck-mult">1.0x</span></div>
-            <div>장착 장비: <span id="equipped-gear">없음</span></div>
-            <div style="grid-column: span 2;">최고 기록: <span id="best-roll">None</span></div>
-        </div>
-
-        <!-- ROLL 버튼 영역 -->
-        <div id="normal-panel">
-            <button id="roll-btn">ROLL</button>
-            <button id="auto-btn">Auto: OFF</button>
-        </div>
-
-        <!-- 관전 모드 해제 -->
-        <div id="inspect-panel" style="display: none;">
-            <button id="exit-inspect-btn">관전 종료</button>
-        </div>
-    </main>
-
-    <!-- 인벤토리 모달 -->
-    <div id="inv-modal" class="modal" style="display: none;">
+    <!-- 모달: 인벤토리 -->
+    <div id="inv-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>🎒 인벤토리</h2>
-                <button class="modal-close-btn" onclick="closeModal('inv-modal')">&times;</button>
+                <h3>🎒 인벤토리</h3>
+                <button class="close-btn" onclick="closeModal('inv-modal')">✕</button>
             </div>
             <div id="inv-list"></div>
         </div>
     </div>
 
-    <!-- 장비 모달 -->
-    <div id="gear-modal" class="modal" style="display: none;">
+    <!-- 모달: 장비 보관함 -->
+    <div id="gear-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>🛡️ 장비 보관함</h2>
-                <button class="modal-close-btn" onclick="closeModal('gear-modal')">&times;</button>
+                <h3>🛡️ 장비 보관함</h3>
+                <button class="close-btn" onclick="closeModal('gear-modal')">✕</button>
             </div>
             <div id="gear-list"></div>
         </div>
     </div>
 
-    <!-- 상점 모달 -->
-    <div id="shop-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🛒 상점</h2>
-                <button class="modal-close-btn" onclick="closeModal('shop-modal')">&times;</button>
-            </div>
-            <div class="shop-item">
-                <div>행운 물약 (Small) - 100 G</div>
-                <button onclick="buyPotion('small')">구매</button>
-            </div>
-            <div class="shop-item">
-                <div>스피드 물약 - 300 G</div>
-                <button onclick="buyPotion('speed_small')">구매</button>
-            </div>
-            <div class="shop-item">
-                <div>1회성 행운 물약 (+10x) - 500 G</div>
-                <button onclick="buyPotion('one_shot_small')">구매</button>
-            </div>
-        </div>
-    </div>
+    <!-- 오디오 재생용 element -->
+    <audio id="bgm-player" loop></audio>
 
-    <!-- 조합소 모달 -->
-    <div id="craft-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>⚒️ 조합소</h2>
-                <button class="modal-close-btn" onclick="closeModal('craft-modal')">&times;</button>
-            </div>
-            <div class="craft-tabs">
-                <button id="tab-potion-btn" class="active" onclick="switchCraftTab('potion')">물약</button>
-                <button id="tab-gear-btn" onclick="switchCraftTab('gear')">장비</button>
-                <button id="tab-aura-btn" onclick="switchCraftTab('aura')">아우라</button>
-            </div>
-            <div id="craft-potion-section">
-                <div class="shop-item">
-                    <div>Large Luck Potion (Rare 1개)</div>
-                    <button onclick="craftPotion('large')">조합</button>
-                </div>
-            </div>
-            <div id="craft-gear-section" style="display: none;">
-                <div class="shop-item">
-                    <div>Luck Glove (Rare 5개)</div>
-                    <button onclick="craftGear('LuckGlove')">제작</button>
-                </div>
-            </div>
-            <div id="craft-aura-section" style="display: none;">
-                <div class="shop-item">
-                    <div>AETHER (Ether Essence 1개 + Crystallized 5개)</div>
-                    <button onclick="craftAura('AETHER')">연성</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 설정 모달 -->
-    <div id="settings-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>⚙️ 설정</h2>
-                <button class="modal-close-btn" onclick="closeModal('settings-modal')">&times;</button>
-            </div>
-            <div class="setting-row">
-                <label>파티클 효과</label>
-                <input type="checkbox" id="particle-toggle" checked>
-            </div>
-            <div class="setting-row">
-                <label>BGM 음량</label>
-                <input type="range" id="bgm-volume" min="0" max="100" value="50">
-            </div>
-            <button onclick="resetGameData()" style="background:#ff4444; color:white; width:100%; margin-top:15px; padding:10px; border:none; border-radius:5px;">데이터 초기화</button>
-        </div>
-    </div>
-
-    <audio id="bgm-player"></audio>
-
-    <!-- 단일 게임 메인 스크립트 연결 -->
+    <!-- 스크립트 연결 -->
     <script src="game.js"></script>
 </body>
 </html>
