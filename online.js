@@ -1,39 +1,64 @@
 // -------------------------------------------------------------
-// SUPABASE 설정
+// SUPABASE REST API Direct Client (CDN 차단 우회용)
 // -------------------------------------------------------------
 const SUPABASE_URL = "https://vkjgznvyvurlnefdskpw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_C-UkMzjJ-OvaGLyjdIvwoQ_QCuEs4hi";
 
-let supabase = null;
-
-try {
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-} catch (e) {
-    console.error("Supabase 연결 실패:", e);
-}
-
 let myNickname = localStorage.getItem('sols_nickname') || '유저_' + Math.floor(Math.random() * 8999 + 1000);
 
-// 클릭 & 모바일 터치 통합 등록 함수
+// 공통 HTTP 요청 함수
+async function supabaseFetch(endpoint, method = 'GET', body = null) {
+    const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+    };
+
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/${endpoint}`, options);
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || `HTTP 에러 ${response.status}`);
+        }
+        if (method === 'GET') {
+            return await response.json();
+        }
+        return true;
+    } catch (err) {
+        console.error(`[Supabase Error] ${endpoint}:`, err);
+        return null;
+    }
+}
+
+// 클릭 및 모바일 터치 이벤트 바인딩
 function bindBtn(id, handler) {
     const el = document.getElementById(id);
     if (!el) return;
+    
     el.onclick = (e) => {
+        e.preventDefault();
+        handler(e);
+    };
+    el.ontouchend = (e) => {
         e.preventDefault();
         handler(e);
     };
 }
 
-// 화면 로드 완료 시 이벤트 바인딩
+// DOM 준비 완료 시 이벤트 및 데이터 초기화
 window.addEventListener('DOMContentLoaded', () => {
-    // 닉네임 표시
+    // 1. 닉네임 표기
     const nickEl = document.getElementById('user-nickname');
     if (nickEl) nickEl.innerText = myNickname;
 
-    // 사이드바 및 모달 버튼 이벤트 연결
+    // 2. 닉네임 변경 버튼
     bindBtn('nav-nickname', changeNickname);
+
+    // 3. 랭킹 모달 열기 버튼
     bindBtn('nav-rank', () => {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -45,7 +70,7 @@ window.addEventListener('DOMContentLoaded', () => {
         loadOnlineRankings();
     });
 
-    // 채팅 버튼 연결
+    // 4. 채팅 전송 버튼 및 엔터키
     bindBtn('chat-send-btn', sendChatMessage);
     const chatInput = document.getElementById('chat-input');
     if (chatInput) {
@@ -54,22 +79,13 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // 초기 채팅 로드 및 실시간 구독
-    if (supabase) {
-        loadInitialChats();
-        try {
-            supabase
-                .channel('public:chat')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, payload => {
-                    appendChatMsg(payload.new.user, payload.new.text);
-                })
-                .subscribe();
-        } catch (e) {}
-    }
+    // 5. 채팅 초기 불러오기 및 3초 간격 실시간 갱신 (CDN 없이 동동 작동)
+    loadInitialChats();
+    setInterval(loadInitialChats, 3000);
 });
 
 // -------------------------------------------------------------
-// 닉네임 변경
+// 닉네임 변경 기능
 // -------------------------------------------------------------
 function changeNickname() {
     const sidebar = document.getElementById('sidebar');
@@ -77,14 +93,15 @@ function changeNickname() {
     if (sidebar) sidebar.classList.remove('open');
     if (overlay) overlay.classList.remove('active');
 
-    const newName = prompt("새 닉네임을 입력하세요:", myNickname);
+    const newName = prompt("새 닉네임을 입력하세요 (최대 10자):", myNickname);
     if (newName && newName.trim() !== "") {
         myNickname = newName.trim().substring(0, 10);
         localStorage.setItem('sols_nickname', myNickname);
+        
         const nickEl = document.getElementById('user-nickname');
         if (nickEl) nickEl.innerText = myNickname;
 
-        // 최고 기록이 있다면 닉네임 갱신 전송
+        // 최고 기록이 있다면 닉네임 갱신 업로드
         if (typeof bestName !== 'undefined' && typeof bestChance !== 'undefined' && bestChance > 0) {
             uploadLeaderboard(bestName, bestChance);
         }
@@ -101,71 +118,69 @@ async function sendChatMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
 
-    if (!supabase) {
-        alert("Supabase 연결이 설정되지 않았습니다.");
-        return;
-    }
-
-    const { error } = await supabase.from('chat').insert([{ user: myNickname, text: text }]);
-    if (error) {
-        alert("채팅 전송 실패: " + error.message);
-    } else {
+    const result = await supabaseFetch('chat', 'POST', [{ user: myNickname, text: text }]);
+    if (result) {
         chatInput.value = '';
+        loadInitialChats();
+    } else {
+        alert("채팅 전송 실패! (네트워크 상태를 확인하세요)");
     }
 }
 
 async function loadInitialChats() {
-    if (!supabase) return;
-    const { data, error } = await supabase.from('chat').select('*').order('created_at', { ascending: false }).limit(20);
-    if (error) return;
-    if (data) {
-        data.reverse().forEach(msg => appendChatMsg(msg.user, msg.text));
+    const data = await supabaseFetch('chat?select=*&order=created_at.desc&limit=20');
+    if (data && Array.isArray(data)) {
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+        
+        chatMessages.innerHTML = '';
+        data.reverse().forEach(msg => {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-msg-item';
+            msgDiv.innerHTML = `<span class="chat-user">${msg.user}:</span> ${msg.text}`;
+            chatMessages.appendChild(msgDiv);
+        });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-}
-
-function appendChatMsg(user, text) {
-    const chatMessages = document.getElementById('chat-messages');
-    if (!chatMessages) return;
-    
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-msg-item';
-    msgDiv.innerHTML = `<span class="chat-user">${user}:</span> ${text}`;
-    chatMessages.appendChild(msgDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // -------------------------------------------------------------
 // 실시간 온라인 랭킹
 // -------------------------------------------------------------
 async function uploadLeaderboard(bestName, bestChance) {
-    if (!supabase || !bestChance) return;
+    if (!bestChance) return;
     
-    await supabase.from('leaderboard').upsert([
-        { user: myNickname, aura: bestName, chance: bestChance }
-    ], { onConflict: 'user' });
+    // Upsert (user 기준 중복 덮어쓰기)
+    const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+    };
+
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/leaderboard`, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify([{ user: myNickname, aura: bestName, chance: bestChance }])
+        });
+    } catch (e) {
+        console.error("랭킹 업로드 에러:", e);
+    }
 }
 
 async function loadOnlineRankings() {
     const rankList = document.getElementById('rank-list');
     if (!rankList) return;
 
-    if (!supabase) {
-        rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Supabase 연결 실패</div>';
+    const data = await supabaseFetch('leaderboard?select=*&order=chance.desc&limit=10');
+
+    if (!data || !Array.isArray(data)) {
+        rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">랭킹 데이터를 불러오지 못했습니다.</div>';
         return;
     }
 
-    const { data, error } = await supabase
-        .from('leaderboard')
-        .select('*')
-        .order('chance', { ascending: false })
-        .limit(10);
-
-    if (error) {
-        rankList.innerHTML = `<div style="text-align:center; padding:20px; color:#ff4444;">오류: ${error.message}</div>`;
-        return;
-    }
-
-    if (!data || data.length === 0) {
+    if (data.length === 0) {
         rankList.innerHTML = '<div style="text-align:center; padding:20px;">등록된 랭킹 데이터가 없습니다.</div>';
         return;
     }
@@ -177,7 +192,7 @@ async function loadOnlineRankings() {
         row.innerHTML = `
             <span class="rank-num">#${idx + 1}</span>
             <span class="rank-user">${item.user}</span>
-            <span class="rank-aura">${item.aura} <span style="color:#aaa; font-size:11px;">(1/${item.chance.toLocaleString()})</span></span>
+            <span class="rank-aura">${item.aura} <span style="color:#aaa; font-size:11px;">(1/${Number(item.chance).toLocaleString()})</span></span>
         `;
         rankList.appendChild(row);
     });
