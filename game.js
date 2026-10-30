@@ -8,7 +8,10 @@ const AURAS = [
     { name: "Crystallized", chance: 64, color: "#00ffff", effect: "crystalShard" },
     { name: "Rage", chance: 128, color: "#ff3333", effect: "fireFlame" },
     
-    // [커스텀 및 1,000 ~ 10,000대 아우라]
+    // [롤랑 9무기 & 게부라 특별 아우라]
+    { name: "Roland: Black Silence (Full Workshop)", chance: 100000000, color: "#111111", effect: ["rolandDurandal", "rolandAtelierLogic", "rolandWheelsChair", "rolandZelkova", "rolandMuksheok", "rolandOldBoys", "rolandRanga", "rolandAllia", "rolandCrystalAtelier", "rolandFurioso", "rolandSilence"] },
+    { name: "Gebura: Red Mist (E.G.O)", chance: 100000000, color: "#ff0033", effect: ["geburaRedMist", "geburaGreatSplitHorizontal", "geburaGreatSplitVertical", "geburaManifestEGO"] },
+    
     { name: "Beats", chance: 4000, color: "#2bff00", effect: ["spinning", "timeClock", "blackHolePull", "sparkle", "swirlVortex", "voidNebula", "blackHole", "shadowEclipse", "cosmicRings", "absoluteRedStorm", "galaxyBigBang"] },
     { name: "Glacier", chance: 1024, color: "#aaffff", effect: ["snowBurst", "spinning"] },
     { name: "Precious", chance: 1024, color: "#00bfff", effect: ["rainbowPrism", "sparkle"] },
@@ -23,9 +26,7 @@ const AURAS = [
     // [중간 재료 아우라]
     { name: "Glacier Alloy", chance: 3000, color: "#aaffff", effect: "snowBurst" },
     { name: "Magnet Core", chance: 8000, color: "#ff3300", effect: ["swirlVortex", "spinning"] },
-    { name: "Age Of Golden", chance: 12000, color: "#fbff00", effect: ["dust", "sparkle", "crystalShard"] },
     { name: "Demon Ember", chance: 35000, color: "#990000", effect: "demonHellfire" },
-    { name: "Cyber Psycho", chance: 46000, color: "#0062ff", effect: ["electricShield", "pixelNoise", "cyberGlitch"] },
     { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
 
     // [상위 및 최상위 아우라]
@@ -39,7 +40,7 @@ const AURAS = [
     { name: "Cyber Chip", chance: 8000000, color: "#00ff66", effect: ["cyberGlitch", "electricShield"] },
     { name: "Cosmic Feather", chance: 15000000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
     { name: "Titan Relic", chance: 25000000, color: "#ff0055", effect: ["darkBloodPillar", "demonHellfire", "chaosPortal"] },
-    { name: "Crimson Crest", chance: 50000000, color: "#ff0000", effect: ["absoluteRedStorm", "meteorFall"] },
+    { name: "Crimson Crest", chance: 50000000, color: "#ff0000", effect: ["absoluteRedStorm", "geburaGreatSplitHorizontal"] },
     { name: "Genesis Heart", chance: 100000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism", "sacredRays"] },
 
     { name: "Glitch", chance: 250000, color: "#00ff66", effect: ["cyberGlitch", "pixelNoise"] },
@@ -48,7 +49,6 @@ const AURAS = [
     { name: "Eclipse", chance: 40000000, color: "#4b0082", effect: ["shadowEclipse", "blackHolePull"] },
     { name: "Matrix", chance: 50000000, color: "#00ff66", effect: ["cyberGlitch", "hexShield"] },
     { name: "AbyssalHunter", chance: 100000000, color: "#00ffff", effect: ["blackHole", "darkBloodPillar"] },
-    { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: ["absoluteRedStorm", "lightningSpark", "sacredRays"] },
     { name: "Atlas", chance: 360000000, color: "#ffcc00", effect: ["goldenBeam", "cosmicRings", "timeClock"] },
     { name: "Creation", chance: 1000000000, color: "#00ffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam", "spinning"] },
     
@@ -56,14 +56,7 @@ const AURAS = [
     { name: "AETHER", chance: 15000, color: "#00ffaa", effect: "swirlVortex", craftOnly: true },
     { name: "CHROMA", chance: 80000, color: "#ff00ff", effect: ["rainbowPrism", "sparkle"], craftOnly: true },
     { name: "HYPERION", chance: 500000, color: "#ffcc00", effect: ["goldenBeam", "sacredRays"], craftOnly: true },
-    { name: "Matrix : Steampunk", chance: 150000000, color: "#e0e0e0", effect: ["pixelNoise", "cyberGlitch", "timeClock"], craftOnly: true },
-    { name: "SOLARIS : Overdrive", chance: 250000000, color: "#ff4500", effect: ["sunExplosion", "solarCrown", "spinning"], craftOnly: true },
-    { name: "AbyssalHunter : Awakened", chance: 400000000, color: "#00ffff", effect: ["blackHole", "blackHolePull", "swirlVortex"], craftOnly: true },
-    { name: "ECLIPSE : Void", chance: 500000000, color: "#4b0082", effect: ["shadowEclipse", "darkBloodPillar", "hexShield"], craftOnly: true },
-    { name: "GLITCH : Unstable", chance: 800000000, color: "#00ff66", effect: ["cyberGlitch", "electricShield", "lightningSpark"], craftOnly: true },
-    { name: "A.T.L.A.S.", chance: 1000000000, color: "#ff0055", effect: ["darkBloodPillar", "goldenBeam", "timeClock"], craftOnly: true },
-    { name: "CELESTIAL : Zenith", chance: 1200000000, color: "#ffff00", effect: ["cosmicRings", "rainbowPrism", "starShower"], craftOnly: true },
-    { name: "ROLAND : Infinity", chance: 2000000000, color: "#ff0000", effect: ["absoluteRedStorm", "demonHellfire", "meteorFall"], craftOnly: true },
+    { name: "ROLAND : Infinity", chance: 2000000000, color: "#ff0000", effect: ["rolandDurandal", "rolandFurioso", "rolandSilence", "geburaGreatSplitVertical"], craftOnly: true },
     { name: "CREATION : Prime", chance: 5000000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam", "spinning", "sacredRays"], craftOnly: true }
 ];
 
@@ -88,14 +81,13 @@ const BGM_PLAYLIST = [
 let bgmIndex = 0;
 let totalRolls = 0, gold = 0, baseAutoDelay = 250;
 let bestChance = 0, bestName = "None", isAuto = false, isRolling = false;
-let isInspecting = false; // ★ 관전 모드 상태 플래그
+let isInspecting = false;
 let equippedGear = null, activeBuff = null, oneShotLuckMult = 0;
 let gearRollCounter = 0, activeGearBuff = null;
 let enableParticles = true, lastRolledAura = AURAS[0];
 
 const inventory = {}, gearInventory = {};
 
-// UI 엘리먼트
 const auraNameEl = document.getElementById('aura-name');
 const auraRarityEl = document.getElementById('aura-rarity');
 const totalRollsEl = document.getElementById('total-rolls');
@@ -114,7 +106,6 @@ const ctx = canvas ? canvas.getContext('2d') : null;
 const particles = [];
 let currentAura = AURAS[0];
 
-// UI 제어 함수
 window.toggleSidebar = function() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
@@ -267,9 +258,7 @@ function processGearSkillOnRoll() {
 }
 
 function roll() {
-    // 관전 모드 중에는 롤링을 진행하지 않음
     if (isInspecting) return;
-    
     tryPlayMusic();
     if (isRolling) return;
     isRolling = true;
@@ -348,7 +337,6 @@ function finalizeRoll() {
     setTimeout(() => {
         isRolling = false;
         if (rollBtn) rollBtn.disabled = false;
-        // 오토 롤 중이더라도 관전 모드로 전환되었으면 다음 롤 중단
         if (isAuto && !isInspecting) setTimeout(roll, getEffectiveDelay());
     }, 250);
 }
@@ -357,7 +345,7 @@ function inspectAura(auraName) {
     const foundAura = AURAS.find(a => a.name === auraName);
     if (!foundAura) return;
 
-    isInspecting = true; // 관전 상태 ON
+    isInspecting = true;
     currentAura = foundAura;
     if (auraNameEl) {
         auraNameEl.innerText = foundAura.name;
@@ -377,7 +365,7 @@ function inspectAura(auraName) {
 const exitInspectBtn = document.getElementById('exit-inspect-btn');
 if (exitInspectBtn) {
     exitInspectBtn.addEventListener('click', () => {
-        isInspecting = false; // 관전 상태 OFF
+        isInspecting = false;
         currentAura = lastRolledAura;
         if (auraNameEl) {
             auraNameEl.innerText = lastRolledAura.name;
@@ -392,7 +380,6 @@ if (exitInspectBtn) {
         document.getElementById('inspect-panel').style.display = 'none';
         document.getElementById('normal-panel').style.display = 'flex';
 
-        // 관전 종료 후 오토가 켜져 있으면 롤 재개
         if (isAuto && !isRolling) roll();
     });
 }
@@ -407,7 +394,6 @@ function renderInventoryList() {
         const row = document.createElement('div');
         row.className = 'item-row';
         
-        // ★ 미해금 아우라 ??? 처리 로직
         const displayName = isUnlocked ? a.name : "???";
         const displayColor = isUnlocked ? a.color : "#555555";
         const displayCountText = isUnlocked ? `보유: ${count}개` : "미해금";
@@ -494,7 +480,6 @@ function renderCanvas() {
     const color = currentAura.color;
     const effects = Array.isArray(currentAura.effect) ? currentAura.effect : [currentAura.effect];
 
-    // 배경 글로우
     const grad = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 180);
     grad.addColorStop(0, color + 'aa');
     grad.addColorStop(1, 'transparent');
@@ -508,122 +493,129 @@ function renderCanvas() {
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
 
-            if (effect === 'spinning') {
-                ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(centerX, centerY, 65, angleTick * 2, angleTick * 2 + Math.PI * 1.2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 85, -angleTick * 2.5, -angleTick * 2.5 + Math.PI * 1.2); ctx.stroke();
-            }
-            else if (effect === 'blackHolePull') {
-                ctx.lineWidth = 2.5;
-                const r = (150 - (angleTick * 60) % 120);
-                ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(10, r), 0, Math.PI * 2); ctx.stroke();
-            }
-            else if (effect === 'dust' || effect === 'leaf' || effect === 'sparkle' || effect === 'floatCircle') {
-                if (Math.random() < 0.3) {
-                    const vy = effect === 'floatCircle' ? -1.5 : (Math.random() - 0.5) * 2;
+            // --- [모든 기본 파티클/이펙트 완전 복원] ---
+            if (effect === 'dust' || effect === 'leaf' || effect === 'sparkle' || effect === 'floatCircle') {
+                if (Math.random() < 0.4) {
+                    const vy = effect === 'floatCircle' ? -1.5 : (effect === 'leaf' ? 1.2 : (Math.random() - 0.5) * 2);
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 180, y: centerY + (Math.random() - 0.5) * 180,
-                        vx: (Math.random() - 0.5) * 2, vy: vy,
-                        size: Math.random() * 5 + 2, life: 1, color: color
+                        x: centerX + (Math.random() - 0.5) * 200, y: centerY + (Math.random() - 0.5) * 200,
+                        vx: (Math.random() - 0.5) * 2, vy: vy, size: Math.random() * 5 + 2, life: 1, color: color
                     });
                 }
-            }
-            else if (effect === 'orbitDots') {
+            } else if (effect === 'orbitDots') {
                 for (let i = 0; i < 4; i++) {
                     const a = angleTick * 2 + (Math.PI / 2) * i;
                     ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 90, centerY + Math.sin(a) * 90, 6, 0, Math.PI * 2); ctx.fill();
                 }
-            }
-            else if (effect === 'crystalShard') {
-                if (Math.random() < 0.3) {
-                    const a = Math.random() * Math.PI * 2;
-                    const r = Math.random() * 80 + 40;
+            } else if (effect === 'crystalShard') {
+                if (Math.random() < 0.4) {
+                    const a = Math.random() * Math.PI * 2; const r = Math.random() * 80 + 40;
                     particles.push({
                         x: centerX + Math.cos(a) * r, y: centerY + Math.sin(a) * r,
-                        vx: Math.cos(a) * 0.5, vy: Math.sin(a) * 0.5,
-                        size: Math.random() * 6 + 3, life: 0.8, color: color
+                        vx: Math.cos(a) * 0.5, vy: Math.sin(a) * 0.5, size: Math.random() * 6 + 3, life: 0.8, color: color
                     });
                 }
-            }
-            else if (effect === 'snowBurst') {
-                if (Math.random() < 0.4) {
+            } else if (effect === 'snowBurst') {
+                if (Math.random() < 0.5) {
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 220, y: centerY - 120,
-                        vx: (Math.random() - 0.5) * 1, vy: Math.random() * 2 + 1,
-                        size: Math.random() * 4 + 2, life: 1, color: color
+                        x: centerX + (Math.random() - 0.5) * 220, y: centerY - 140,
+                        vx: (Math.random() - 0.5) * 1, vy: Math.random() * 3 + 1, size: Math.random() * 4 + 2, life: 1, color: color
                     });
                 }
-            }
-            else if (effect === 'goldRune') {
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.arc(centerX, centerY, 100, 0, Math.PI * 2); ctx.stroke();
+            } else if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
+                if (Math.random() < 0.6) {
+                    particles.push({
+                        x: centerX + (Math.random() - 0.5) * 90, y: centerY + 40,
+                        vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2, size: Math.random() * 8 + 4, life: 1, color: color
+                    });
+                }
+            } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2); ctx.stroke();
+            } else if (effect === 'goldRune') {
+                ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(centerX, centerY, 100, 0, Math.PI * 2); ctx.stroke();
                 for (let i = 0; i < 6; i++) {
                     const a = (Math.PI * 2 / 6) * i - angleTick * 0.5;
                     ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 100, centerY + Math.sin(a) * 100, 5, 0, Math.PI * 2); ctx.fill();
                 }
-            }
-            else if (effect === 'goldenBeam') {
+            } else if (effect === 'goldenBeam') {
                 ctx.lineWidth = 15; ctx.globalAlpha = 0.3;
                 ctx.beginPath(); ctx.moveTo(centerX - 40, 0); ctx.lineTo(centerX - 40, 500); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(centerX + 40, 0); ctx.lineTo(centerX + 40, 500); ctx.stroke();
-                ctx.globalAlpha = 1.0;
-            }
-            else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
+                ctx.beginPath(); ctx.moveTo(centerX + 40, 0); ctx.lineTo(centerX + 40, 500); ctx.stroke(); ctx.globalAlpha = 1.0;
+            } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
                 ctx.lineWidth = 2.5;
                 for (let i = 0; i < 4; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(centerX + (Math.random() - 0.5) * 260, centerY + (Math.random() - 0.5) * 260);
-                    ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(centerX + (Math.random() - 0.5) * 260, centerY + (Math.random() - 0.5) * 260); ctx.stroke();
                 }
-            }
-            else if (effect === 'solarCrown') {
-                ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.arc(centerX, centerY, 85, 0, Math.PI * 2); ctx.stroke();
-                for (let i = 0; i < 12; i++) {
-                    const a = (Math.PI * 2 / 12) * i + angleTick;
-                    ctx.beginPath();
-                    ctx.moveTo(centerX + Math.cos(a) * 85, centerY + Math.sin(a) * 85);
-                    ctx.lineTo(centerX + Math.cos(a) * 110, centerY + Math.sin(a) * 110);
-                    ctx.stroke();
-                }
-            }
-            else if (effect === 'sunExplosion') {
-                if (Math.random() < 0.6) {
-                    const a = Math.random() * Math.PI * 2;
-                    const spd = Math.random() * 5 + 2;
-                    particles.push({
-                        x: centerX, y: centerY,
-                        vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
-                        size: Math.random() * 7 + 3, life: 0.7, color: color
-                    });
-                }
-            }
-            else if (effect === 'voidNebula') {
+            } else if (effect === 'voidNebula') {
                 ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 70 + Math.sin(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
                 ctx.beginPath(); ctx.arc(centerX, centerY, 120 + Math.cos(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
+            } else if (effect === 'solarCrown') {
+                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, 85, 0, Math.PI * 2); ctx.stroke();
+                for (let i = 0; i < 12; i++) {
+                    const a = (Math.PI * 2 / 12) * i + angleTick;
+                    ctx.beginPath(); ctx.moveTo(centerX + Math.cos(a) * 85, centerY + Math.sin(a) * 85);
+                    ctx.lineTo(centerX + Math.cos(a) * 110, centerY + Math.sin(a) * 110); ctx.stroke();
+                }
+            } else if (effect === 'pixelNoise' || effect === 'cyberGlitch') {
+                if (Math.random() < 0.5) {
+                    ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
+                }
+            } else if (effect === 'sunExplosion') {
+                if (Math.random() < 0.6) {
+                    const a = Math.random() * Math.PI * 2; const spd = Math.random() * 5 + 2;
+                    particles.push({
+                        x: centerX, y: centerY, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+                        size: Math.random() * 7 + 3, life: 0.7, color: color
+                    });
+                }
+            } else if (effect === 'galaxyBigBang' || effect === 'blackHole' || effect === 'shadowEclipse') {
+                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, 140 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2); ctx.stroke();
             }
-            else if (effect === 'electricShield') {
+
+            // --- [커스텀 확장 이펙트] ---
+            else if (effect === 'spinning') {
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 65, angleTick * 2, angleTick * 2 + Math.PI * 1.2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 85, -angleTick * 2.5, -angleTick * 2.5 + Math.PI * 1.2); ctx.stroke();
+            } else if (effect === 'spiralUp') {
+                if (Math.random() < 0.5) {
+                    particles.push({
+                        x: centerX + Math.cos(angleTick * 4) * 50, y: centerY + 100,
+                        vx: 0, vy: -Math.random() * 3 - 2, size: Math.random() * 4 + 2, life: 1, color: color
+                    });
+                }
+            } else if (effect === 'pulseWave') {
+                ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 90) % 180, 0, Math.PI * 2); ctx.stroke();
+            } else if (effect === 'starShower') {
+                if (Math.random() < 0.4) {
+                    const pAngle = Math.random() * Math.PI * 2;
+                    particles.push({
+                        x: centerX, y: centerY, vx: Math.cos(pAngle) * (Math.random() * 4 + 1), vy: Math.sin(pAngle) * (Math.random() * 4 + 1),
+                        size: Math.random() * 6 + 3, life: 1, color: color
+                    });
+                }
+            } else if (effect === 'orbitalLaser') {
+                ctx.lineWidth = 2; ctx.beginPath();
+                ctx.moveTo(centerX + Math.cos(angleTick) * 200, centerY + Math.sin(angleTick) * 200);
+                ctx.lineTo(centerX - Math.cos(angleTick) * 200, centerY - Math.sin(angleTick) * 200); ctx.stroke();
+            } else if (effect === 'electricShield') {
                 ctx.lineWidth = 2; ctx.beginPath();
                 for (let i = 0; i < 8; i++) {
-                    const a = (Math.PI * 2 / 8) * i + angleTick;
-                    const r = 75 + (Math.random() - 0.5) * 12;
-                    const x = centerX + Math.cos(a) * r;
-                    const y = centerY + Math.sin(a) * r;
+                    const a = (Math.PI * 2 / 8) * i + angleTick; const r = 75 + (Math.random() - 0.5) * 12;
+                    const x = centerX + Math.cos(a) * r; const y = centerY + Math.sin(a) * r;
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.closePath(); ctx.stroke();
-            }
-            else if (effect === 'meteorFall') {
+            } else if (effect === 'meteorFall') {
                 if (Math.random() < 0.4) {
                     particles.push({
                         x: centerX + (Math.random() - 0.5) * 300, y: centerY - 200,
                         vx: -2, vy: Math.random() * 6 + 4, size: Math.random() * 5 + 3, life: 0.8, color: color
                     });
                 }
-            }
-            else if (effect === 'dnaHelix') {
+            } else if (effect === 'dnaHelix') {
                 for (let i = -80; i <= 80; i += 20) {
                     const y = centerY + i;
                     const x1 = centerX + Math.sin(angleTick * 2 + i * 0.05) * 45;
@@ -631,81 +623,91 @@ function renderCanvas() {
                     ctx.beginPath(); ctx.arc(x1, y, 5, 0, Math.PI * 2); ctx.fill();
                     ctx.beginPath(); ctx.arc(x2, y, 5, 0, Math.PI * 2); ctx.fill();
                 }
-            }
-            else if (effect === 'timeClock') {
-                ctx.lineWidth = 2.5;
-                ctx.beginPath(); ctx.arc(centerX, centerY, 110, 0, Math.PI * 2); ctx.stroke();
+            } else if (effect === 'timeClock') {
+                ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(centerX, centerY, 110, 0, Math.PI * 2); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(centerX, centerY);
                 ctx.lineTo(centerX + Math.cos(angleTick) * 90, centerY + Math.sin(angleTick) * 90); ctx.stroke();
-            }
-            else if (effect === 'chaosPortal') {
-                ctx.lineWidth = 3;
-                ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(angleTick);
+            } else if (effect === 'chaosPortal') {
+                ctx.lineWidth = 3; ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(angleTick);
                 ctx.strokeRect(-70, -70, 140, 140); ctx.restore();
-            }
-            else if (effect === 'sacredRays') {
+            } else if (effect === 'sacredRays') {
                 ctx.lineWidth = 2.5;
                 for (let i = 0; i < 6; i++) {
                     const a = (Math.PI * 2 / 6) * i + angleTick * 0.5;
                     ctx.beginPath(); ctx.moveTo(centerX, centerY);
                     ctx.lineTo(centerX + Math.cos(a) * 180, centerY + Math.sin(a) * 180); ctx.stroke();
                 }
-            }
-            else if (effect === 'hexShield') {
+            } else if (effect === 'hexShield') {
                 ctx.lineWidth = 2.5; ctx.beginPath();
                 for (let i = 0; i < 6; i++) {
-                    const a = (Math.PI * 2 / 6) * i;
-                    const x = centerX + Math.cos(a) * 95;
-                    const y = centerY + Math.sin(a) * 95;
+                    const a = (Math.PI * 2 / 6) * i; const x = centerX + Math.cos(a) * 95; const y = centerY + Math.sin(a) * 95;
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.closePath(); ctx.stroke();
+            } else if (effect === 'blackHolePull') {
+                ctx.lineWidth = 2.5; const r = (150 - (angleTick * 60) % 120);
+                ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(10, r), 0, Math.PI * 2); ctx.stroke();
             }
-            else if (effect === 'spiralUp') {
+
+            // --- [롤랑 9개 무기 세부 구현] ---
+            else if (effect === 'rolandDurandal') {
+                ctx.lineWidth = 4; ctx.beginPath();
+                ctx.arc(centerX, centerY, 80 + Math.sin(angleTick * 3) * 15, angleTick * 1.5, angleTick * 1.5 + Math.PI * 0.8); ctx.stroke();
                 if (Math.random() < 0.5) {
                     particles.push({
-                        x: centerX + Math.cos(angleTick * 4) * 50, y: centerY + 100,
-                        vx: 0, vy: -Math.random() * 3 - 2, size: Math.random() * 4 + 2, life: 1, color: color
+                        x: centerX + (Math.random() - 0.5) * 160, y: centerY + (Math.random() - 0.5) * 160,
+                        vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3, size: Math.random() * 4 + 2, life: 0.7, color: '#ffd700'
                     });
                 }
-            }
-            else if (effect === 'pulseWave') {
-                ctx.lineWidth = 2.5;
-                ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 90) % 180, 0, Math.PI * 2); ctx.stroke();
-            }
-            else if (effect === 'starShower') {
+            } else if (effect === 'rolandAtelierLogic') {
                 if (Math.random() < 0.4) {
-                    const pAngle = Math.random() * Math.PI * 2;
+                    ctx.lineWidth = 2; ctx.beginPath(); const shootAngle = Math.random() * Math.PI * 2;
+                    ctx.moveTo(centerX, centerY); ctx.lineTo(centerX + Math.cos(shootAngle) * 220, centerY + Math.sin(shootAngle) * 220); ctx.stroke();
+                }
+            } else if (effect === 'rolandWheelsChair') {
+                ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 100) % 150, 0, Math.PI * 2); ctx.stroke();
+            } else if (effect === 'rolandZelkova') {
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 60, angleTick * 4, angleTick * 4 + Math.PI * 0.5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 100, -angleTick * 4, -angleTick * 4 + Math.PI * 0.5); ctx.stroke();
+            } else if (effect === 'rolandMuksheok') {
+                ctx.lineWidth = 6; ctx.strokeRect(centerX - 90, centerY - 90, 180, 180);
+            } else if (effect === 'rolandOldBoys') {
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 70, angleTick, angleTick + Math.PI * 0.8); ctx.stroke();
+            } else if (effect === 'rolandRanga') {
+                for (let i = 0; i < 3; i++) {
+                    const a = angleTick * 5 + (Math.PI * 2 / 3) * i;
+                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 85, centerY + Math.sin(a) * 85, 4, 0, Math.PI * 2); ctx.fill();
+                }
+            } else if (effect === 'rolandAllia') {
+                ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(centerX, centerY);
+                ctx.lineTo(centerX + Math.cos(angleTick * 3) * 180, centerY + Math.sin(angleTick * 3) * 180); ctx.stroke();
+            } else if (effect === 'rolandCrystalAtelier') {
+                ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(centerX, centerY, 110, angleTick * 3, angleTick * 3 + Math.PI); ctx.stroke();
+            } else if (effect === 'rolandFurioso') {
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 4; i++) {
+                    const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 130 + 30;
+                    ctx.beginPath(); ctx.moveTo(centerX + Math.cos(angle) * dist, centerY + Math.sin(angle) * dist);
+                    ctx.lineTo(centerX - Math.cos(angle) * dist, centerY - Math.sin(angle) * dist); ctx.stroke();
+                }
+            } else if (effect === 'rolandSilence') {
+                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, 110 + Math.cos(angleTick) * 20, 0, Math.PI * 2); ctx.stroke();
+            }
+
+            // --- [게부라 세부 구현] ---
+            else if (effect === 'geburaRedMist') {
+                if (Math.random() < 0.8) {
                     particles.push({
-                        x: centerX, y: centerY,
-                        vx: Math.cos(pAngle) * (Math.random() * 4 + 1),
-                        vy: Math.sin(pAngle) * (Math.random() * 4 + 1),
-                        size: Math.random() * 6 + 3, life: 1, color: color
+                        x: centerX + (Math.random() - 0.5) * 180, y: centerY + (Math.random() - 0.5) * 180,
+                        vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, size: Math.random() * 7 + 3, life: 0.8, color: Math.random() < 0.5 ? '#ff0033' : '#990000'
                     });
                 }
-            }
-            else if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
-                if (Math.random() < 0.6) {
-                    particles.push({
-                        x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
-                        vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
-                        size: Math.random() * 8 + 4, life: 1, color: color
-                    });
-                }
-            }
-            else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
-                ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5); ctx.stroke();
-            }
-            else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
-                if (Math.random() < 0.4) {
-                    ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
-                    ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
-                }
-            }
-            else if (effect === 'galaxyBigBang' || effect === 'blackHole' || effect === 'shadowEclipse') {
-                ctx.lineWidth = 4;
-                ctx.beginPath(); ctx.arc(centerX, centerY, 140 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2); ctx.stroke();
+            } else if (effect === 'geburaGreatSplitHorizontal') {
+                ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(500, centerY); ctx.stroke();
+            } else if (effect === 'geburaGreatSplitVertical') {
+                ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, 500); ctx.stroke();
+            } else if (effect === 'geburaManifestEGO') {
+                ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 130) % 170, 0, Math.PI * 2); ctx.stroke();
             }
         });
 
@@ -718,10 +720,8 @@ function renderCanvas() {
         }
 
         for (let i = particles.length - 1; i >= 0; i--) {
-            const p = particles[i];
-            p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-            ctx.fillStyle = p.color;
-            ctx.globalAlpha = Math.max(0, p.life);
+            const p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.02;
+            ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life);
             ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
             if (p.life <= 0) particles.splice(i, 1);
         }
@@ -825,7 +825,6 @@ function craftAura(key) {
 
 if (rollBtn) rollBtn.addEventListener('click', roll);
 window.addEventListener('keydown', (e) => {
-    // 관전 모드가 아니고, 스페이스 키 입력 시에만 롤 작동
     if (e.code === 'Space' && !isRolling && !isInspecting && document.activeElement.tagName !== 'BUTTON') roll();
 });
 
