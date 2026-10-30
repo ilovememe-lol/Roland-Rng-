@@ -8,7 +8,8 @@ const AURAS = [
     { name: "Crystallized", chance: 64, color: "#00ffff", effect: "crystalShard" },
     { name: "Rage", chance: 128, color: "#ff3333", effect: "fireFlame" },
     
-    // [1,000 ~ 10,000대: 신규 이펙트 및 다중 이펙트 보강]
+    // [커스텀 및 1,000 ~ 10,000대 아우라]
+    { name: "Beats", chance: 4000, color: "#2bff00", effect: ["spinning", "timeClock", "blackHolePull", "sparkle", "swirlVortex", "voidNebula", "blackHole", "shadowEclipse", "cosmicRings", "absoluteRedStorm", "galaxyBigBang"] },
     { name: "Glacier", chance: 1024, color: "#aaffff", effect: ["snowBurst", "spinning"] },
     { name: "Precious", chance: 1024, color: "#00bfff", effect: ["rainbowPrism", "sparkle"] },
     { name: "Magnetic", chance: 2048, color: "#ff3300", effect: ["swirlVortex", "electricShield"] },
@@ -25,7 +26,7 @@ const AURAS = [
     { name: "Demon Ember", chance: 35000, color: "#990000", effect: "demonHellfire" },
     { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
 
-    // [상위 및 최상위 아우라: 화려한 이펙트 폭발]
+    // [상위 및 최상위 아우라]
     { name: "Ether Essence", chance: 5000, color: "#00ffaa", effect: "swirlVortex" },
     { name: "Prism Fragment", chance: 25000, color: "#ff00ff", effect: "rainbowPrism" },
     { name: "Solar Core", chance: 100000, color: "#ffcc00", effect: ["solarCrown", "goldenBeam", "sacredRays"] },
@@ -85,6 +86,7 @@ const BGM_PLAYLIST = [
 let bgmIndex = 0;
 let totalRolls = 0, gold = 0, baseAutoDelay = 250;
 let bestChance = 0, bestName = "None", isAuto = false, isRolling = false;
+let isInspecting = false; // ★ 관전 모드 상태 플래그
 let equippedGear = null, activeBuff = null, oneShotLuckMult = 0;
 let gearRollCounter = 0, activeGearBuff = null;
 let enableParticles = true, lastRolledAura = AURAS[0];
@@ -263,6 +265,9 @@ function processGearSkillOnRoll() {
 }
 
 function roll() {
+    // 관전 모드 중에는 롤링을 진행하지 않음
+    if (isInspecting) return;
+    
     tryPlayMusic();
     if (isRolling) return;
     isRolling = true;
@@ -341,7 +346,8 @@ function finalizeRoll() {
     setTimeout(() => {
         isRolling = false;
         if (rollBtn) rollBtn.disabled = false;
-        if (isAuto) setTimeout(roll, getEffectiveDelay());
+        // 오토 롤 중이더라도 관전 모드로 전환되었으면 다음 롤 중단
+        if (isAuto && !isInspecting) setTimeout(roll, getEffectiveDelay());
     }, 250);
 }
 
@@ -349,6 +355,7 @@ function inspectAura(auraName) {
     const foundAura = AURAS.find(a => a.name === auraName);
     if (!foundAura) return;
 
+    isInspecting = true; // 관전 상태 ON
     currentAura = foundAura;
     if (auraNameEl) {
         auraNameEl.innerText = foundAura.name;
@@ -368,6 +375,7 @@ function inspectAura(auraName) {
 const exitInspectBtn = document.getElementById('exit-inspect-btn');
 if (exitInspectBtn) {
     exitInspectBtn.addEventListener('click', () => {
+        isInspecting = false; // 관전 상태 OFF
         currentAura = lastRolledAura;
         if (auraNameEl) {
             auraNameEl.innerText = lastRolledAura.name;
@@ -381,6 +389,9 @@ if (exitInspectBtn) {
 
         document.getElementById('inspect-panel').style.display = 'none';
         document.getElementById('normal-panel').style.display = 'flex';
+
+        // 관전 종료 후 오토가 켜져 있으면 롤 재개
+        if (isAuto && !isRolling) roll();
     });
 }
 
@@ -390,19 +401,25 @@ function renderInventoryList() {
     listEl.innerHTML = '';
     AURAS.forEach(a => {
         const count = inventory[a.name] || 0;
+        const isUnlocked = count > 0;
         const row = document.createElement('div');
         row.className = 'item-row';
         
-        const viewBtnHtml = count > 0 
-            ? `<button class="view-btn" onclick="inspectAura('${a.name}')">👁️ 구경</button>` 
-            : `<span style="color:#666; font-size:12px;">미해금</span>`;
+        // ★ 미해금 아우라 ??? 처리 로직
+        const displayName = isUnlocked ? a.name : "???";
+        const displayColor = isUnlocked ? a.color : "#555555";
+        const displayCountText = isUnlocked ? `보유: ${count}개` : "미해금";
 
-        const tagText = a.craftOnly ? " [조합 전용]" : "";
+        const viewBtnHtml = isUnlocked 
+            ? `<button class="view-btn" onclick="inspectAura('${a.name}')">👁️ 구경</button>` 
+            : `<span style="color:#555; font-size:12px;">🔒 미해금</span>`;
+
+        const tagText = (a.craftOnly && isUnlocked) ? " [조합 전용]" : "";
 
         row.innerHTML = `
             <div>
-                <span style="color:${a.color}; font-weight:bold;">${a.name}${tagText} (1/${a.chance.toLocaleString()})</span>
-                <div style="font-size:12px; color:#aaa;">보유: ${count}개</div>
+                <span style="color:${displayColor}; font-weight:bold;">${displayName}${tagText} (1/${a.chance.toLocaleString()})</span>
+                <div style="font-size:12px; color:#aaa;">${displayCountText}</div>
             </div>
             ${viewBtnHtml}
         `;
@@ -473,7 +490,6 @@ function renderCanvas() {
     angleTick += 0.03;
 
     const color = currentAura.color;
-    // 이펙트가 단일 문자열이거나 배열이어도 모두 호환되도록 수용
     const effects = Array.isArray(currentAura.effect) ? currentAura.effect : [currentAura.effect];
 
     // 배경 글로우
@@ -490,19 +506,16 @@ function renderCanvas() {
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
 
-            // 1. spinning
             if (effect === 'spinning') {
                 ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 65, angleTick * 2, angleTick * 2 + Math.PI * 1.2); ctx.stroke();
                 ctx.beginPath(); ctx.arc(centerX, centerY, 85, -angleTick * 2.5, -angleTick * 2.5 + Math.PI * 1.2); ctx.stroke();
             }
-            // 2. blackHolePull
             else if (effect === 'blackHolePull') {
                 ctx.lineWidth = 2.5;
                 const r = (150 - (angleTick * 60) % 120);
                 ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(10, r), 0, Math.PI * 2); ctx.stroke();
             }
-            // 3. dust, leaf, sparkle, floatCircle
             else if (effect === 'dust' || effect === 'leaf' || effect === 'sparkle' || effect === 'floatCircle') {
                 if (Math.random() < 0.3) {
                     const vy = effect === 'floatCircle' ? -1.5 : (Math.random() - 0.5) * 2;
@@ -513,14 +526,12 @@ function renderCanvas() {
                     });
                 }
             }
-            // 4. orbitDots
             else if (effect === 'orbitDots') {
                 for (let i = 0; i < 4; i++) {
                     const a = angleTick * 2 + (Math.PI / 2) * i;
                     ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 90, centerY + Math.sin(a) * 90, 6, 0, Math.PI * 2); ctx.fill();
                 }
             }
-            // 5. crystalShard
             else if (effect === 'crystalShard') {
                 if (Math.random() < 0.3) {
                     const a = Math.random() * Math.PI * 2;
@@ -532,7 +543,6 @@ function renderCanvas() {
                     });
                 }
             }
-            // 6. snowBurst
             else if (effect === 'snowBurst') {
                 if (Math.random() < 0.4) {
                     particles.push({
@@ -542,7 +552,6 @@ function renderCanvas() {
                     });
                 }
             }
-            // 7. goldRune
             else if (effect === 'goldRune') {
                 ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 100, 0, Math.PI * 2); ctx.stroke();
@@ -551,14 +560,12 @@ function renderCanvas() {
                     ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 100, centerY + Math.sin(a) * 100, 5, 0, Math.PI * 2); ctx.fill();
                 }
             }
-            // 8. goldenBeam
             else if (effect === 'goldenBeam') {
                 ctx.lineWidth = 15; ctx.globalAlpha = 0.3;
                 ctx.beginPath(); ctx.moveTo(centerX - 40, 0); ctx.lineTo(centerX - 40, 500); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(centerX + 40, 0); ctx.lineTo(centerX + 40, 500); ctx.stroke();
                 ctx.globalAlpha = 1.0;
             }
-            // 9. lightningSpark / absoluteRedStorm
             else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
                 ctx.lineWidth = 2.5;
                 for (let i = 0; i < 4; i++) {
@@ -568,7 +575,6 @@ function renderCanvas() {
                     ctx.stroke();
                 }
             }
-            // 10. solarCrown
             else if (effect === 'solarCrown') {
                 ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 85, 0, Math.PI * 2); ctx.stroke();
@@ -580,7 +586,6 @@ function renderCanvas() {
                     ctx.stroke();
                 }
             }
-            // 11. sunExplosion
             else if (effect === 'sunExplosion') {
                 if (Math.random() < 0.6) {
                     const a = Math.random() * Math.PI * 2;
@@ -592,13 +597,11 @@ function renderCanvas() {
                     });
                 }
             }
-            // 12. voidNebula
             else if (effect === 'voidNebula') {
                 ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 70 + Math.sin(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
                 ctx.beginPath(); ctx.arc(centerX, centerY, 120 + Math.cos(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
             }
-            // 13. electricShield
             else if (effect === 'electricShield') {
                 ctx.lineWidth = 2; ctx.beginPath();
                 for (let i = 0; i < 8; i++) {
@@ -610,7 +613,6 @@ function renderCanvas() {
                 }
                 ctx.closePath(); ctx.stroke();
             }
-            // 14. meteorFall
             else if (effect === 'meteorFall') {
                 if (Math.random() < 0.4) {
                     particles.push({
@@ -619,7 +621,6 @@ function renderCanvas() {
                     });
                 }
             }
-            // 15. dnaHelix
             else if (effect === 'dnaHelix') {
                 for (let i = -80; i <= 80; i += 20) {
                     const y = centerY + i;
@@ -629,20 +630,17 @@ function renderCanvas() {
                     ctx.beginPath(); ctx.arc(x2, y, 5, 0, Math.PI * 2); ctx.fill();
                 }
             }
-            // 16. timeClock
             else if (effect === 'timeClock') {
                 ctx.lineWidth = 2.5;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 110, 0, Math.PI * 2); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(centerX, centerY);
                 ctx.lineTo(centerX + Math.cos(angleTick) * 90, centerY + Math.sin(angleTick) * 90); ctx.stroke();
             }
-            // 17. chaosPortal
             else if (effect === 'chaosPortal') {
                 ctx.lineWidth = 3;
                 ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(angleTick);
                 ctx.strokeRect(-70, -70, 140, 140); ctx.restore();
             }
-            // 18. sacredRays
             else if (effect === 'sacredRays') {
                 ctx.lineWidth = 2.5;
                 for (let i = 0; i < 6; i++) {
@@ -651,7 +649,6 @@ function renderCanvas() {
                     ctx.lineTo(centerX + Math.cos(a) * 180, centerY + Math.sin(a) * 180); ctx.stroke();
                 }
             }
-            // 19. hexShield
             else if (effect === 'hexShield') {
                 ctx.lineWidth = 2.5; ctx.beginPath();
                 for (let i = 0; i < 6; i++) {
@@ -662,7 +659,6 @@ function renderCanvas() {
                 }
                 ctx.closePath(); ctx.stroke();
             }
-            // 20. spiralUp
             else if (effect === 'spiralUp') {
                 if (Math.random() < 0.5) {
                     particles.push({
@@ -671,12 +667,10 @@ function renderCanvas() {
                     });
                 }
             }
-            // 21. pulseWave
             else if (effect === 'pulseWave') {
                 ctx.lineWidth = 2.5;
                 ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 90) % 180, 0, Math.PI * 2); ctx.stroke();
             }
-            // 22. starShower
             else if (effect === 'starShower') {
                 if (Math.random() < 0.4) {
                     const pAngle = Math.random() * Math.PI * 2;
@@ -688,7 +682,6 @@ function renderCanvas() {
                     });
                 }
             }
-            // 23. fireFlame / demonHellfire / darkBloodPillar
             else if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
                 if (Math.random() < 0.6) {
                     particles.push({
@@ -698,26 +691,22 @@ function renderCanvas() {
                     });
                 }
             }
-            // 24. swirlVortex / cosmicRings / rainbowPrism
             else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
                 ctx.lineWidth = 3;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5); ctx.stroke();
             }
-            // 25. cyberGlitch / pixelNoise
             else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
                 if (Math.random() < 0.4) {
                     ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
                     ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
                 }
             }
-            // 26. galaxyBigBang / blackHole / shadowEclipse
             else if (effect === 'galaxyBigBang' || effect === 'blackHole' || effect === 'shadowEclipse') {
                 ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.arc(centerX, centerY, 140 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2); ctx.stroke();
             }
         });
 
-        // 공통 회전 소형 파티클 생성
         if (Math.random() < 0.3) {
             particles.push({
                 x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
@@ -726,7 +715,6 @@ function renderCanvas() {
             });
         }
 
-        // 전체 파티클 물리 이동 및 실시간 렌더링
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
             p.x += p.vx; p.y += p.vy; p.life -= 0.02;
@@ -835,7 +823,8 @@ function craftAura(key) {
 
 if (rollBtn) rollBtn.addEventListener('click', roll);
 window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && !isRolling && document.activeElement.tagName !== 'BUTTON') roll();
+    // 관전 모드가 아니고, 스페이스 키 입력 시에만 롤 작동
+    if (e.code === 'Space' && !isRolling && !isInspecting && document.activeElement.tagName !== 'BUTTON') roll();
 });
 
 if (autoBtn) {
@@ -844,7 +833,7 @@ if (autoBtn) {
         isAuto = !isAuto;
         if (isAuto) {
             autoBtn.innerText = "Auto: ON"; autoBtn.classList.add('active');
-            if (!isRolling) roll();
+            if (!isRolling && !isInspecting) roll();
         } else {
             autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
         }
