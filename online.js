@@ -6,64 +6,75 @@ const SUPABASE_ANON_KEY = "sb_publishable_C-UkMzjJ-OvaGLyjdIvwoQ_QCuEs4hi";
 
 let supabase = null;
 
-// 모바일 화면용 디버그 콘솔 생성 함수
-function mobileLog(msg, isError = false) {
-    let logBox = document.getElementById('mobile-debug-log');
-    if (!logBox) {
-        logBox = document.createElement('div');
-        logBox.id = 'mobile-debug-log';
-        logBox.style.cssText = 'position:fixed; bottom:0; left:0; width:100%; max-height:120px; overflow-y:auto; background:rgba(0,0,0,0.85); color:#00ffcc; font-size:10px; z-index:99999; padding:5px; border-top:1px solid #333; word-break:break-all; pointer-events:none;';
-        document.body.appendChild(logBox);
+// 모바일 상단 강제 알림창 (오류 확인용)
+function showMobileBanner(msg, isError = false) {
+    let banner = document.getElementById('mobile-banner');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'mobile-banner';
+        banner.style.cssText = 'position:fixed; top:0; left:0; width:100%; z-index:999999; padding:8px 12px; font-size:12px; font-weight:bold; text-align:center; transition:0.3s;';
+        document.body.appendChild(banner);
     }
-    const item = document.createElement('div');
-    item.style.color = isError ? '#ff4444' : '#00ffcc';
-    item.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    logBox.appendChild(item);
-    logBox.scrollTop = logBox.scrollHeight;
+    banner.style.background = isError ? '#ff3333' : '#00cc88';
+    banner.style.color = '#ffffff';
+    banner.innerText = msg;
+
+    // 4초 후 자동으로 사라짐
+    setTimeout(() => {
+        if (banner) banner.style.display = 'none';
+    }, 4000);
 }
 
-function initSupabase() {
+function initSupabaseClient() {
     try {
         if (window.supabase && typeof window.supabase.createClient === 'function') {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            mobileLog("Supabase 연결 성공!");
+            showMobileBanner("✅ Supabase 서버 연결 완료!");
             return true;
         } else {
-            mobileLog("Supabase SDK(CDN) 로드 안됨", true);
+            showMobileBanner("❌ Supabase SDK를 불러오지 못했습니다. (네트워크/CDN 차단)", true);
         }
     } catch (e) {
-        mobileLog("Supabase 에러: " + e.message, true);
+        showMobileBanner("❌ Supabase 초기화 에러: " + e.message, true);
     }
     return false;
 }
 
 let myNickname = localStorage.getItem('sols_nickname') || '유저_' + Math.floor(Math.random() * 8999 + 1000);
 
-// 이벤트 바인딩 (클릭 + 터치 대응)
-function bindEvent(id, handler) {
+// 모바일 터치(Touch) 및 터치클릭 대응 함수
+function bindMobileClick(id, callback) {
     const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener('click', handler);
-        el.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            handler(e);
-        });
-    }
+    if (!el) return;
+    
+    const handler = (e) => {
+        e.preventDefault();
+        callback(e);
+    };
+
+    el.removeEventListener('click', callback);
+    el.addEventListener('click', callback);
+    el.addEventListener('touchend', handler);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    initSupabase();
+// DOM 로드 후 실행
+window.addEventListener('load', () => {
+    // 1. Supabase 접속 시도
+    initSupabaseClient();
 
+    // 2. 닉네임 표기
     const nickEl = document.getElementById('user-nickname');
     if (nickEl) nickEl.innerText = myNickname;
 
-    bindEvent('chat-send-btn', sendChatMessage);
+    // 3. 채팅 버튼 이벤트 등록
+    bindMobileClick('chat-send-btn', sendChatMessage);
 
     const inputEl = document.getElementById('chat-input');
     if (inputEl) {
         inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
     }
 
+    // 4. 초기 채팅 데이터 및 실시간 구독
     if (supabase) {
         loadInitialChats();
         try {
@@ -74,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
                 .subscribe();
         } catch (e) {
-            mobileLog("Realtime 구독 에러: " + e.message, true);
+            console.error("Realtime 에러:", e);
         }
     }
 });
@@ -89,25 +100,24 @@ async function sendChatMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
 
-    if (!supabase && !initSupabase()) {
-        alert("Supabase 서버에 연결되어 있지 않습니다.");
+    if (!supabase && !initSupabaseClient()) {
+        alert("Supabase 서버에 연결할 수 없습니다. 상단 배너 문구를 확인해주세요.");
         return;
     }
 
     const { error } = await supabase.from('chat').insert([{ user: myNickname, text: text }]);
     if (error) {
-        mobileLog("채팅 오류: " + error.message, true);
-        alert("채팅 실패: " + error.message);
+        showMobileBanner("채팅 전송 실패: " + error.message, true);
     } else {
         chatInput.value = '';
     }
 }
 
 async function loadInitialChats() {
-    if (!supabase && !initSupabase()) return;
+    if (!supabase && !initSupabaseClient()) return;
     const { data, error } = await supabase.from('chat').select('*').order('created_at', { ascending: false }).limit(20);
     if (error) {
-        mobileLog("채팅 불러오기 오류: " + error.message, true);
+        showMobileBanner("채팅 불러오기 실패: " + error.message, true);
         return;
     }
     if (data) {
@@ -130,14 +140,14 @@ function appendChatMsg(user, text) {
 // 실시간 온라인 랭킹
 // -------------------------------------------------------------
 async function uploadLeaderboard(bestName, bestChance) {
-    if ((!supabase && !initSupabase()) || bestChance === 0) return;
+    if ((!supabase && !initSupabaseClient()) || bestChance === 0) return;
     
     const { error } = await supabase.from('leaderboard').upsert([
         { user: myNickname, aura: bestName, chance: bestChance }
     ], { onConflict: 'user' });
 
     if (error) {
-        mobileLog("랭킹 등록 오류: " + error.message, true);
+        showMobileBanner("랭킹 업로드 에러: " + error.message, true);
     }
 }
 
@@ -145,7 +155,7 @@ async function loadOnlineRankings() {
     const rankList = document.getElementById('rank-list');
     if (!rankList) return;
 
-    if (!supabase && !initSupabase()) {
+    if (!supabase && !initSupabaseClient()) {
         rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Supabase 연동 안됨</div>';
         return;
     }
@@ -157,7 +167,7 @@ async function loadOnlineRankings() {
         .limit(10);
 
     if (error) {
-        mobileLog("랭킹 오류: " + error.message, true);
+        showMobileBanner("랭킹 불러오기 에러: " + error.message, true);
         rankList.innerHTML = `<div style="text-align:center; padding:20px; color:#ff4444;">오류: ${error.message}</div>`;
         return;
     }
