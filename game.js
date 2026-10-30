@@ -8,60 +8,60 @@ const AURAS = [
     { name: "Crystallized", chance: 64, color: "#00ffff", effect: "crystalShard" },
     { name: "Rage", chance: 128, color: "#ff3333", effect: "fireFlame" },
     
-    // [1,000 ~ 10,000대: 화려한 이펙트 및 다중 이펙트 조합]
-    { name: "Glacier", chance: 1024, color: "#aaffff", effect: "snowBurst" },
+    // [1,000 ~ 10,000대: 신규 이펙트 및 다중 이펙트 보강]
+    { name: "Glacier", chance: 1024, color: "#aaffff", effect: ["snowBurst", "spinning"] },
     { name: "Precious", chance: 1024, color: "#00bfff", effect: ["rainbowPrism", "sparkle"] },
-    { name: "Magnetic", chance: 2048, color: "#ff3300", effect: ["swirlVortex", "lightningSpark"] },
-    { name: "Sidereum", chance: 4096, color: "#ffd700", effect: "goldRune" },
+    { name: "Magnetic", chance: 2048, color: "#ff3300", effect: ["swirlVortex", "electricShield"] },
+    { name: "Sidereum", chance: 4096, color: "#ffd700", effect: ["goldRune", "timeClock"] },
     { name: "Gilded", chance: 5000, color: "#ffd700", effect: ["goldenBeam", "goldRune"] },
-    { name: "Quartz", chance: 8192, color: "#ff69b4", effect: ["crystalShard", "orbitDots"] },
-    { name: "Diaboli", chance: 10000, color: "#990000", effect: ["demonHellfire", "fireFlame"] },
-    { name: "Powered", chance: 16384, color: "#ffffff", effect: "lightningSpark" },
-    { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: ["voidNebula", "swirlVortex"] },
+    { name: "Quartz", chance: 8192, color: "#ff69b4", effect: ["crystalShard", "dnaHelix"] },
+    { name: "Diaboli", chance: 10000, color: "#990000", effect: ["demonHellfire", "chaosPortal"] },
+    { name: "Powered", chance: 16384, color: "#ffffff", effect: ["lightningSpark", "electricShield"] },
+    { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: ["voidNebula", "blackHolePull"] },
 
     // [중간 재료 아우라]
     { name: "Glacier Alloy", chance: 3000, color: "#aaffff", effect: "snowBurst" },
-    { name: "Magnet Core", chance: 8000, color: "#ff3300", effect: "swirlVortex" },
+    { name: "Magnet Core", chance: 8000, color: "#ff3300", effect: ["swirlVortex", "spinning"] },
     { name: "Demon Ember", chance: 35000, color: "#990000", effect: "demonHellfire" },
-    { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: "cosmicRings" },
+    { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
 
-    // [상위 및 최상위 아우라: 다중 이펙트 극대화]
+    // [상위 및 최상위 아우라: 화려한 이펙트 폭발]
     { name: "Ether Essence", chance: 5000, color: "#00ffaa", effect: "swirlVortex" },
     { name: "Prism Fragment", chance: 25000, color: "#ff00ff", effect: "rainbowPrism" },
-    { name: "Solar Core", chance: 100000, color: "#ffcc00", effect: ["solarCrown", "goldenBeam"] },
-    { name: "Clockwork Core", chance: 500000, color: "#e0e0e0", effect: "pixelNoise" },
+    { name: "Solar Core", chance: 100000, color: "#ffcc00", effect: ["solarCrown", "goldenBeam", "sacredRays"] },
+    { name: "Clockwork Core", chance: 500000, color: "#e0e0e0", effect: ["pixelNoise", "timeClock"] },
     { name: "Flame Spark", chance: 1200000, color: "#ff4500", effect: ["sunExplosion", "fireFlame"] },
-    { name: "Abyss Orb", chance: 2500000, color: "#00ffff", effect: ["blackHole", "swirlVortex"] },
-    { name: "Void Crystal", chance: 5000000, color: "#4b0082", effect: "shadowEclipse" },
-    { name: "Cyber Chip", chance: 8000000, color: "#00ff66", effect: "cyberGlitch" },
-    { name: "Cosmic Feather", chance: 15000000, color: "#ffff00", effect: ["cosmicRings", "sparkle"] },
-    { name: "Titan Relic", chance: 25000000, color: "#ff0055", effect: ["darkBloodPillar", "demonHellfire"] },
-    { name: "Crimson Crest", chance: 50000000, color: "#ff0000", effect: ["absoluteRedStorm", "lightningSpark"] },
-    { name: "Genesis Heart", chance: 100000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism"] },
+    { name: "Abyss Orb", chance: 2500000, color: "#00ffff", effect: ["blackHole", "blackHolePull"] },
+    { name: "Void Crystal", chance: 5000000, color: "#4b0082", effect: ["shadowEclipse", "hexShield"] },
+    { name: "Cyber Chip", chance: 8000000, color: "#00ff66", effect: ["cyberGlitch", "electricShield"] },
+    { name: "Cosmic Feather", chance: 15000000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
+    { name: "Titan Relic", chance: 25000000, color: "#ff0055", effect: ["darkBloodPillar", "demonHellfire", "chaosPortal"] },
+    { name: "Crimson Crest", chance: 50000000, color: "#ff0000", effect: ["absoluteRedStorm", "meteorFall"] },
+    { name: "Genesis Heart", chance: 100000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism", "sacredRays"] },
 
-    { name: "Glitch", chance: 250000, color: "#00ff66", effect: "cyberGlitch" },
-    { name: "Celestial", chance: 500000, color: "#00bfff", effect: "cosmicRings" },
+    { name: "Glitch", chance: 250000, color: "#00ff66", effect: ["cyberGlitch", "pixelNoise"] },
+    { name: "Celestial", chance: 500000, color: "#00bfff", effect: ["cosmicRings", "starShower"] },
     { name: "Solaris", chance: 7500000, color: "#ff8c00", effect: ["solarCrown", "sunExplosion"] },
-    { name: "Eclipse", chance: 40000000, color: "#4b0082", effect: ["shadowEclipse", "blackHole"] },
-    { name: "Matrix", chance: 50000000, color: "#00ff66", effect: ["cyberGlitch", "pixelNoise"] },
+    { name: "Eclipse", chance: 40000000, color: "#4b0082", effect: ["shadowEclipse", "blackHolePull"] },
+    { name: "Matrix", chance: 50000000, color: "#00ff66", effect: ["cyberGlitch", "hexShield"] },
     { name: "AbyssalHunter", chance: 100000000, color: "#00ffff", effect: ["blackHole", "darkBloodPillar"] },
-    { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: ["absoluteRedStorm", "lightningSpark"] },
-    { name: "Atlas", chance: 360000000, color: "#ffcc00", effect: ["goldenBeam", "cosmicRings"] },
-    { name: "Creation", chance: 1000000000, color: "#00ffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam"] },
+    { name: "Roland: Absolute", chance: 100000000, color: "#ff0000", effect: ["absoluteRedStorm", "lightningSpark", "sacredRays"] },
+    { name: "Atlas", chance: 360000000, color: "#ffcc00", effect: ["goldenBeam", "cosmicRings", "timeClock"] },
+    { name: "Creation", chance: 1000000000, color: "#00ffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam", "spinning"] },
     
     // [조합 전용 아우라 그룹]
     { name: "AETHER", chance: 15000, color: "#00ffaa", effect: "swirlVortex", craftOnly: true },
-    { name: "CHROMA", chance: 80000, color: "#ff00ff", effect: "rainbowPrism", craftOnly: true },
-    { name: "HYPERION", chance: 500000, color: "#ffcc00", effect: "goldenBeam", craftOnly: true },
-    { name: "Matrix : Steampunk", chance: 150000000, color: "#e0e0e0", effect: ["pixelNoise", "cyberGlitch"], craftOnly: true },
-    { name: "SOLARIS : Overdrive", chance: 250000000, color: "#ff4500", effect: ["sunExplosion", "solarCrown"], craftOnly: true },
-    { name: "AbyssalHunter : Awakened", chance: 400000000, color: "#00ffff", effect: ["blackHole", "swirlVortex"], craftOnly: true },
-    { name: "ECLIPSE : Void", chance: 500000000, color: "#4b0082", effect: ["shadowEclipse", "darkBloodPillar"], craftOnly: true },
-    { name: "GLITCH : Unstable", chance: 800000000, color: "#00ff66", effect: ["cyberGlitch", "lightningSpark"], craftOnly: true },
-    { name: "A.T.L.A.S.", chance: 1000000000, color: "#ff0055", effect: ["darkBloodPillar", "goldenBeam"], craftOnly: true },
-    { name: "CELESTIAL : Zenith", chance: 1200000000, color: "#ffff00", effect: ["cosmicRings", "rainbowPrism"], craftOnly: true },
-    { name: "ROLAND : Infinity", chance: 2000000000, color: "#ff0000", effect: ["absoluteRedStorm", "demonHellfire"], craftOnly: true },
-    { name: "CREATION : Prime", chance: 5000000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam"], craftOnly: true }
+    { name: "CHROMA", chance: 80000, color: "#ff00ff", effect: ["rainbowPrism", "sparkle"], craftOnly: true },
+    { name: "HYPERION", chance: 500000, color: "#ffcc00", effect: ["goldenBeam", "sacredRays"], craftOnly: true },
+    { name: "Matrix : Steampunk", chance: 150000000, color: "#e0e0e0", effect: ["pixelNoise", "cyberGlitch", "timeClock"], craftOnly: true },
+    { name: "SOLARIS : Overdrive", chance: 250000000, color: "#ff4500", effect: ["sunExplosion", "solarCrown", "spinning"], craftOnly: true },
+    { name: "AbyssalHunter : Awakened", chance: 400000000, color: "#00ffff", effect: ["blackHole", "blackHolePull", "swirlVortex"], craftOnly: true },
+    { name: "ECLIPSE : Void", chance: 500000000, color: "#4b0082", effect: ["shadowEclipse", "darkBloodPillar", "hexShield"], craftOnly: true },
+    { name: "GLITCH : Unstable", chance: 800000000, color: "#00ff66", effect: ["cyberGlitch", "electricShield", "lightningSpark"], craftOnly: true },
+    { name: "A.T.L.A.S.", chance: 1000000000, color: "#ff0055", effect: ["darkBloodPillar", "goldenBeam", "timeClock"], craftOnly: true },
+    { name: "CELESTIAL : Zenith", chance: 1200000000, color: "#ffff00", effect: ["cosmicRings", "rainbowPrism", "starShower"], craftOnly: true },
+    { name: "ROLAND : Infinity", chance: 2000000000, color: "#ff0000", effect: ["absoluteRedStorm", "demonHellfire", "meteorFall"], craftOnly: true },
+    { name: "CREATION : Prime", chance: 5000000000, color: "#ffffff", effect: ["galaxyBigBang", "rainbowPrism", "goldenBeam", "spinning", "sacredRays"], craftOnly: true }
 ];
 
 const GEARS = {
@@ -473,9 +473,10 @@ function renderCanvas() {
     angleTick += 0.03;
 
     const color = currentAura.color;
-    // 이펙트가 단일 문자열이거나 배열이어도 모두 호환되도록 처리
+    // 이펙트가 단일 문자열이거나 배열이어도 모두 호환되도록 수용
     const effects = Array.isArray(currentAura.effect) ? currentAura.effect : [currentAura.effect];
 
+    // 배경 글로우
     const grad = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 180);
     grad.addColorStop(0, color + 'aa');
     grad.addColorStop(1, 'transparent');
@@ -486,59 +487,252 @@ function renderCanvas() {
 
     if (enableParticles) {
         effects.forEach(effect => {
-            if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+
+            // 1. spinning
+            if (effect === 'spinning') {
+                ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(centerX, centerY, 65, angleTick * 2, angleTick * 2 + Math.PI * 1.2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 85, -angleTick * 2.5, -angleTick * 2.5 + Math.PI * 1.2); ctx.stroke();
+            }
+            // 2. blackHolePull
+            else if (effect === 'blackHolePull') {
+                ctx.lineWidth = 2.5;
+                const r = (150 - (angleTick * 60) % 120);
+                ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(10, r), 0, Math.PI * 2); ctx.stroke();
+            }
+            // 3. dust, leaf, sparkle, floatCircle
+            else if (effect === 'dust' || effect === 'leaf' || effect === 'sparkle' || effect === 'floatCircle') {
+                if (Math.random() < 0.3) {
+                    const vy = effect === 'floatCircle' ? -1.5 : (Math.random() - 0.5) * 2;
+                    particles.push({
+                        x: centerX + (Math.random() - 0.5) * 180, y: centerY + (Math.random() - 0.5) * 180,
+                        vx: (Math.random() - 0.5) * 2, vy: vy,
+                        size: Math.random() * 5 + 2, life: 1, color: color
+                    });
+                }
+            }
+            // 4. orbitDots
+            else if (effect === 'orbitDots') {
+                for (let i = 0; i < 4; i++) {
+                    const a = angleTick * 2 + (Math.PI / 2) * i;
+                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 90, centerY + Math.sin(a) * 90, 6, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            // 5. crystalShard
+            else if (effect === 'crystalShard') {
+                if (Math.random() < 0.3) {
+                    const a = Math.random() * Math.PI * 2;
+                    const r = Math.random() * 80 + 40;
+                    particles.push({
+                        x: centerX + Math.cos(a) * r, y: centerY + Math.sin(a) * r,
+                        vx: Math.cos(a) * 0.5, vy: Math.sin(a) * 0.5,
+                        size: Math.random() * 6 + 3, life: 0.8, color: color
+                    });
+                }
+            }
+            // 6. snowBurst
+            else if (effect === 'snowBurst') {
+                if (Math.random() < 0.4) {
+                    particles.push({
+                        x: centerX + (Math.random() - 0.5) * 220, y: centerY - 120,
+                        vx: (Math.random() - 0.5) * 1, vy: Math.random() * 2 + 1,
+                        size: Math.random() * 4 + 2, life: 1, color: color
+                    });
+                }
+            }
+            // 7. goldRune
+            else if (effect === 'goldRune') {
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(centerX, centerY, 100, 0, Math.PI * 2); ctx.stroke();
+                for (let i = 0; i < 6; i++) {
+                    const a = (Math.PI * 2 / 6) * i - angleTick * 0.5;
+                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 100, centerY + Math.sin(a) * 100, 5, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            // 8. goldenBeam
+            else if (effect === 'goldenBeam') {
+                ctx.lineWidth = 15; ctx.globalAlpha = 0.3;
+                ctx.beginPath(); ctx.moveTo(centerX - 40, 0); ctx.lineTo(centerX - 40, 500); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(centerX + 40, 0); ctx.lineTo(centerX + 40, 500); ctx.stroke();
+                ctx.globalAlpha = 1.0;
+            }
+            // 9. lightningSpark / absoluteRedStorm
+            else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
+                ctx.lineWidth = 2.5;
+                for (let i = 0; i < 4; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(centerX + (Math.random() - 0.5) * 260, centerY + (Math.random() - 0.5) * 260);
+                    ctx.stroke();
+                }
+            }
+            // 10. solarCrown
+            else if (effect === 'solarCrown') {
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(centerX, centerY, 85, 0, Math.PI * 2); ctx.stroke();
+                for (let i = 0; i < 12; i++) {
+                    const a = (Math.PI * 2 / 12) * i + angleTick;
+                    ctx.beginPath();
+                    ctx.moveTo(centerX + Math.cos(a) * 85, centerY + Math.sin(a) * 85);
+                    ctx.lineTo(centerX + Math.cos(a) * 110, centerY + Math.sin(a) * 110);
+                    ctx.stroke();
+                }
+            }
+            // 11. sunExplosion
+            else if (effect === 'sunExplosion') {
+                if (Math.random() < 0.6) {
+                    const a = Math.random() * Math.PI * 2;
+                    const spd = Math.random() * 5 + 2;
+                    particles.push({
+                        x: centerX, y: centerY,
+                        vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+                        size: Math.random() * 7 + 3, life: 0.7, color: color
+                    });
+                }
+            }
+            // 12. voidNebula
+            else if (effect === 'voidNebula') {
+                ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(centerX, centerY, 70 + Math.sin(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, 120 + Math.cos(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
+            }
+            // 13. electricShield
+            else if (effect === 'electricShield') {
+                ctx.lineWidth = 2; ctx.beginPath();
+                for (let i = 0; i < 8; i++) {
+                    const a = (Math.PI * 2 / 8) * i + angleTick;
+                    const r = 75 + (Math.random() - 0.5) * 12;
+                    const x = centerX + Math.cos(a) * r;
+                    const y = centerY + Math.sin(a) * r;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath(); ctx.stroke();
+            }
+            // 14. meteorFall
+            else if (effect === 'meteorFall') {
+                if (Math.random() < 0.4) {
+                    particles.push({
+                        x: centerX + (Math.random() - 0.5) * 300, y: centerY - 200,
+                        vx: -2, vy: Math.random() * 6 + 4, size: Math.random() * 5 + 3, life: 0.8, color: color
+                    });
+                }
+            }
+            // 15. dnaHelix
+            else if (effect === 'dnaHelix') {
+                for (let i = -80; i <= 80; i += 20) {
+                    const y = centerY + i;
+                    const x1 = centerX + Math.sin(angleTick * 2 + i * 0.05) * 45;
+                    const x2 = centerX - Math.sin(angleTick * 2 + i * 0.05) * 45;
+                    ctx.beginPath(); ctx.arc(x1, y, 5, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(x2, y, 5, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            // 16. timeClock
+            else if (effect === 'timeClock') {
+                ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.arc(centerX, centerY, 110, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(centerX, centerY);
+                ctx.lineTo(centerX + Math.cos(angleTick) * 90, centerY + Math.sin(angleTick) * 90); ctx.stroke();
+            }
+            // 17. chaosPortal
+            else if (effect === 'chaosPortal') {
+                ctx.lineWidth = 3;
+                ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(angleTick);
+                ctx.strokeRect(-70, -70, 140, 140); ctx.restore();
+            }
+            // 18. sacredRays
+            else if (effect === 'sacredRays') {
+                ctx.lineWidth = 2.5;
+                for (let i = 0; i < 6; i++) {
+                    const a = (Math.PI * 2 / 6) * i + angleTick * 0.5;
+                    ctx.beginPath(); ctx.moveTo(centerX, centerY);
+                    ctx.lineTo(centerX + Math.cos(a) * 180, centerY + Math.sin(a) * 180); ctx.stroke();
+                }
+            }
+            // 19. hexShield
+            else if (effect === 'hexShield') {
+                ctx.lineWidth = 2.5; ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const a = (Math.PI * 2 / 6) * i;
+                    const x = centerX + Math.cos(a) * 95;
+                    const y = centerY + Math.sin(a) * 95;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath(); ctx.stroke();
+            }
+            // 20. spiralUp
+            else if (effect === 'spiralUp') {
+                if (Math.random() < 0.5) {
+                    particles.push({
+                        x: centerX + Math.cos(angleTick * 4) * 50, y: centerY + 100,
+                        vx: 0, vy: -Math.random() * 3 - 2, size: Math.random() * 4 + 2, life: 1, color: color
+                    });
+                }
+            }
+            // 21. pulseWave
+            else if (effect === 'pulseWave') {
+                ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 90) % 180, 0, Math.PI * 2); ctx.stroke();
+            }
+            // 22. starShower
+            else if (effect === 'starShower') {
+                if (Math.random() < 0.4) {
+                    const pAngle = Math.random() * Math.PI * 2;
+                    particles.push({
+                        x: centerX, y: centerY,
+                        vx: Math.cos(pAngle) * (Math.random() * 4 + 1),
+                        vy: Math.sin(pAngle) * (Math.random() * 4 + 1),
+                        size: Math.random() * 6 + 3, life: 1, color: color
+                    });
+                }
+            }
+            // 23. fireFlame / demonHellfire / darkBloodPillar
+            else if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
                 if (Math.random() < 0.6) {
                     particles.push({
                         x: centerX + (Math.random() - 0.5) * 80, y: centerY + 40,
                         vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2,
-                        size: Math.random() * 8 + 4, life: 1, color
+                        size: Math.random() * 8 + 4, life: 1, color: color
                     });
                 }
-            } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
-                ctx.strokeStyle = color; ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2);
-                ctx.stroke();
-            } else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
+            }
+            // 24. swirlVortex / cosmicRings / rainbowPrism
+            else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
+                ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5); ctx.stroke();
+            }
+            // 25. cyberGlitch / pixelNoise
+            else if (effect === 'cyberGlitch' || effect === 'pixelNoise') {
                 if (Math.random() < 0.4) {
                     ctx.fillStyle = Math.random() < 0.5 ? '#00ff66' : '#ff00ff';
                     ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
                 }
-            } else if (effect === 'lightningSpark' || effect === 'absoluteRedStorm') {
-                ctx.strokeStyle = color; ctx.lineWidth = 2;
-                for (let i = 0; i < 3; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(centerX + (Math.random() - 0.5) * 240, centerY + (Math.random() - 0.5) * 240);
-                    ctx.stroke();
-                }
-            } else if (effect === 'galaxyBigBang' || effect === 'whiteGodLight' || effect === 'blackHole') {
-                ctx.strokeStyle = color; ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 150 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2);
-                ctx.stroke();
+            }
+            // 26. galaxyBigBang / blackHole / shadowEclipse
+            else if (effect === 'galaxyBigBang' || effect === 'blackHole' || effect === 'shadowEclipse') {
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(centerX, centerY, 140 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2); ctx.stroke();
             }
         });
 
+        // 공통 회전 소형 파티클 생성
         if (Math.random() < 0.3) {
             particles.push({
                 x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
                 vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
-                size: Math.random() * 6 + 3, life: 1, color
+                size: Math.random() * 6 + 3, life: 1, color: color
             });
         }
 
+        // 전체 파티클 물리 이동 및 실시간 렌더링
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i];
             p.x += p.vx; p.y += p.vy; p.life -= 0.02;
             ctx.fillStyle = p.color;
             ctx.globalAlpha = Math.max(0, p.life);
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
             if (p.life <= 0) particles.splice(i, 1);
         }
         ctx.globalAlpha = 1.0;
