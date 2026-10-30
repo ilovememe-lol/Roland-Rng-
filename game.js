@@ -90,16 +90,13 @@ const menuBtn = document.getElementById('menu-toggle-btn');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-const navRank = document.getElementById('nav-rank');
 const navInv = document.getElementById('nav-inv');
 const navGear = document.getElementById('nav-gear');
 const navShop = document.getElementById('nav-shop');
 const navCraft = document.getElementById('nav-craft');
-const navNickname = document.getElementById('nav-nickname');
 const navFullscreen = document.getElementById('nav-fullscreen');
 const navSettings = document.getElementById('nav-settings');
 
-const rankModal = document.getElementById('rank-modal');
 const invModal = document.getElementById('inv-modal');
 const gearModal = document.getElementById('gear-modal');
 const shopModal = document.getElementById('shop-modal');
@@ -146,45 +143,36 @@ function tryPlayMusic() {
 }
 
 function toggleSidebar() {
-    sidebar.classList.toggle('open');
-    sidebarOverlay.classList.toggle('active');
+    if (sidebar) sidebar.classList.toggle('open');
+    if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
 }
 
-menuBtn.addEventListener('click', toggleSidebar);
-sidebarOverlay.addEventListener('click', toggleSidebar);
+if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
+if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
 
-navRank.addEventListener('click', () => { toggleSidebar(); loadOnlineRankings(); rankModal.style.display = 'flex'; });
-navInv.addEventListener('click', () => { toggleSidebar(); renderInventoryList(); invModal.style.display = 'flex'; });
-navGear.addEventListener('click', () => { toggleSidebar(); renderGearList(); gearModal.style.display = 'flex'; });
-navShop.addEventListener('click', () => { toggleSidebar(); shopModal.style.display = 'flex'; });
-navCraft.addEventListener('click', () => { toggleSidebar(); craftModal.style.display = 'flex'; });
-navSettings.addEventListener('click', () => { toggleSidebar(); settingsModal.style.display = 'flex'; });
+if (navInv) navInv.addEventListener('click', () => { toggleSidebar(); renderInventoryList(); if (invModal) invModal.style.display = 'flex'; });
+if (navGear) navGear.addEventListener('click', () => { toggleSidebar(); renderGearList(); if (gearModal) gearModal.style.display = 'flex'; });
+if (navShop) navShop.addEventListener('click', () => { toggleSidebar(); if (shopModal) shopModal.style.display = 'flex'; });
+if (navCraft) navCraft.addEventListener('click', () => { toggleSidebar(); if (craftModal) craftModal.style.display = 'flex'; });
+if (navSettings) navSettings.addEventListener('click', () => { toggleSidebar(); if (settingsModal) settingsModal.style.display = 'flex'; });
 
-navNickname.addEventListener('click', () => {
-    toggleSidebar();
-    const newName = prompt("새 닉네임을 입력하세요:", myNickname);
-    if (newName && newName.trim() !== "") {
-        myNickname = newName.trim().substring(0, 10);
-        localStorage.setItem('sols_nickname', myNickname);
-        document.getElementById('user-nickname').innerText = myNickname;
-        uploadLeaderboard(bestName, bestChance);
-    }
-});
-
-navFullscreen.addEventListener('click', () => {
-    toggleSidebar();
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-        if (document.exitFullscreen) document.exitFullscreen();
-    }
-});
+if (navFullscreen) {
+    navFullscreen.addEventListener('click', () => {
+        toggleSidebar();
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+        }
+    });
+}
 
 document.querySelectorAll('.modal-close-btn').forEach(btn => {
     btn.addEventListener('click', (e) => { e.target.closest('.modal').style.display = 'none'; });
 });
 
-document.getElementById('particle-toggle').addEventListener('change', (e) => { enableParticles = e.target.checked; });
+const particleToggle = document.getElementById('particle-toggle');
+if (particleToggle) particleToggle.addEventListener('change', (e) => { enableParticles = e.target.checked; });
 
 function resetGameData() {
     if (confirm("정말로 모든 데이터를 초기화하시겠습니까? (복구 불가)")) {
@@ -211,9 +199,9 @@ function loadData() {
             Object.assign(inventory, data.inventory || {});
             Object.assign(gearInventory, data.gearInventory || {});
 
-            totalRollsEl.innerText = totalRolls.toLocaleString();
-            goldValEl.innerText = gold.toLocaleString();
-            if (bestChance > 0) {
+            if (totalRollsEl) totalRollsEl.innerText = totalRolls.toLocaleString();
+            if (goldValEl) goldValEl.innerText = gold.toLocaleString();
+            if (bestChance > 0 && bestRollEl) {
                 bestRollEl.innerText = `${bestName} (1/${bestChance.toLocaleString()})`;
                 const bestAura = AURAS.find(a => a.name === bestName);
                 if (bestAura) bestRollEl.style.color = bestAura.color;
@@ -247,9 +235,13 @@ function updateStatsDisplay() {
     if (oneShotLuckMult > 0) statusTag += " [⚡1회]";
     if (activeGearBuff) statusTag += " [🔥버프]";
 
-    luckMultEl.innerText = `${effectiveLuck.toFixed(1)}x${statusTag}`;
-    luckMultEl.style.color = activeGearBuff ? "#ff0055" : (oneShotLuckMult > 0 ? "#ff00ff" : (activeBuff ? "#ffaa00" : "#00ffcc"));
-    equippedGearEl.innerText = equippedGear && GEARS[equippedGear] ? GEARS[equippedGear].name : "없음";
+    if (luckMultEl) {
+        luckMultEl.innerText = `${effectiveLuck.toFixed(1)}x${statusTag}`;
+        luckMultEl.style.color = activeGearBuff ? "#ff0055" : (oneShotLuckMult > 0 ? "#ff00ff" : (activeBuff ? "#ffaa00" : "#00ffcc"));
+    }
+    if (equippedGearEl) {
+        equippedGearEl.innerText = equippedGear && GEARS[equippedGear] ? GEARS[equippedGear].name : "없음";
+    }
 }
 
 function triggerGearSkillBuff(luckMult, speedMult, duration, isOneShot = false) {
@@ -283,18 +275,20 @@ function roll() {
     tryPlayMusic();
     if (isRolling) return;
     isRolling = true;
-    rollBtn.disabled = true;
+    if (rollBtn) rollBtn.disabled = true;
 
     totalRolls++;
-    totalRollsEl.innerText = totalRolls.toLocaleString();
+    if (totalRollsEl) totalRollsEl.innerText = totalRolls.toLocaleString();
     processGearSkillOnRoll();
 
     let rollCount = 0;
     const rollInterval = setInterval(() => {
         const tempAura = AURAS[Math.floor(Math.random() * 6)];
-        auraNameEl.innerText = tempAura.name;
-        auraNameEl.style.color = tempAura.color;
-        auraRarityEl.innerText = `1 / ${tempAura.chance.toLocaleString()}`;
+        if (auraNameEl) {
+            auraNameEl.innerText = tempAura.name;
+            auraNameEl.style.color = tempAura.color;
+        }
+        if (auraRarityEl) auraRarityEl.innerText = `1 / ${tempAura.chance.toLocaleString()}`;
         rollCount++;
 
         if (rollCount > 7) {
@@ -323,36 +317,44 @@ function finalizeRoll() {
 
     const earnedGold = Math.max(1, Math.floor(Math.log2(selectedAura.chance)));
     gold += earnedGold;
-    goldValEl.innerText = gold.toLocaleString();
+    if (goldValEl) goldValEl.innerText = gold.toLocaleString();
 
-    auraNameEl.innerText = selectedAura.name;
-    auraNameEl.style.color = selectedAura.color;
-    auraNameEl.style.transform = "scale(1.2)";
-    setTimeout(() => auraNameEl.style.transform = "scale(1)", 150);
-    auraRarityEl.innerText = `1 / ${selectedAura.chance.toLocaleString()}`;
+    if (auraNameEl) {
+        auraNameEl.innerText = selectedAura.name;
+        auraNameEl.style.color = selectedAura.color;
+        auraNameEl.style.transform = "scale(1.2)";
+        setTimeout(() => auraNameEl.style.transform = "scale(1)", 150);
+    }
+    if (auraRarityEl) auraRarityEl.innerText = `1 / ${selectedAura.chance.toLocaleString()}`;
 
     currentAura = selectedAura;
     lastRolledAura = selectedAura;
-    avatar.style.backgroundColor = selectedAura.color;
-    avatar.style.boxShadow = `0 0 35px ${selectedAura.color}`;
+    if (avatar) {
+        avatar.style.backgroundColor = selectedAura.color;
+        avatar.style.boxShadow = `0 0 35px ${selectedAura.color}`;
+    }
 
     inventory[selectedAura.name] = (inventory[selectedAura.name] || 0) + 1;
 
     if (selectedAura.chance > bestChance) {
         bestChance = selectedAura.chance;
         bestName = selectedAura.name;
-        bestRollEl.innerText = `${bestName} (1/${bestChance.toLocaleString()})`;
-        bestRollEl.style.color = selectedAura.color;
+        if (bestRollEl) {
+            bestRollEl.innerText = `${bestName} (1/${bestChance.toLocaleString()})`;
+            bestRollEl.style.color = selectedAura.color;
+        }
 
-        // online.js에 선언된 랭킹 업로드 함수 호출
-        uploadLeaderboard(bestName, bestChance);
+        // online.js 연동 랭킹 업로드 호출
+        if (typeof uploadLeaderboard === 'function') {
+            uploadLeaderboard(bestName, bestChance);
+        }
     }
 
     saveData();
 
     setTimeout(() => {
         isRolling = false;
-        rollBtn.disabled = false;
+        if (rollBtn) rollBtn.disabled = false;
         if (isAuto) setTimeout(roll, getEffectiveDelay());
     }, 250);
 }
@@ -362,31 +364,42 @@ function inspectAura(auraName) {
     if (!foundAura) return;
 
     currentAura = foundAura;
-    auraNameEl.innerText = foundAura.name;
-    auraNameEl.style.color = foundAura.color;
-    auraRarityEl.innerText = `1 / ${foundAura.chance.toLocaleString()} (관전 모드)`;
-    avatar.style.backgroundColor = foundAura.color;
-    avatar.style.boxShadow = `0 0 35px ${foundAura.color}`;
+    if (auraNameEl) {
+        auraNameEl.innerText = foundAura.name;
+        auraNameEl.style.color = foundAura.color;
+    }
+    if (auraRarityEl) auraRarityEl.innerText = `1 / ${foundAura.chance.toLocaleString()} (관전 모드)`;
+    if (avatar) {
+        avatar.style.backgroundColor = foundAura.color;
+        avatar.style.boxShadow = `0 0 35px ${foundAura.color}`;
+    }
 
-    invModal.style.display = 'none';
-    normalPanel.style.display = 'none';
-    inspectPanel.style.display = 'flex';
+    if (invModal) invModal.style.display = 'none';
+    if (normalPanel) normalPanel.style.display = 'none';
+    if (inspectPanel) inspectPanel.style.display = 'flex';
 }
 
-exitInspectBtn.addEventListener('click', () => {
-    currentAura = lastRolledAura;
-    auraNameEl.innerText = lastRolledAura.name;
-    auraNameEl.style.color = lastRolledAura.color;
-    auraRarityEl.innerText = `1 / ${lastRolledAura.chance.toLocaleString()}`;
-    avatar.style.backgroundColor = lastRolledAura.color;
-    avatar.style.boxShadow = `0 0 35px ${lastRolledAura.color}`;
+if (exitInspectBtn) {
+    exitInspectBtn.addEventListener('click', () => {
+        currentAura = lastRolledAura;
+        if (auraNameEl) {
+            auraNameEl.innerText = lastRolledAura.name;
+            auraNameEl.style.color = lastRolledAura.color;
+        }
+        if (auraRarityEl) auraRarityEl.innerText = `1 / ${lastRolledAura.chance.toLocaleString()}`;
+        if (avatar) {
+            avatar.style.backgroundColor = lastRolledAura.color;
+            avatar.style.boxShadow = `0 0 35px ${lastRolledAura.color}`;
+        }
 
-    inspectPanel.style.display = 'none';
-    normalPanel.style.display = 'flex';
-});
+        if (inspectPanel) inspectPanel.style.display = 'none';
+        if (normalPanel) normalPanel.style.display = 'flex';
+    });
+}
 
 function renderInventoryList() {
     const listEl = document.getElementById('inv-list');
+    if (!listEl) return;
     listEl.innerHTML = '';
     AURAS.forEach(a => {
         const count = inventory[a.name] || 0;
@@ -412,6 +425,7 @@ function renderInventoryList() {
 
 function renderGearList() {
     const listEl = document.getElementById('gear-list');
+    if (!listEl) return;
     listEl.innerHTML = '';
 
     Object.keys(GEARS).forEach(key => {
@@ -466,6 +480,7 @@ function unequipGear() {
 
 let angleTick = 0;
 function renderCanvas() {
+    if (!ctx) return;
     ctx.clearRect(0, 0, 500, 500);
     const centerX = 250, centerY = 250;
     angleTick += 0.03;
@@ -560,15 +575,15 @@ function applyBuff(luckMult, speedMult, duration) {
 function buyPotion(type) {
     if (type === 'small') {
         if (gold < 100) { alert('골드가 부족합니다!'); return; }
-        gold -= 100; goldValEl.innerText = gold.toLocaleString();
+        gold -= 100; if (goldValEl) goldValEl.innerText = gold.toLocaleString();
         applyBuff(1.5, 1.0, 30);
     } else if (type === 'speed_small') {
         if (gold < 300) { alert('골드가 부족합니다!'); return; }
-        gold -= 300; goldValEl.innerText = gold.toLocaleString();
+        gold -= 300; if (goldValEl) goldValEl.innerText = gold.toLocaleString();
         applyBuff(1.0, 2.0, 20);
     } else if (type === 'one_shot_small') {
         if (gold < 500) { alert('골드가 부족합니다!'); return; }
-        gold -= 500; goldValEl.innerText = gold.toLocaleString();
+        gold -= 500; if (goldValEl) goldValEl.innerText = gold.toLocaleString();
         oneShotLuckMult += 10;
         updateStatsDisplay();
     }
@@ -644,23 +659,23 @@ function switchCraftTab(tabName) {
     const gearSection = document.getElementById('craft-gear-section');
     const auraSection = document.getElementById('craft-aura-section');
 
-    potionTabBtn.classList.remove('active');
-    gearTabBtn.classList.remove('active');
-    auraTabBtn.classList.remove('active');
+    if (potionTabBtn) potionTabBtn.classList.remove('active');
+    if (gearTabBtn) gearTabBtn.classList.remove('active');
+    if (auraTabBtn) auraTabBtn.classList.remove('active');
 
-    potionSection.style.display = 'none';
-    gearSection.style.display = 'none';
-    auraSection.style.display = 'none';
+    if (potionSection) potionSection.style.display = 'none';
+    if (gearSection) gearSection.style.display = 'none';
+    if (auraSection) auraSection.style.display = 'none';
 
     if (tabName === 'potion') {
-        potionTabBtn.classList.add('active');
-        potionSection.style.display = 'block';
+        if (potionTabBtn) potionTabBtn.classList.add('active');
+        if (potionSection) potionSection.style.display = 'block';
     } else if (tabName === 'gear') {
-        gearTabBtn.classList.add('active');
-        gearSection.style.display = 'block';
+        if (gearTabBtn) gearTabBtn.classList.add('active');
+        if (gearSection) gearSection.style.display = 'block';
     } else {
-        auraTabBtn.classList.add('active');
-        auraSection.style.display = 'block';
+        if (auraTabBtn) auraTabBtn.classList.add('active');
+        if (auraSection) auraSection.style.display = 'block';
     }
 }
 
@@ -754,21 +769,23 @@ function craftAura(key) {
     saveData();
 }
 
-rollBtn.addEventListener('click', roll);
+if (rollBtn) rollBtn.addEventListener('click', roll);
 window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' && !isRolling && document.activeElement.tagName !== 'BUTTON') roll();
 });
 
-autoBtn.addEventListener('click', () => {
-    tryPlayMusic();
-    isAuto = !isAuto;
-    if (isAuto) {
-        autoBtn.innerText = "Auto: ON"; autoBtn.classList.add('active');
-        if (!isRolling) roll();
-    } else {
-        autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
-    }
-});
+if (autoBtn) {
+    autoBtn.addEventListener('click', () => {
+        tryPlayMusic();
+        isAuto = !isAuto;
+        if (isAuto) {
+            autoBtn.innerText = "Auto: ON"; autoBtn.classList.add('active');
+            if (!isRolling) roll();
+        } else {
+            autoBtn.innerText = "Auto: OFF"; autoBtn.classList.remove('active');
+        }
+    });
+}
 
 loadData();
 renderCanvas();
