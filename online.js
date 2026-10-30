@@ -6,27 +6,32 @@ const SUPABASE_ANON_KEY = "sb_publishable_C-UkMzjJ-OvaGLyjdIvwoQ_QCuEs4hi";
 
 let supabase = null;
 
-// Supabase 클라이언트 안전 생성
-try {
+function initSupabase() {
     if (window.supabase && typeof window.supabase.createClient === 'function') {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        return true;
     }
-} catch (e) {
-    console.error("Supabase 초기화 실패:", e);
+    return false;
 }
 
 let myNickname = localStorage.getItem('sols_nickname') || '유저_' + Math.floor(Math.random() * 8999 + 1000);
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Supabase 초기화 시도
+    initSupabase();
+
+    // 2. 닉네임 표시
     const nickEl = document.getElementById('user-nickname');
     if (nickEl) nickEl.innerText = myNickname;
 
+    // 3. 채팅 버튼 및 엔터키 이벤트 등록
     const sendBtn = document.getElementById('chat-send-btn');
     const inputEl = document.getElementById('chat-input');
     
     if (sendBtn) sendBtn.addEventListener('click', sendChatMessage);
     if (inputEl) inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 
+    // 4. 초기 채팅 데이터 불러오기 및 실시간 구독
     if (supabase) {
         loadInitialChats();
         supabase
@@ -48,8 +53,8 @@ async function sendChatMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
 
-    if (!supabase) {
-        alert("Supabase 서버에 연결되어 있지 않습니다.");
+    if (!supabase && !initSupabase()) {
+        alert("Supabase 서버에 연결되어 있지 않습니다. 인터넷 연결이나 SDK 로드를 확인하세요.");
         return;
     }
 
@@ -63,7 +68,7 @@ async function sendChatMessage() {
 }
 
 async function loadInitialChats() {
-    if (!supabase) return;
+    if (!supabase && !initSupabase()) return;
     const { data, error } = await supabase.from('chat').select('*').order('created_at', { ascending: false }).limit(20);
     if (error) {
         console.error("채팅 로드 에러:", error);
@@ -89,7 +94,7 @@ function appendChatMsg(user, text) {
 // 실시간 온라인 랭킹
 // -------------------------------------------------------------
 async function uploadLeaderboard(bestName, bestChance) {
-    if (!supabase || bestChance === 0) return;
+    if ((!supabase && !initSupabase()) || bestChance === 0) return;
     
     const { error } = await supabase.from('leaderboard').upsert([
         { user: myNickname, aura: bestName, chance: bestChance }
@@ -104,7 +109,7 @@ async function loadOnlineRankings() {
     const rankList = document.getElementById('rank-list');
     if (!rankList) return;
 
-    if (!supabase) {
+    if (!supabase && !initSupabase()) {
         rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Supabase 연동이 설정되지 않았습니다.</div>';
         return;
     }
