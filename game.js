@@ -1,4 +1,5 @@
 const AURAS = [
+    // [기본 아우라 그룹]
     { name: "Common", chance: 2, color: "#a0a0a0", effect: "dust" },
     { name: "Uncommon", chance: 4, color: "#55ff55", effect: "leaf" },
     { name: "Good", chance: 5, color: "#55ffff", effect: "sparkle" },
@@ -6,26 +7,30 @@ const AURAS = [
     { name: "Rare", chance: 16, color: "#5555ff", effect: "orbitDots" },
     { name: "Crystallized", chance: 64, color: "#00ffff", effect: "crystalShard" },
     { name: "Rage", chance: 128, color: "#ff3333", effect: "fireFlame" },
+    
+    // [1,000 ~ 10,000대: 화려한 이펙트 보강]
     { name: "Glacier", chance: 1024, color: "#aaffff", effect: "snowBurst" },
-    { name: "Precious", chance: 1024, color: "#00bfff", effect: "snowBurst" },
+    { name: "Precious", chance: 1024, color: "#00bfff", effect: "rainbowPrism" },
     { name: "Magnetic", chance: 2048, color: "#ff3300", effect: "swirlVortex" },
     { name: "Sidereum", chance: 4096, color: "#ffd700", effect: "goldRune" },
-    { name: "Gilded", chance: 5000, color: "#ffd700", effect: "goldRune" },
-    { name: "Quartz", chance: 8192, color: "#ff69b4", effect: "orbitDots" },
+    { name: "Gilded", chance: 5000, color: "#ffd700", effect: "goldenBeam" },
+    { name: "Quartz", chance: 8192, color: "#ff69b4", effect: "crystalShard" },
     { name: "Diaboli", chance: 10000, color: "#990000", effect: "demonHellfire" },
     { name: "Powered", chance: 16384, color: "#ffffff", effect: "lightningSpark" },
     { name: "BOUNDLESS", chance: 120000, color: "#da70d6", effect: "voidNebula" },
 
+    // [중간 재료 아우라]
     { name: "Glacier Alloy", chance: 3000, color: "#aaffff", effect: "snowBurst" },
     { name: "Magnet Core", chance: 8000, color: "#ff3300", effect: "swirlVortex" },
     { name: "Demon Ember", chance: 35000, color: "#990000", effect: "demonHellfire" },
     { name: "Celestial Dust", chance: 500000, color: "#ffff00", effect: "cosmicRings" },
 
+    // [상위 및 최상위 아우라: 파티클/특수 이펙트 집중]
     { name: "Ether Essence", chance: 5000, color: "#00ffaa", effect: "swirlVortex" },
     { name: "Prism Fragment", chance: 25000, color: "#ff00ff", effect: "rainbowPrism" },
-    { name: "Solar Core", chance: 100000, color: "#ffcc00", effect: "goldenBeam" },
+    { name: "Solar Core", chance: 100000, color: "#ffcc00", effect: "solarCrown" },
     { name: "Clockwork Core", chance: 500000, color: "#e0e0e0", effect: "pixelNoise" },
-    { name: "Flame Spark", chance: 1200000, color: "#ff4500", effect: "fireFlame" },
+    { name: "Flame Spark", chance: 1200000, color: "#ff4500", effect: "sunExplosion" },
     { name: "Abyss Orb", chance: 2500000, color: "#00ffff", effect: "blackHole" },
     { name: "Void Crystal", chance: 5000000, color: "#4b0082", effect: "shadowEclipse" },
     { name: "Cyber Chip", chance: 8000000, color: "#00ff66", effect: "cyberGlitch" },
@@ -44,6 +49,7 @@ const AURAS = [
     { name: "Atlas", chance: 360000000, color: "#ffcc00", effect: "goldenBeam" },
     { name: "Creation", chance: 1000000000, color: "#00ffff", effect: "galaxyBigBang" },
     
+    // [조합 전용 아우라 그룹]
     { name: "AETHER", chance: 15000, color: "#00ffaa", effect: "swirlVortex", craftOnly: true },
     { name: "CHROMA", chance: 80000, color: "#ff00ff", effect: "rainbowPrism", craftOnly: true },
     { name: "HYPERION", chance: 500000, color: "#ffcc00", effect: "goldenBeam", craftOnly: true },
