@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sol's RNG Online</title>
+    <title>Sol's RNG</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,25 +12,23 @@
     <header id="header">
         <button id="menu-toggle-btn" onclick="toggleSidebar()">☰ 메뉴</button>
         <div id="user-info">
-            <span id="user-nickname">유저_0000</span>
+            <span>Sol's RNG</span>
         </div>
     </header>
 
-    <!-- 사이드바 및 어두운 배경 오버레이 -->
+    <!-- 사이드바 오버레이 및 메뉴 -->
     <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
     <nav id="sidebar">
         <h2>메뉴</h2>
-        <button id="nav-nickname" onclick="changeNickname()">닉네임 변경</button>
-        <button id="nav-rank" onclick="openRankModal()">전체 랭킹</button>
-        <button id="nav-inv" onclick="openModal('inv-modal')">인벤토리</button>
-        <button id="nav-gear" onclick="openModal('gear-modal')">장비</button>
-        <button id="nav-shop" onclick="openModal('shop-modal')">상점</button>
-        <button id="nav-craft" onclick="openModal('craft-modal')">조합소</button>
-        <button id="nav-fullscreen" onclick="toggleFullscreen()">전체화면</button>
-        <button id="nav-settings" onclick="openModal('settings-modal')">설정</button>
+        <button id="nav-inv" onclick="openModal('inv-modal')">🎒 인벤토리</button>
+        <button id="nav-gear" onclick="openModal('gear-modal')">🛡️ 장비 보관함</button>
+        <button id="nav-shop" onclick="openModal('shop-modal')">🛒 상점</button>
+        <button id="nav-craft" onclick="openModal('craft-modal')">⚒️ 조합소</button>
+        <button id="nav-fullscreen" onclick="toggleFullscreen()">📺 전체화면</button>
+        <button id="nav-settings" onclick="openModal('settings-modal')">⚙️ 설정</button>
     </nav>
 
-    <!-- 메인 게임 메인 컨테이너 -->
+    <!-- 메인 게임 컨테이너 -->
     <main id="game-container">
         <!-- 캔버스 / 비주얼 -->
         <div id="visual-area">
@@ -63,30 +61,7 @@
         <div id="inspect-panel" style="display: none;">
             <button id="exit-inspect-btn">관전 종료</button>
         </div>
-
-        <!-- 실시간 온라인 채팅 -->
-        <section id="chat-section">
-            <h3>실시간 채팅</h3>
-            <div id="chat-messages"></div>
-            <div id="chat-input-box">
-                <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." maxlength="100">
-                <button id="chat-send-btn" onclick="sendChatMessage()">전송</button>
-            </div>
-        </section>
     </main>
-
-    <!-- 랭킹 모달 -->
-    <div id="rank-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🏆 실시간 전체 랭킹</h2>
-                <button class="modal-close-btn" onclick="closeModal('rank-modal')">&times;</button>
-            </div>
-            <div id="rank-list">
-                <div style="text-align:center; padding:20px;">랭킹을 불러오는 중...</div>
-            </div>
-        </div>
-    </div>
 
     <!-- 인벤토리 모달 -->
     <div id="inv-modal" class="modal" style="display: none;">
@@ -186,8 +161,7 @@
 
     <audio id="bgm-player"></audio>
 
-    <!-- 스크립트 연결 (CDN 배제) -->
-    <script src="online.js"></script>
+    <!-- 단일 게임 메인 스크립트 연결 -->
     <script src="game.js"></script>
 </body>
 </html>
