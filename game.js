@@ -36,6 +36,7 @@ const AURAS = [
     { name: "Clockwork Core", chance: 500000, color: "#e0e0e0", effect: ["pixelNoise", "timeClock"] },
     { name: "Flame Spark", chance: 1200000, color: "#ff4500", effect: ["sunExplosion", "fireFlame"] },
     { name: "Abyss Orb", chance: 2500000, color: "#00ffff", effect: ["blackHole", "blackHolePull"] },
+    { name: "Gebura", chance: 44444, color: "#ff0000", effect: ["leaf", "sparkle", "floatCircle", "fireFlame", "sunExplosion", "darkBloodPillar", "spinning", "rolandAllia", "rolandSilence", "geburaRedMist", "geburaGreatSplitVertical"] },
     { name: "Void Crystal", chance: 5000000, color: "#4b0082", effect: ["shadowEclipse", "hexShield"] },
     { name: "Cyber Chip", chance: 8000000, color: "#00ff66", effect: ["cyberGlitch", "electricShield"] },
     { name: "Cosmic Feather", chance: 15000000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
