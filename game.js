@@ -36,7 +36,6 @@ const AURAS = [
     { name: "Clockwork Core", chance: 500000, color: "#e0e0e0", effect: ["pixelNoise", "timeClock"] },
     { name: "Flame Spark", chance: 1200000, color: "#ff4500", effect: ["sunExplosion", "fireFlame"] },
     { name: "Abyss Orb", chance: 2500000, color: "#00ffff", effect: ["blackHole", "blackHolePull"] },
-    { name: "Gebura", chance: 44444, color: "#ff0000", effect: ["leaf", "sparkle", "floatCircle", "fireFlame", "sunExplosion", "darkBloodPillar", "spinning", "rolandAllia", "rolandSilence", "geburaRedMist", "geburaGreatSplitVertical"] },
     { name: "Void Crystal", chance: 5000000, color: "#4b0082", effect: ["shadowEclipse", "hexShield"] },
     { name: "Cyber Chip", chance: 8000000, color: "#00ff66", effect: ["cyberGlitch", "electricShield"] },
     { name: "Cosmic Feather", chance: 15000000, color: "#ffff00", effect: ["cosmicRings", "starShower"] },
@@ -86,6 +85,10 @@ let isInspecting = false;
 let equippedGear = null, activeBuff = null, oneShotLuckMult = 0;
 let gearRollCounter = 0, activeGearBuff = null;
 let enableParticles = true, lastRolledAura = AURAS[0];
+
+// 파티클 각도 및 생성 범위(Radius) 설정 변수
+let globalEmitAngle = 0;      // 파티클 방출 각도 (0~360도)
+let globalEmitRadius = 100;   // 파티클 생성 범위 반지름 (기본 100px)
 
 const inventory = {}, gearInventory = {};
 
@@ -481,6 +484,7 @@ function renderCanvas() {
     const color = currentAura.color;
     const effects = Array.isArray(currentAura.effect) ? currentAura.effect : [currentAura.effect];
 
+    // 배경 아우라 글로우
     const grad = ctx.createRadialGradient(centerX, centerY, 20, centerX, centerY, 180);
     grad.addColorStop(0, color + 'aa');
     grad.addColorStop(1, 'transparent');
@@ -494,23 +498,29 @@ function renderCanvas() {
             ctx.strokeStyle = color;
             ctx.fillStyle = color;
 
-            // --- [모든 기본 파티클/이펙트 완전 복원] ---
+            const emitAngleRad = (globalEmitAngle * Math.PI) / 180;
+
+            // --- [1. 기본 파티클 복원] ---
             if (effect === 'dust' || effect === 'leaf' || effect === 'sparkle' || effect === 'floatCircle') {
                 if (Math.random() < 0.4) {
-                    const vy = effect === 'floatCircle' ? -1.5 : (effect === 'leaf' ? 1.2 : (Math.random() - 0.5) * 2);
+                    const spd = Math.random() * 3 + 1;
+                    const spawnDist = (Math.random() - 0.5) * (globalEmitRadius * 2);
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 200, y: centerY + (Math.random() - 0.5) * 200,
-                        vx: (Math.random() - 0.5) * 2, vy: vy, size: Math.random() * 5 + 2, life: 1, color: color
+                        x: centerX + Math.cos(emitAngleRad + Math.PI / 2) * spawnDist,
+                        y: centerY + Math.sin(emitAngleRad + Math.PI / 2) * spawnDist,
+                        vx: Math.cos(emitAngleRad) * spd + (Math.random() - 0.5),
+                        vy: Math.sin(emitAngleRad) * spd + (Math.random() - 0.5),
+                        size: Math.random() * 5 + 2, life: 1, color: color
                     });
                 }
             } else if (effect === 'orbitDots') {
                 for (let i = 0; i < 4; i++) {
                     const a = angleTick * 2 + (Math.PI / 2) * i;
-                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 90, centerY + Math.sin(a) * 90, 6, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * (globalEmitRadius * 0.9), centerY + Math.sin(a) * (globalEmitRadius * 0.9), 6, 0, Math.PI * 2); ctx.fill();
                 }
             } else if (effect === 'crystalShard') {
                 if (Math.random() < 0.4) {
-                    const a = Math.random() * Math.PI * 2; const r = Math.random() * 80 + 40;
+                    const a = Math.random() * Math.PI * 2; const r = Math.random() * globalEmitRadius * 0.8 + 20;
                     particles.push({
                         x: centerX + Math.cos(a) * r, y: centerY + Math.sin(a) * r,
                         vx: Math.cos(a) * 0.5, vy: Math.sin(a) * 0.5, size: Math.random() * 6 + 3, life: 0.8, color: color
@@ -519,25 +529,25 @@ function renderCanvas() {
             } else if (effect === 'snowBurst') {
                 if (Math.random() < 0.5) {
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 220, y: centerY - 140,
+                        x: centerX + (Math.random() - 0.5) * (globalEmitRadius * 2.2), y: centerY - globalEmitRadius,
                         vx: (Math.random() - 0.5) * 1, vy: Math.random() * 3 + 1, size: Math.random() * 4 + 2, life: 1, color: color
                     });
                 }
             } else if (effect === 'fireFlame' || effect === 'demonHellfire' || effect === 'darkBloodPillar') {
                 if (Math.random() < 0.6) {
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 90, y: centerY + 40,
+                        x: centerX + (Math.random() - 0.5) * globalEmitRadius, y: centerY + 40,
                         vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 4 - 2, size: Math.random() * 8 + 4, life: 1, color: color
                     });
                 }
             } else if (effect === 'swirlVortex' || effect === 'cosmicRings' || effect === 'rainbowPrism') {
-                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 90 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5); ctx.stroke();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 130 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2); ctx.stroke();
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 0.9 + Math.sin(angleTick) * 10, angleTick, angleTick + Math.PI * 1.5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 1.3 + Math.cos(angleTick) * 10, -angleTick, -angleTick + Math.PI * 1.2); ctx.stroke();
             } else if (effect === 'goldRune') {
-                ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(centerX, centerY, 100, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius, 0, Math.PI * 2); ctx.stroke();
                 for (let i = 0; i < 6; i++) {
                     const a = (Math.PI * 2 / 6) * i - angleTick * 0.5;
-                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 100, centerY + Math.sin(a) * 100, 5, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * globalEmitRadius, centerY + Math.sin(a) * globalEmitRadius, 5, 0, Math.PI * 2); ctx.fill();
                 }
             } else if (effect === 'goldenBeam') {
                 ctx.lineWidth = 15; ctx.globalAlpha = 0.3;
@@ -547,22 +557,22 @@ function renderCanvas() {
                 ctx.lineWidth = 2.5;
                 for (let i = 0; i < 4; i++) {
                     ctx.beginPath(); ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(centerX + (Math.random() - 0.5) * 260, centerY + (Math.random() - 0.5) * 260); ctx.stroke();
+                    ctx.lineTo(centerX + (Math.random() - 0.5) * (globalEmitRadius * 2.6), centerY + (Math.random() - 0.5) * (globalEmitRadius * 2.6)); ctx.stroke();
                 }
             } else if (effect === 'voidNebula') {
                 ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(centerX, centerY, 70 + Math.sin(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 120 + Math.cos(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 0.7 + Math.sin(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 1.2 + Math.cos(angleTick) * 15, 0, Math.PI * 2); ctx.stroke();
             } else if (effect === 'solarCrown') {
-                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, 85, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 0.85, 0, Math.PI * 2); ctx.stroke();
                 for (let i = 0; i < 12; i++) {
                     const a = (Math.PI * 2 / 12) * i + angleTick;
-                    ctx.beginPath(); ctx.moveTo(centerX + Math.cos(a) * 85, centerY + Math.sin(a) * 85);
-                    ctx.lineTo(centerX + Math.cos(a) * 110, centerY + Math.sin(a) * 110); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX + Math.cos(a) * (globalEmitRadius * 0.85), centerY + Math.sin(a) * (globalEmitRadius * 0.85));
+                    ctx.lineTo(centerX + Math.cos(a) * (globalEmitRadius * 1.1), centerY + Math.sin(a) * (globalEmitRadius * 1.1)); ctx.stroke();
                 }
             } else if (effect === 'pixelNoise' || effect === 'cyberGlitch') {
                 if (Math.random() < 0.5) {
-                    ctx.fillRect(centerX + (Math.random() - 0.5) * 200, centerY + (Math.random() - 0.5) * 200, Math.random() * 20 + 5, 4);
+                    ctx.fillRect(centerX + (Math.random() - 0.5) * (globalEmitRadius * 2), centerY + (Math.random() - 0.5) * (globalEmitRadius * 2), Math.random() * 20 + 5, 4);
                 }
             } else if (effect === 'sunExplosion') {
                 if (Math.random() < 0.6) {
@@ -573,22 +583,22 @@ function renderCanvas() {
                     });
                 }
             } else if (effect === 'galaxyBigBang' || effect === 'blackHole' || effect === 'shadowEclipse') {
-                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, 140 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 1.4 + Math.sin(angleTick * 2) * 20, 0, Math.PI * 2); ctx.stroke();
             }
 
-            // --- [커스텀 확장 이펙트] ---
+            // --- [2. 확장 이펙트] ---
             else if (effect === 'spinning') {
-                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 65, angleTick * 2, angleTick * 2 + Math.PI * 1.2); ctx.stroke();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 85, -angleTick * 2.5, -angleTick * 2.5 + Math.PI * 1.2); ctx.stroke();
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 0.65, angleTick * 2, angleTick * 2 + Math.PI * 1.2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 0.85, -angleTick * 2.5, -angleTick * 2.5 + Math.PI * 1.2); ctx.stroke();
             } else if (effect === 'spiralUp') {
                 if (Math.random() < 0.5) {
                     particles.push({
-                        x: centerX + Math.cos(angleTick * 4) * 50, y: centerY + 100,
+                        x: centerX + Math.cos(angleTick * 4) * (globalEmitRadius * 0.5), y: centerY + globalEmitRadius,
                         vx: 0, vy: -Math.random() * 3 - 2, size: Math.random() * 4 + 2, life: 1, color: color
                     });
                 }
             } else if (effect === 'pulseWave') {
-                ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 90) % 180, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 90) % (globalEmitRadius * 1.8), 0, Math.PI * 2); ctx.stroke();
             } else if (effect === 'starShower') {
                 if (Math.random() < 0.4) {
                     const pAngle = Math.random() * Math.PI * 2;
@@ -599,12 +609,12 @@ function renderCanvas() {
                 }
             } else if (effect === 'orbitalLaser') {
                 ctx.lineWidth = 2; ctx.beginPath();
-                ctx.moveTo(centerX + Math.cos(angleTick) * 200, centerY + Math.sin(angleTick) * 200);
-                ctx.lineTo(centerX - Math.cos(angleTick) * 200, centerY - Math.sin(angleTick) * 200); ctx.stroke();
+                ctx.moveTo(centerX + Math.cos(angleTick) * (globalEmitRadius * 2), centerY + Math.sin(angleTick) * (globalEmitRadius * 2));
+                ctx.lineTo(centerX - Math.cos(angleTick) * (globalEmitRadius * 2), centerY - Math.sin(angleTick) * (globalEmitRadius * 2)); ctx.stroke();
             } else if (effect === 'electricShield') {
                 ctx.lineWidth = 2; ctx.beginPath();
                 for (let i = 0; i < 8; i++) {
-                    const a = (Math.PI * 2 / 8) * i + angleTick; const r = 75 + (Math.random() - 0.5) * 12;
+                    const a = (Math.PI * 2 / 8) * i + angleTick; const r = globalEmitRadius * 0.75 + (Math.random() - 0.5) * 12;
                     const x = centerX + Math.cos(a) * r; const y = centerY + Math.sin(a) * r;
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
@@ -612,94 +622,94 @@ function renderCanvas() {
             } else if (effect === 'meteorFall') {
                 if (Math.random() < 0.4) {
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 300, y: centerY - 200,
+                        x: centerX + (Math.random() - 0.5) * (globalEmitRadius * 3), y: centerY - 200,
                         vx: -2, vy: Math.random() * 6 + 4, size: Math.random() * 5 + 3, life: 0.8, color: color
                     });
                 }
             } else if (effect === 'dnaHelix') {
                 for (let i = -80; i <= 80; i += 20) {
                     const y = centerY + i;
-                    const x1 = centerX + Math.sin(angleTick * 2 + i * 0.05) * 45;
-                    const x2 = centerX - Math.sin(angleTick * 2 + i * 0.05) * 45;
+                    const x1 = centerX + Math.sin(angleTick * 2 + i * 0.05) * (globalEmitRadius * 0.45);
+                    const x2 = centerX - Math.sin(angleTick * 2 + i * 0.05) * (globalEmitRadius * 0.45);
                     ctx.beginPath(); ctx.arc(x1, y, 5, 0, Math.PI * 2); ctx.fill();
                     ctx.beginPath(); ctx.arc(x2, y, 5, 0, Math.PI * 2); ctx.fill();
                 }
             } else if (effect === 'timeClock') {
-                ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(centerX, centerY, 110, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 1.1, 0, Math.PI * 2); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(centerX, centerY);
-                ctx.lineTo(centerX + Math.cos(angleTick) * 90, centerY + Math.sin(angleTick) * 90); ctx.stroke();
+                ctx.lineTo(centerX + Math.cos(angleTick) * (globalEmitRadius * 0.9), centerY + Math.sin(angleTick) * (globalEmitRadius * 0.9)); ctx.stroke();
             } else if (effect === 'chaosPortal') {
                 ctx.lineWidth = 3; ctx.save(); ctx.translate(centerX, centerY); ctx.rotate(angleTick);
-                ctx.strokeRect(-70, -70, 140, 140); ctx.restore();
+                ctx.strokeRect(-globalEmitRadius * 0.7, -globalEmitRadius * 0.7, globalEmitRadius * 1.4, globalEmitRadius * 1.4); ctx.restore();
             } else if (effect === 'sacredRays') {
                 ctx.lineWidth = 2.5;
                 for (let i = 0; i < 6; i++) {
                     const a = (Math.PI * 2 / 6) * i + angleTick * 0.5;
                     ctx.beginPath(); ctx.moveTo(centerX, centerY);
-                    ctx.lineTo(centerX + Math.cos(a) * 180, centerY + Math.sin(a) * 180); ctx.stroke();
+                    ctx.lineTo(centerX + Math.cos(a) * (globalEmitRadius * 1.8), centerY + Math.sin(a) * (globalEmitRadius * 1.8)); ctx.stroke();
                 }
             } else if (effect === 'hexShield') {
                 ctx.lineWidth = 2.5; ctx.beginPath();
                 for (let i = 0; i < 6; i++) {
-                    const a = (Math.PI * 2 / 6) * i; const x = centerX + Math.cos(a) * 95; const y = centerY + Math.sin(a) * 95;
+                    const a = (Math.PI * 2 / 6) * i; const x = centerX + Math.cos(a) * (globalEmitRadius * 0.95); const y = centerY + Math.sin(a) * (globalEmitRadius * 0.95);
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.closePath(); ctx.stroke();
             } else if (effect === 'blackHolePull') {
-                ctx.lineWidth = 2.5; const r = (150 - (angleTick * 60) % 120);
+                ctx.lineWidth = 2.5; const r = ((globalEmitRadius * 1.5) - (angleTick * 60) % (globalEmitRadius * 1.2));
                 ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(10, r), 0, Math.PI * 2); ctx.stroke();
             }
 
-            // --- [롤랑 9개 무기 세부 구현] ---
+            // --- [3. 롤랑 9개 공방 무기 구현] ---
             else if (effect === 'rolandDurandal') {
                 ctx.lineWidth = 4; ctx.beginPath();
-                ctx.arc(centerX, centerY, 80 + Math.sin(angleTick * 3) * 15, angleTick * 1.5, angleTick * 1.5 + Math.PI * 0.8); ctx.stroke();
+                ctx.arc(centerX, centerY, globalEmitRadius * 0.8 + Math.sin(angleTick * 3) * 15, angleTick * 1.5, angleTick * 1.5 + Math.PI * 0.8); ctx.stroke();
                 if (Math.random() < 0.5) {
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 160, y: centerY + (Math.random() - 0.5) * 160,
+                        x: centerX + (Math.random() - 0.5) * (globalEmitRadius * 1.6), y: centerY + (Math.random() - 0.5) * (globalEmitRadius * 1.6),
                         vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3, size: Math.random() * 4 + 2, life: 0.7, color: '#ffd700'
                     });
                 }
             } else if (effect === 'rolandAtelierLogic') {
                 if (Math.random() < 0.4) {
                     ctx.lineWidth = 2; ctx.beginPath(); const shootAngle = Math.random() * Math.PI * 2;
-                    ctx.moveTo(centerX, centerY); ctx.lineTo(centerX + Math.cos(shootAngle) * 220, centerY + Math.sin(shootAngle) * 220); ctx.stroke();
+                    ctx.moveTo(centerX, centerY); ctx.lineTo(centerX + Math.cos(shootAngle) * (globalEmitRadius * 2.2), centerY + Math.sin(shootAngle) * (globalEmitRadius * 2.2)); ctx.stroke();
                 }
             } else if (effect === 'rolandWheelsChair') {
-                ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 100) % 150, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 100) % (globalEmitRadius * 1.5), 0, Math.PI * 2); ctx.stroke();
             } else if (effect === 'rolandZelkova') {
-                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 60, angleTick * 4, angleTick * 4 + Math.PI * 0.5); ctx.stroke();
-                ctx.beginPath(); ctx.arc(centerX, centerY, 100, -angleTick * 4, -angleTick * 4 + Math.PI * 0.5); ctx.stroke();
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 0.6, angleTick * 4, angleTick * 4 + Math.PI * 0.5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius, -angleTick * 4, -angleTick * 4 + Math.PI * 0.5); ctx.stroke();
             } else if (effect === 'rolandMuksheok') {
-                ctx.lineWidth = 6; ctx.strokeRect(centerX - 90, centerY - 90, 180, 180);
+                ctx.lineWidth = 6; ctx.strokeRect(centerX - globalEmitRadius * 0.9, centerY - globalEmitRadius * 0.9, globalEmitRadius * 1.8, globalEmitRadius * 1.8);
             } else if (effect === 'rolandOldBoys') {
-                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, 70, angleTick, angleTick + Math.PI * 0.8); ctx.stroke();
+                ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 0.7, angleTick, angleTick + Math.PI * 0.8); ctx.stroke();
             } else if (effect === 'rolandRanga') {
                 for (let i = 0; i < 3; i++) {
                     const a = angleTick * 5 + (Math.PI * 2 / 3) * i;
-                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * 85, centerY + Math.sin(a) * 85, 4, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(centerX + Math.cos(a) * (globalEmitRadius * 0.85), centerY + Math.sin(a) * (globalEmitRadius * 0.85), 4, 0, Math.PI * 2); ctx.fill();
                 }
             } else if (effect === 'rolandAllia') {
                 ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(centerX, centerY);
-                ctx.lineTo(centerX + Math.cos(angleTick * 3) * 180, centerY + Math.sin(angleTick * 3) * 180); ctx.stroke();
+                ctx.lineTo(centerX + Math.cos(angleTick * 3) * (globalEmitRadius * 1.8), centerY + Math.sin(angleTick * 3) * (globalEmitRadius * 1.8)); ctx.stroke();
             } else if (effect === 'rolandCrystalAtelier') {
-                ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(centerX, centerY, 110, angleTick * 3, angleTick * 3 + Math.PI); ctx.stroke();
+                ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 1.1, angleTick * 3, angleTick * 3 + Math.PI); ctx.stroke();
             } else if (effect === 'rolandFurioso') {
                 ctx.lineWidth = 2;
                 for (let i = 0; i < 4; i++) {
-                    const angle = Math.random() * Math.PI * 2; const dist = Math.random() * 130 + 30;
+                    const angle = Math.random() * Math.PI * 2; const dist = Math.random() * (globalEmitRadius * 1.3) + 30;
                     ctx.beginPath(); ctx.moveTo(centerX + Math.cos(angle) * dist, centerY + Math.sin(angle) * dist);
                     ctx.lineTo(centerX - Math.cos(angle) * dist, centerY - Math.sin(angle) * dist); ctx.stroke();
                 }
             } else if (effect === 'rolandSilence') {
-                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, 110 + Math.cos(angleTick) * 20, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(centerX, centerY, globalEmitRadius * 1.1 + Math.cos(angleTick) * 20, 0, Math.PI * 2); ctx.stroke();
             }
 
-            // --- [게부라 세부 구현] ---
+            // --- [4. 게부라 구현] ---
             else if (effect === 'geburaRedMist') {
                 if (Math.random() < 0.8) {
                     particles.push({
-                        x: centerX + (Math.random() - 0.5) * 180, y: centerY + (Math.random() - 0.5) * 180,
+                        x: centerX + (Math.random() - 0.5) * (globalEmitRadius * 1.8), y: centerY + (Math.random() - 0.5) * (globalEmitRadius * 1.8),
                         vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4, size: Math.random() * 7 + 3, life: 0.8, color: Math.random() < 0.5 ? '#ff0033' : '#990000'
                     });
                 }
@@ -708,18 +718,20 @@ function renderCanvas() {
             } else if (effect === 'geburaGreatSplitVertical') {
                 ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, 500); ctx.stroke();
             } else if (effect === 'geburaManifestEGO') {
-                ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 130) % 170, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(centerX, centerY, (angleTick * 130) % (globalEmitRadius * 1.7), 0, Math.PI * 2); ctx.stroke();
             }
         });
 
+        // 서클 앰비언트 파티클
         if (Math.random() < 0.3) {
             particles.push({
-                x: centerX + Math.cos(angleTick * 2) * 100, y: centerY + Math.sin(angleTick * 2) * 100,
+                x: centerX + Math.cos(angleTick * 2) * globalEmitRadius, y: centerY + Math.sin(angleTick * 2) * globalEmitRadius,
                 vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2,
                 size: Math.random() * 6 + 3, life: 1, color: color
             });
         }
 
+        // 전체 파티클 물리 이동 및 실시간 렌더링
         for (let i = particles.length - 1; i >= 0; i--) {
             const p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.02;
             ctx.fillStyle = p.color; ctx.globalAlpha = Math.max(0, p.life);
