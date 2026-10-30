@@ -1,45 +1,81 @@
 // -------------------------------------------------------------
-// SUPABASE 설정
+// SUPABASE 모바일 최적화 설정
 // -------------------------------------------------------------
 const SUPABASE_URL = "https://vkjgznvyvurlnefdskpw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_C-UkMzjJ-OvaGLyjdIvwoQ_QCuEs4hi";
 
 let supabase = null;
 
+// 모바일 화면용 디버그 콘솔 생성 함수
+function mobileLog(msg, isError = false) {
+    let logBox = document.getElementById('mobile-debug-log');
+    if (!logBox) {
+        logBox = document.createElement('div');
+        logBox.id = 'mobile-debug-log';
+        logBox.style.cssText = 'position:fixed; bottom:0; left:0; width:100%; max-height:120px; overflow-y:auto; background:rgba(0,0,0,0.85); color:#00ffcc; font-size:10px; z-index:99999; padding:5px; border-top:1px solid #333; word-break:break-all; pointer-events:none;';
+        document.body.appendChild(logBox);
+    }
+    const item = document.createElement('div');
+    item.style.color = isError ? '#ff4444' : '#00ffcc';
+    item.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logBox.appendChild(item);
+    logBox.scrollTop = logBox.scrollHeight;
+}
+
 function initSupabase() {
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        return true;
+    try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            mobileLog("Supabase 연결 성공!");
+            return true;
+        } else {
+            mobileLog("Supabase SDK(CDN) 로드 안됨", true);
+        }
+    } catch (e) {
+        mobileLog("Supabase 에러: " + e.message, true);
     }
     return false;
 }
 
 let myNickname = localStorage.getItem('sols_nickname') || '유저_' + Math.floor(Math.random() * 8999 + 1000);
 
+// 이벤트 바인딩 (클릭 + 터치 대응)
+function bindEvent(id, handler) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('click', handler);
+        el.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handler(e);
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Supabase 초기화 시도
     initSupabase();
 
-    // 2. 닉네임 표시
     const nickEl = document.getElementById('user-nickname');
     if (nickEl) nickEl.innerText = myNickname;
 
-    // 3. 채팅 버튼 및 엔터키 이벤트 등록
-    const sendBtn = document.getElementById('chat-send-btn');
-    const inputEl = document.getElementById('chat-input');
-    
-    if (sendBtn) sendBtn.addEventListener('click', sendChatMessage);
-    if (inputEl) inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+    bindEvent('chat-send-btn', sendChatMessage);
 
-    // 4. 초기 채팅 데이터 불러오기 및 실시간 구독
+    const inputEl = document.getElementById('chat-input');
+    if (inputEl) {
+        inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+    }
+
     if (supabase) {
         loadInitialChats();
-        supabase
-            .channel('public:chat')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, payload => {
-                appendChatMsg(payload.new.user, payload.new.text);
-            })
-            .subscribe();
+        try {
+            supabase
+                .channel('public:chat')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, payload => {
+                    appendChatMsg(payload.new.user, payload.new.text);
+                })
+                .subscribe();
+        } catch (e) {
+            mobileLog("Realtime 구독 에러: " + e.message, true);
+        }
     }
 });
 
@@ -54,14 +90,14 @@ async function sendChatMessage() {
     if (!text) return;
 
     if (!supabase && !initSupabase()) {
-        alert("Supabase 서버에 연결되어 있지 않습니다. 인터넷 연결이나 SDK 로드를 확인하세요.");
+        alert("Supabase 서버에 연결되어 있지 않습니다.");
         return;
     }
 
     const { error } = await supabase.from('chat').insert([{ user: myNickname, text: text }]);
     if (error) {
-        console.error("채팅 전송 에러:", error);
-        alert("채팅 전송 실패: " + error.message);
+        mobileLog("채팅 오류: " + error.message, true);
+        alert("채팅 실패: " + error.message);
     } else {
         chatInput.value = '';
     }
@@ -71,7 +107,7 @@ async function loadInitialChats() {
     if (!supabase && !initSupabase()) return;
     const { data, error } = await supabase.from('chat').select('*').order('created_at', { ascending: false }).limit(20);
     if (error) {
-        console.error("채팅 로드 에러:", error);
+        mobileLog("채팅 불러오기 오류: " + error.message, true);
         return;
     }
     if (data) {
@@ -101,7 +137,7 @@ async function uploadLeaderboard(bestName, bestChance) {
     ], { onConflict: 'user' });
 
     if (error) {
-        console.error("랭킹 등록 에러:", error);
+        mobileLog("랭킹 등록 오류: " + error.message, true);
     }
 }
 
@@ -110,7 +146,7 @@ async function loadOnlineRankings() {
     if (!rankList) return;
 
     if (!supabase && !initSupabase()) {
-        rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Supabase 연동이 설정되지 않았습니다.</div>';
+        rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Supabase 연동 안됨</div>';
         return;
     }
 
@@ -121,13 +157,13 @@ async function loadOnlineRankings() {
         .limit(10);
 
     if (error) {
-        console.error("랭킹 불러오기 에러:", error);
+        mobileLog("랭킹 오류: " + error.message, true);
         rankList.innerHTML = `<div style="text-align:center; padding:20px; color:#ff4444;">오류: ${error.message}</div>`;
         return;
     }
 
     if (!data || data.length === 0) {
-        rankList.innerHTML = '<div style="text-align:center; padding:20px;">등록된 랭킹 데이터가 없습니다.</div>';
+        rankList.innerHTML = '<div style="text-align:center; padding:20px;">등록된 랭킹이 없습니다.</div>';
         return;
     }
 
