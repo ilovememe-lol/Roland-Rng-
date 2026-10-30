@@ -1,18 +1,19 @@
 // -------------------------------------------------------------
-// SUPABASE 설정 (본인의 키 값으로 입력 필요)
+// SUPABASE 설정 (제공해주신 URL 및 Publishable Key 적용)
 // -------------------------------------------------------------
-const SUPABASE_URL = "https://supabase.com/dashboard/project/vkjgznvyvurlnefdskpw/editor/17604?schema=public";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const SUPABASE_URL = "https://vkjgznvyvurlnefdskpw.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_C-UkMzjJ-OvaGLyjdIvwoQ_QCuEs4hi";
 
 let supabase = null;
-if (SUPABASE_URL !== "sb_publishable_C-UkMzjJ-OvaGLyjdIvwoQ_QCuEs4hi") {
+if (typeof window.supabase !== 'undefined') {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 let myNickname = localStorage.getItem('sols_nickname') || '유저_' + Math.floor(Math.random() * 8999 + 1000);
 
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('user-nickname').innerText = myNickname;
+    const nickEl = document.getElementById('user-nickname');
+    if (nickEl) nickEl.innerText = myNickname;
 });
 
 // -------------------------------------------------------------
@@ -20,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // -------------------------------------------------------------
 async function sendChatMessage() {
     const chatInput = document.getElementById('chat-input');
+    if (!chatInput) return;
+    
     const text = chatInput.value.trim();
     if (!text || !supabase) return;
 
@@ -37,6 +40,8 @@ async function loadInitialChats() {
 
 function appendChatMsg(user, text) {
     const chatMessages = document.getElementById('chat-messages');
+    if (!chatMessages) return;
+    
     const msgDiv = document.createElement('div');
     msgDiv.className = 'chat-msg-item';
     msgDiv.innerHTML = `<span class="chat-user">${user}:</span> ${text}`;
@@ -44,8 +49,13 @@ function appendChatMsg(user, text) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-document.getElementById('chat-send-btn').addEventListener('click', sendChatMessage);
-document.getElementById('chat-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+document.addEventListener('DOMContentLoaded', () => {
+    const sendBtn = document.getElementById('chat-send-btn');
+    const inputEl = document.getElementById('chat-input');
+    
+    if (sendBtn) sendBtn.addEventListener('click', sendChatMessage);
+    if (inputEl) inputEl.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+});
 
 if (supabase) {
     loadInitialChats();
@@ -70,8 +80,10 @@ async function uploadLeaderboard(bestName, bestChance) {
 
 async function loadOnlineRankings() {
     const rankList = document.getElementById('rank-list');
+    if (!rankList) return;
+
     if (!supabase) {
-        rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Supabase 연동 키 설정이 필요합니다.</div>';
+        rankList.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4444;">Supabase 연동 오류가 발생했습니다.</div>';
         return;
     }
 
@@ -82,7 +94,7 @@ async function loadOnlineRankings() {
         .limit(10);
 
     if (error || !data) {
-        rankList.innerHTML = '<div style="text-align:center; padding:20px;">랭킹을 불러오지 못했습니다.</div>';
+        rankList.innerHTML = '<div style="text-align:center; padding:20px;">랭킹을 불러오지 못했습니다. (Table 설정 확인 필요)</div>';
         return;
     }
 
